@@ -8,6 +8,7 @@ GéoNum : Paul Greaume, Silya Guerboub, Charlotte Jouve, Olivier Prima
 L’objectif de la réunion est d’éclaircir plusieurs points portant notamment sur l’organisation et l’emploi du temps ainsi que sur le projet de webcartographie.
 Le projet consiste en la création d’une cartographie web permettant de se renseigner sur les PAT (Projet Alimentaire Territoriale). Cette webcartographie doit utiliser des données libres et être implanter sur le site de la DRAAF. Les deux utilisateurs cible sont les collectivités territoriales et le grand public.
 Un conseil de fonctionnement proposé est d’utiliser GitHub pour ce projet, ainsi que la méthode agile pour la gestion de projet notamment lors que la phase de réalisation.
+
 Fonctionnalité :
 -	Rendre la superposition des PAT lisible dans la webcartographie,
 -	Filtres (par exemple selon le type de porteur de projet),
@@ -21,9 +22,11 @@ Date des rendus :
 -	19 janvier 2026, Présentation oral sur le projet auprès des enseignant. Se renseigner si la présence du commanditaire est requise ?
 -	13 février 2026,
 -	13 mars 2026, soutenance publique du projet
+
 Date des réunions équipe et commanditaire :
 -	Fin novembre, début décembre 2025 en visio. Une réunion après le rendu de la V0 du cahier des charges, pour en faire un retour.
 -	Le 17 décembre 2025 sur l’architecture technique du projet (commanditaire et GéoNum uniquement)
 -	Fin janvier, début février 2026 pour lancer la partie technique du projet une fois la maquette faite.
 -	Du 25 février au 12 mars 2026. Une réunion en visio tous les 2 jours de courte durée (environs 30 minutes) sur l’avancement durant la période de rush.
+
 Indisponibilités connues pour les réunions : lundi matin, mercredi après-midi et vendredi après-midi
