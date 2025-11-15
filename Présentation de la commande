@@ -1,0 +1,11 @@
+Nous devons développer une cartographie interactive des Projets Alimentaires Territoriaux (PAT). Ce projet est commandité par la DRAAF Auvergne-Rhône-Alpes, à travers le Service Régional d’Information 
+Statistique, Économique et Territoriale (SRISET), pour le Service Régional de l’Alimentation (SRAL). L’objectif est de remplacer la carte statique actuelle, au format image PNG, par une carte web dynamique, 
+légère et aisément intégrable au site de la DRAAF, avec une architecture conçue pour un déploiement à l’échelle nationale.
+
+L’application devra permettre une visualisation claire de l’ensemble des PAT de la région, en mettant en évidence leurs périmètres, niveaux de reconnaissance, caractéristiques et porteurs de projets. 
+Elle offrira également aux agents du SRAL la possibilité de mettre à jour simplement les informations relatives à chaque projet.
+
+Un enjeu majeur du projet porte sur la sémiologie graphique, indispensable pour gérer la superposition des territoires concernés : chevauchements des périmètres (départements, EPCI, communes), 
+hiérarchisation des informations et diversité des acteurs impliqués. L’expérience utilisateur devra être fluide et intuitive, y compris pour un public non spécialisé.L’objectif est de remplacer la 
+carte statique actuelle, au format image PNG, par une carte web dynamique, légère et aisément intégrable au site de la DRAAF, avec une architecture conçue pour un déploiement à l’échelle nationale.
+
