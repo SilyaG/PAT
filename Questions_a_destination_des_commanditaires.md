@@ -1,6 +1,6 @@
 Questions à destination des commanditaires
 
-1) Concernant l’actualisation et la mise à jour des données, est ce que vous souhaitez que les données soit chargées de manière statique ou bien dynamique ?
+1) Concernant l’actualisation et la mise à jour des données, est ce que vous souhaitez que les données soit chargées de manière statique (fichier local herbergé sur serveur) ou bien dynamique (données stockées sur une base de données, API ou autre) ?
 
 2) Est ce que les données présente sur la carte interactive devront toutes être éditable ou cela devra laisser place à un arbitrage ? Si oui, comment déterminer les champs a conserver, quelle donnée agréger, etc etc.
 
