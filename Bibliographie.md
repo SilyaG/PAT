@@ -77,4 +77,5 @@ une spatialisation reflet de la gouvernance. Revue Géographique de l'Est, 61(1-
 - MAPVIEW : https://r-spatial.github.io/mapview/index.html
 - R shiny : https://shiny.posit.co
 - Cheet sheat R : https://iqss.github.io/dss-workshops/R/Rintro/base-r-cheat-sheet.pdf
-- 
+- R Gallery book - Chapitre sur les cartes : https://bookdown.org/content/b298e479-b1ab-49fa-b83d-a57c2b034d49/map.html
+- R gallery - Onglet "map" : https://r-graph-gallery.com
