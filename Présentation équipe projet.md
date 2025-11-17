@@ -6,7 +6,7 @@ Louise De Simone – Master 2 SENTINELLES, Université Jean Moulin Lyon 3 :
 
 Sabry Fandi – Master 2 SENTINELLES, Université Jean Moulin Lyon 3 :
 - Réflexion, développement d’idées fonctionnelles, rédaction. Description d’un utilisateur/personae.
-- Appétence / compétence : 
+- Appétence / compétence : Analyse et compréhension des besoins / Développement méthodologique 
 
 Paul Greaume – Master 2 GéoNum, Université Lumière Lyon 2 :
 - Réflexion et développement de fonction technique. Exploration des données.
