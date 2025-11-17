@@ -67,6 +67,6 @@ une spatialisation reflet de la gouvernance. Revue Géographique de l'Est, 61(1-
 
 - DRAAF Ile de France : https://driaaf.ile-de-france.agriculture.gouv.fr/les-projets-alimentaires-territoriaux-franciliens-a2903.html
 
-DRAAF Grand Est : https://draaf.grand-est.agriculture.gouv.fr/les-pat-du-grand-est-a4528.html ( c’est une requête sur la carte PAT France)
+- DRAAF Grand Est : https://draaf.grand-est.agriculture.gouv.fr/les-pat-du-grand-est-a4528.html ( c’est une requête sur la carte PAT France)
 
-DRAAF Corse : https://draaf.corse.agriculture.gouv.fr/pat-en-corse-a1532.html
+- DRAAF Corse : https://draaf.corse.agriculture.gouv.fr/pat-en-corse-a1532.html
