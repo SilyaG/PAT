@@ -8,7 +8,7 @@ Description
 Le donnée renseignant sur les Projets Alimentaires Territoriaux (PAT) qui est une démarche initiée par un territoire (qu'il soit à l'échelle d'une commune, d'une communauté de communes, d'un département ou d'une région) visant à relocaliser la production et la consommation alimentaire.
 
 
-◦ Les limites administratives et la population des territoires (IGN ADMINEXPRESS),
+◦ Les limites administratives et la population des territoires (IGN ADMINEXPRESS)
 Description : Le découpage administratif du territoire français (commune, arrondissement départemental, département, région...). 
 
 
