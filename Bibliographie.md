@@ -43,6 +43,8 @@ une spatialisation reflet de la gouvernance. Revue Géographique de l'Est, 61(1-
                               Cartographie intercative des PAT : 
 - France PAT : https://france-pat.fr/carte-des-pats/
 
+- Ma Carte IGN : https://macarte.ign.fr/carte/ZWkhl6/PAT
+
 - Région Grand Est : https://reseau-partaage.fr/carte-interactive/
 
 - DRAAF Normandie : https://umap.openstreetmap.fr/fr/map/laureats-mesure-13-de-la-normandie_714872#9/49.2032/0.2582$
@@ -70,3 +72,9 @@ une spatialisation reflet de la gouvernance. Revue Géographique de l'Est, 61(1-
 - DRAAF Grand Est : https://draaf.grand-est.agriculture.gouv.fr/les-pat-du-grand-est-a4528.html ( c’est une requête sur la carte PAT France)
 
 - DRAAF Corse : https://draaf.corse.agriculture.gouv.fr/pat-en-corse-a1532.html
+
+                            Cheet Sheat - Documentation : 
+- MAPVIEW : https://r-spatial.github.io/mapview/index.html
+- R shiny : https://shiny.posit.co
+- Cheet sheat R : https://iqss.github.io/dss-workshops/R/Rintro/base-r-cheat-sheet.pdf
+- 
