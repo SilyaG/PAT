@@ -3,13 +3,13 @@ Les principales données mobilisées sont publiques et seront enrichies par d’
 thématiques agricoles ou socio-économiques publiquement disponibles :
 • Les données de base de la thématique :
 
-◦ Les données des PAT https://www.data.gouv.fr/organizations/france-pat/
-Description :
+◦ Les données des PAT https://www.data.gouv.fr/organizations/france-pat/  
+  Description :
 Le donnée renseignant sur les Projets Alimentaires Territoriaux (PAT) qui est une démarche initiée par un territoire (qu'il soit à l'échelle d'une commune, d'une communauté de communes, d'un département ou d'une région) visant à relocaliser la production et la consommation alimentaire.
 
 
-◦ Les limites administratives et la population des territoires (IGN ADMINEXPRESS)
-Description : Le découpage administratif du territoire français (commune, arrondissement départemental, département, région...). 
+◦ Les limites administratives et la population des territoires (IGN ADMINEXPRESS)  
+  Description : Le découpage administratif du territoire français (commune, arrondissement départemental, département, région...). 
 
 
 ◦ Les fonds de cartes satellitaires ou plan IGN
