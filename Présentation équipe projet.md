@@ -2,7 +2,7 @@ L’équipe projet est composée de 2 étudiants SENTINELLES et 4 étudiants Gé
 
 Louise De Simone – Master 2 SENTINELLES, Université Jean Moulin Lyon 3 : 
 - Cheffe de projet, copilotage et cogestion du projet. Liaison avec les commanditaires et définition de la commande.
-- Appétence / compétence : 
+- Appétence / compétence : Cartographie / Base de données / Gestion de projet
 
 Sabry Fandi – Master 2 SENTINELLES, Université Jean Moulin Lyon 3 :
 - Réflexion, développement d’idées fonctionnelles, rédaction. Description d’un utilisateur/personae.
