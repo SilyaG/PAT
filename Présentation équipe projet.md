@@ -13,7 +13,7 @@ Paul Greaume – Master 2 GéoNum, Université Lumière Lyon 2 :
 - Appétence / compétence : Bases de données / Webmapping 
 
 Silya Guerboub – Master 2 GéoNum, Université Lumière Lyon 2 :
-- Rôle : Réflexion et développement de fonction technique, développeur. Recherche d’outils partagés. 
+- Rôle : Réflexion et développement de fonction technique, développeur. Recherche et production d’outils partagés. 
 - Appétence / compétence : Programmation en R / Webmapping / gestion de base de données 
 
 Charlotte Jouve – Master 2 GéoNum, Université Lumière Lyon 2 :
