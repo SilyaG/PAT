@@ -18,8 +18,8 @@ Silya Guerboub – Master 2 GéoNum, Université Lumière Lyon 2 :
 
 Charlotte Jouve – Master 2 GéoNum, Université Lumière Lyon 2 :
 - Réflexion et développement de fonction technique. Recherche bibliographique.
-- Appétence / compétence : Programmation en R / 
+- Appétence / compétence : Programmation en R / Analyse critique de productions cartographiques / Sémiologie 
 
 Olivier Prima – Master 2 GéoNum, Université Lumière Lyon 2 :
 - Assistant chef de projet, copilotage et cogestion du projet. Liaison avec les commanditaires et présentation de l’équipe.
-- Appétence / compétence : Cartographie thématique / mise en page / sémiologie
+- Appétence / compétence : Cartographie thématique / Mise en page / Sémiologie
