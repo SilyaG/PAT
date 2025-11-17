@@ -4,7 +4,7 @@ thématiques agricoles ou socio-économiques publiquement disponibles :
 • Les données de base de la thématique :
 
 ◦ Les données des PAT https://www.data.gouv.fr/organizations/france-pat/
-Description
+Description :
 Le donnée renseignant sur les Projets Alimentaires Territoriaux (PAT) qui est une démarche initiée par un territoire (qu'il soit à l'échelle d'une commune, d'une communauté de communes, d'un département ou d'une région) visant à relocaliser la production et la consommation alimentaire.
 
 
