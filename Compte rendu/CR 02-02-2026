@@ -1,9 +1,0 @@
-Question sur le SRISET :
-Le SERVICE STAT ET CARTE : Aide à la décision, la déclinaison des politiques publiques. Aide service métier, direction et d’autres acteurs et partenaire pour prendre des décisions. Mise à disposition RPG, publications… chiffre, analyse conjoncture, publication des chiffres.
-
-Question géoserver :
-Géoserver non déployable par la DRAAF. Serveur de tuile existant comme datara ou géoplatforme. Geonetworks : https://geonetwork-opensource.org/	open source, geoserver de tuile. Cartegouvfr. Juger l’opportunité, si besoin flux de tuile calculé. Faut tester avant de se lancer dans un géoserver. Limite liée au souhait également d’une solution déployée au national. Carte des PAT sur la géoplatforme.
-
-Question des mises à jour :
-Commanditaire réfléchie activement à cette question des mises-à-jour
-Mise à jour du flux sera le problème du commanditaire
