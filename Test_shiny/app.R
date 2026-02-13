@@ -4,7 +4,7 @@ library(sf)
 
 #Chargement des couches 
 couche_pat <- st_read("./data/pat_112025_etudiant.gpkg")
-admin_express_com<- st_read("./data/commune_aura.gpkg")
+admin_express_com<- st_read("./data/communes.gpkg")
 
 
 #Reprojection
@@ -60,7 +60,7 @@ server <- function(input, output, session) {
         color = "orange",
         weight = 2,
         fillOpacity = 0.4,
-        popup = ~as.character(nom_du_pat,niveau,pop_hab= "<br/>"),
+        popup = ~paste(nom_du_pat,niveau,pop_hab, sep= "<br/>"),
         group = "PAT"
       ) %>%
       
@@ -72,7 +72,7 @@ server <- function(input, output, session) {
         weight = 1,
         fillColor = NA,
         fillOpacity = 0,
-        popup = ~paste(nom_officiel, statut, sep = "<br/>"),
+        popup = ~paste(nom_officiel, sep = "<br/>"),
         group = "COM"
       ) %>%
       
