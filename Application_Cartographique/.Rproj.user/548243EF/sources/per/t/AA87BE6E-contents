@@ -1,0 +1,257 @@
+# mod_qa.R
+# Module Shiny : Qualité de l'eau (QE)
+
+# Dépendances du module
+usethis::use_package("shiny")
+usethis::use_package("dplyr")
+usethis::use_package("ggplot2")
+usethis::use_package("leaflet")
+usethis::use_package("sf")
+
+# Chargement des bibliothèques
+library(shiny)
+library(dplyr)
+library(ggplot2)
+library(leaflet)
+library(sf)
+library(tidyr)
+dat=load_data("qe")
+
+# UI du module QA
+mod_qe_ui <- function(id) {
+  ns <- NS(id)  # Namespacing du module
+  
+  fluidPage(
+    fluidRow(
+      
+      # Colonne gauche : texte + onglets graphiques
+      column(
+        width = 6,
+        wellPanel(
+          h3("Qualité de l'eau"),
+          p(
+            "Cette page présente les dépassements des polluants présent dans l'eau par région entre 2021 et 2025.
+             Utilisez les onglets pour naviguer entre les différents polluants."
+          )
+        ),
+        wellPanel(
+          uiOutput(ns("pollutant_tabs"))  # Onglets générés dynamiquement côté serveur
+        )
+      ),
+      
+      # Colonne droite : contrôles + carte
+      column(
+        width = 6,
+        wellPanel(
+          fluidRow(
+            
+            # Sélecteur de polluant (synchronisé avec les onglets)
+            column(
+              width = 6,
+              selectInput(
+                ns("pollutant_select"),
+                "Choisir un polluant",
+                choices = c("ACIBENZOLAR S MÉTHYL", "ARSENIC", "BENZO(A)PYRÈNE *", "CADMIUM", "CHROME HEXAVALENT"),
+                selected ="ARSENIC")
+              )
+            ),
+            
+            # Curseur temporel (mois) avec label textuel dynamique
+            column(
+              width = 6,
+              tagList(
+                strong("ANNEE :"),
+                textOutput(ns("ANNEE_label"), inline = TRUE),  # nom du mois affiché
+                sliderInput(
+                  ns("ANNEE_slider"),
+                  "",
+                  min = 2021,
+                  max = 2025,
+                  value = 2021,
+                  step = 1,
+                  animate = animationOptions(interval = 500)  # lecture automatique
+                )
+              )            
+            )
+          ),
+          
+          # Sortie carte Leaflet
+          leaflet::leafletOutput(ns("map"), height = 550)
+        )
+      )
+    )
+}
+
+
+# Server du module QA
+# Server du module QA
+mod_qe_server <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
+    # Chargement des données
+   dat<-dat # fonction externe de chargement
+    
+    Polluants <- sort(unique(as.character(dat$libmajparametre)))
+    
+    # Texte dynamique : année sélectionnée
+    output$ANNEE_label <- renderText({
+      ANNEE_vec <- c("2021","2022","2023","2024","2025")
+      ANNEE_vec[input$ANNEE_slider]
+    })
+    
+    # Génération dynamique des onglets par polluant
+    output$pollutant_tabs <- shiny::renderUI({
+      tabs <- lapply(Polluants, function(p) {
+        shiny::tabPanel(
+          title = p,
+          shiny::plotOutput(ns(paste0("bar_", p)), height = "450px")
+        )
+      })
+      do.call(
+        shiny::tabsetPanel,
+        c(list(id = ns("pollutant_tabs_id")), tabs)
+      )
+    })
+    
+    # Graphiques : diagramme en barres par polluant
+    lapply(Polluants, function(p) {
+      output[[paste0("bar_", p)]] <- shiny::renderPlot({
+        df <- dat %>%
+          filter(libmajparametre == p) %>%
+          select(ANNEE, nb_conformes, nb_non_conformes) %>%
+          pivot_longer(
+            cols = c(nb_conformes, nb_non_conformes),
+            names_to = "Conformite",
+            values_to = "nb"
+          ) %>%
+          mutate(
+            Conformite = recode(
+              Conformite,
+              nb_conformes = "C",
+              nb_non_conformes = "N"
+            )
+          )
+        
+        ggplot(df, aes(x = factor(ANNEE), y = nb, fill = Conformite)) +
+          geom_bar(stat = "identity", position = "dodge") +
+          labs(
+            x = "Année",
+            y = "Nombre de prélèvements",
+            fill = "Conformité"
+          ) +
+          scale_fill_manual(
+            values = c("C" = "forestgreen", "N" = "firebrick"),
+            labels = c("C" = "Conforme", "N" = "Non conforme")
+          ) +
+          theme_minimal() +
+          theme(
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            axis.title = element_text(size = 14),
+            axis.text = element_text(size = 12)
+          )
+      })
+    })
+    
+    # Synchronisation onglet -> selectInput
+    observeEvent(input$pollutant_tabs_id, {
+      updateSelectInput(
+        session,
+        "pollutant_select",
+        selected = input$pollutant_tabs_id
+      )
+    })
+    
+    # Synchronisation selectInput-> onglet
+    observeEvent(input$pollutant_select, {
+      updateTabsetPanel(
+        session,
+        "pollutant_tabs_id",
+        selected = input$pollutant_select
+      )
+    })
+    
+    # Préparation des données carte (agrégation spatiale)
+    
+    
+    # Initialisation de la carte Leaflet
+    output$map <- leaflet::renderLeaflet({
+      map_dat <- dat %>%
+        group_by(INSEE_REG, libmajparametre, ANNEE) %>%
+        summarise(
+          nb_nc_moy = mean(nb_non_conformes, na.rm = TRUE),
+          Latitude = mean(Latitude, na.rm = TRUE),
+          Longitude = mean(Longitude, na.rm = TRUE),
+          .groups = "drop"
+        ) %>%
+        filter(!is.na(Latitude) & !is.na(Longitude))%>%
+        filter(ANNEE==input$ANNEE_slider,
+               libmajparametre==input$pollutant_select)
+      
+      
+      
+      leaflet(options = leafletOptions(zoomControl = FALSE)) %>% 
+        addProviderTiles("CartoDB.Positron") %>%
+        setView(lng = 2.35, lat = 46.5, zoom = 5)
+    })
+    
+    # Mise à jour réactive de la carte
+    observe({
+      map_dat <- dat %>%
+        group_by(INSEE_REG, libmajparametre, ANNEE) %>%
+        summarise(
+          nb_nc_moy = mean(nb_non_conformes, na.rm = TRUE),
+          Latitude = mean(Latitude, na.rm = TRUE),
+          Longitude = mean(Longitude, na.rm = TRUE),
+          .groups = "drop"
+        ) %>%
+        filter(!is.na(Latitude) & !is.na(Longitude))%>%
+        filter(ANNEE==input$ANNEE_slider,
+               libmajparametre==input$pollutant_select)
+      # Conversion annee numérique -> annee texte
+      ANNEE_vec <- c(
+        "2021","2022","2023","2024","2025"
+      )
+      ANNEE_sel <- ANNEE_vec[input$ANNEE_slider] 
+      
+      # Filtrage des données pour la carte
+      df_map <- map_dat %>%
+        filter(ANNEE == ANNEE_sel, 
+               libmajparametre== input$pollutant_select)
+      
+      # Cas sans données : on vide la carte
+      if (nrow(df_map) == 0) {
+        leafletProxy("map", session) %>%
+          clearShapes() %>%
+          clearMarkers() %>%
+          clearControls()
+        return()
+      }
+      
+      # Palette de couleurs dépendante des valeurs
+      pal <- colorNumeric("Greens", domain = df_map$nb_non_coformes)
+      
+      # Affichage des cercles proportionnels
+      leafletProxy("map", session) %>%
+        clearShapes() %>%      
+        clearMarkers() %>%
+        clearControls() %>%
+        addCircleMarkers(
+          lng = df_map$Longitude,
+          lat = df_map$Latitude,
+          radius = sqrt(df_map$nb_non_conformes) * 10,  # taille proportionnelle
+          stroke = TRUE,
+          weight = 1,
+          color = "white",
+          opacity = 0.8,
+          fillColor = pal(df_map$nb_non_conformes),
+          fillOpacity = 0.75,
+          label = paste0(
+            df_map$INSEE_REG, " : ",
+            round(df_map$nb_non_conformes, 1),
+            " Années"
+          )
+        )
+    })
+  })
+}
