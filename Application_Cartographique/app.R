@@ -25,11 +25,76 @@ dep_aura_4326 <- st_transform(dep_aura, crs = 4326)
 
 #ui
 ui <- fluidPage(
-  titlePanel("Cartographie des Projets Alimentaires Territoriaux"), #Titre
-  mainPanel(
-    leafletOutput("map", height = "800px") #Taille de la carte
+  
+  # Inclusion DSFR depuis CDN
+  tags$head(
+    tags$link(
+      rel = "stylesheet",
+      href = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/dsfr.min.css"
+    ),
+    tags$script(
+      src = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/dsfr.module.min.js",
+      type = "module"
+    )
+  ),
+  
+  # Header officiel
+  tags$header(
+    class = "fr-header",
+    tags$div(
+      class = "fr-header__body",
+      tags$div(
+        class = "fr-container",
+        tags$div(
+          class = "fr-header__body-row",
+          # Logo République Française
+          tags$div(
+            class = "fr-header__brand",
+            tags$a(
+              class = "fr-header__brand-link",
+              href = "#",
+              tags$p(
+                class = "fr-logo",
+                "République\nFrançaise"
+              )
+            )
+          ),
+          # Titre de service
+          tags$div(
+            class = "fr-header__service",
+            tags$p(
+              class = "fr-header__service-title",
+              "Cartographie des Projets Alimentaires Territoriaux"
+            ),
+            tags$p(
+              class = "fr-header__service-tagline",
+              "Région Auvergne-Rhône-Alpes"
+            )
+          )
+        )
+      )
+    )
+  ),
+  
+  # Contenu principal
+  tags$main(
+    class = "fr-container",
+    br(),
+    leafletOutput("map", height = "800px")
+  ),
+  
+  # Footer officiel
+  tags$footer(
+    class = "fr-footer",
+    tags$div(
+      class = "fr-container",
+      tags$p("© République Française - Tous droits réservés")
+    )
   )
 )
+
+
+
 
 #Carte
 server <- function(input, output, session) {
@@ -79,7 +144,7 @@ server <- function(input, output, session) {
       
       
       
-
+      
       # Commune AURA
       addPolygons(
         data = commune_aura,
@@ -121,6 +186,8 @@ server <- function(input, output, session) {
 
 #
 shinyApp(ui, server)
+
+
 
 
 
