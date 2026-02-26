@@ -296,6 +296,11 @@ server <- function(input, output, session) {
   observe({
     proxy <- leafletProxy("map")
     
+    pal_pat <- colorFactor(
+      palette = c("#fbe769", "#E4794A"),
+      domain = couche_pat_4326$niveau
+    )
+    
     # On enlève la couche PAT existante
     proxy %>% clearGroup("Projet Alimentaire Territoriaux")
     
@@ -315,10 +320,11 @@ server <- function(input, output, session) {
     # Réaffichage
     proxy %>% addPolygons(
       data = pat_filtre,
-      color = "orange",
-      weight = 2,
-      fillOpacity = 0.4,
-      popup = ~paste(nom_du_pat, niveau, pop_hab, sep = "<br/>"),
+      color = ~pal_pat(niveau),
+      fillColor = ~pal_pat(niveau),
+      weight = 3,
+      fillOpacity = 0.35,
+      popup = ~paste(nom_du_pat,niveau,pop_hab, sep= "<br/>"),
       group = "Projet Alimentaire Territoriaux"
     )
   })
