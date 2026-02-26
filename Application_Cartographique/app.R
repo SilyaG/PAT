@@ -107,23 +107,44 @@ server <- function(input, output, session) {
     xmax <- unname(bbox["xmax"])
     ymax <- unname(bbox["ymax"])
     
-    #Palettes de couleur
+    #Cercle proportionnel (création des rayons des cercles)
+    # Centroïdes des communes
+    communes_centroid <- st_centroid(commune_aura)
+    
+    # Part de SAU bio
+    part_bio <- communes_centroid$bio_ha_sum/2 / communes_centroid$rpg_ha_sum
+    
+    # Sécurisation (évite division par 0 et NA)
+    part_bio[is.na(part_bio) | is.infinite(part_bio)] <- 0
+    
+    #Population
+    pop_com <- communes_centroid$population
+    rayon_brut_pop <- sqrt(pop_com)
+    rayon_pop <- scales::rescale(rayon_brut_pop, to = c(1, 50))
+    
+    #SAU
+    sau_com <- communes_centroid$rpg_ha_sum
+    rayon_brut_sau <- sqrt(sau_com)
+    rayon_sau <- scales::rescale(rayon_brut_sau, to = c(1, 30))
+    
+    #SAU_bio
+    saubio_com <- communes_centroid$bio_ha_sum
+    rayon_brut_saubio <- sqrt(saubio_com)
+    rayon_saubio <- scales::rescale(rayon_brut_saubio, to = c(1, 30))
+    
+    ##Palettes de couleur
     #Palette PAT
     pal_pat <- colorFactor(
       palette = c("#fbe769", "#E4794A"),
       domain = couche_pat_4326$niveau
     )
     
-    # Centroïdes des communes
-    communes_centroid <- st_centroid(commune_aura)
-    
-    # Variable utilisée pour les communes
-    pop_com <- communes_centroid$population
-    
-    rayon_brut <- sqrt(pop_com)
-    
-    # Rayon proportionnel (mise à l'échelle)
-    rayon <- scales::rescale(rayon_brut, to = c(1, 50))
+    #Palette % SAU bio
+    pal_bio <- colorNumeric(
+      palette = c("#bcd9a3","#306600"),
+      domain = part_bio,
+      na.color = "transparent"
+    )
     
     #Limitation du dézoom
     leaflet(
@@ -185,16 +206,47 @@ server <- function(input, output, session) {
       # Cercle population
       addCircleMarkers(
         data = communes_centroid,
-        radius = rayon,
+        radius = rayon_pop,
         fillColor = "#CE614A",
         color = "#ffffff",
         weight = 1,
         fillOpacity = 0.7,
         popup = ~paste(
           "<strong>", nom_officiel, "</strong><br/>",
-          "Valeur :", population
+          "Population :", population
         ),
-        group = "Indicateur communal"
+        group = "Population communale"
+      ) %>%
+      
+      # Cercle SAU
+      addCircleMarkers(
+        data = communes_centroid,
+        radius = rayon_sau,
+        fillColor = "#CE614A",
+        color = "#ffffff",
+        weight = 1,
+        fillOpacity = 0.7,
+        popup = ~paste(
+          "<strong>", nom_officiel, "</strong><br/>",
+          "SAU (ha) :", rpg_ha_sum
+        ),
+        group = "SAU"
+      ) %>%
+      
+      # Cercle SAU bio
+      addCircleMarkers(
+        data = communes_centroid,
+        radius = rayon_saubio,
+        fillColor = ~pal_bio(part_bio),
+        color = "#ffffff",
+        weight = 1,
+        fillOpacity = 1,
+        popup = ~paste(
+          "<strong>", nom_officiel, "</strong><br/>",
+          "SAU Bio (ha) :", bio_ha_sum/2,"<br/>",
+          "Part de la SAU Bio (%) :", part_bio
+        ),
+        group = "SAU bio"
       ) %>%
       
       # couche CLS
@@ -220,7 +272,7 @@ server <- function(input, output, session) {
       
       # Menu couche
       addLayersControl(
-        overlayGroups = c("Projet Alimentaire Territoriaux","Contrats locaux de santé","Communes","Departement","Registre Parcellaire Graphique","Plan IGN","Indicateur communal"),
+        overlayGroups = c("Projet Alimentaire Territoriaux","Contrats locaux de santé","Communes","Departement","Registre Parcellaire Graphique","Plan IGN","Population communale","SAU","SAU bio"),
         options = layersControlOptions(collapsed = FALSE)
       )
   })
