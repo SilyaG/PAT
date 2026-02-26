@@ -33,7 +33,21 @@ ui <- fluidPage(
     tags$script(
       src = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/dsfr.module.min.js",
       type = "module"
-    )
+    ),
+    tags$style(HTML("
+    .menu-couches {
+      background-color:#f6f6f6;
+      padding: 10px;
+      border-radius: 8px;
+      height: 90hv;
+      overflow-y:auto;
+    }
+                    
+    .menu-couches h4 {
+      font-weight: 600;
+      margin-top: 15px;
+    }
+    "))
   ),
   
   # Header officiel
@@ -95,18 +109,78 @@ ui <- fluidPage(
     )
   )
 ),
-  # Carte pleine largeur
-  leafletOutput("map", height = "90vh"),
+
+# Création de colone pour la carte et le menu de couche 
+
+#menu lateral gauche 
+fluidRow(
   
+  column(
+    width = 2,
+    
+    div(class = "menu-couches",
+        
+        h4("Fond cartographique"),
+        
+        radioButtons(
+          "fond",
+          label = NULL,
+          choices = c(
+            "Plan IGN" = "ign",
+            "Registre Parcellaire Graphique" = "rpg",
+            "OpenStreetMap" = "osm"
+          ),
+          selected = "ign"
+        ),
+        
+        hr(),
+        
+        h4("Couches"),
+        
+        checkboxInput("pat_layer", "Projet Alimentaire Territoriaux", TRUE),
+        checkboxInput("cls_layer", "Contrat Locaux de Santé", FALSE),
+        checkboxInput("dep_layer", "Départements", FALSE),
+        checkboxInput("com_layer", "Communes",FALSE),
+        
+        hr(),
+        
+        conditionalPanel(
+          condition = "input.com_layer == true",
+          
+          h4("Indicateurs communaux"),
+          
+          radioButtons(
+           "indicateur",
+           label = NULL,
+           choices = c(
+             "Aucun" = "none",
+             "Population" = "pop",
+             "surface agricole utile (ha)" = "sau",
+             "surface agricole utile bio" = "bio"
+          ),
+          selected = "none"
+     )
+    )
+  )
+),
+
+#Intégration de la carte 
+column(
+  width = 9,
+  leafletOutput("map", height = "90vh")
+   )
+  )
+ )
+
   # Footer officiel
   tags$footer(
     class = "fr-footer",
     tags$div(
       class = "fr-container",
       tags$p("© République Française - Tous droits réservés")
-    )
   )
 )
+
 
 #Carte
 server <- function(input, output, session) {
@@ -176,19 +250,19 @@ server <- function(input, output, session) {
         layers  = "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
         options = WMSTileOptions(
           format = "image/png",
-          transparent = TRUE,
+          transparent = FALSE,
           version = "1.3.0"
         ),
         group = "Plan IGN"
       ) %>%
       
-      # RGA landuse
+      # RPG landuse
       addWMSTiles(
         baseUrl = "https://data.geopf.fr/wms-r/wms",
         layers  = "LANDUSE.AGRICULTURE2024",
         options = WMSTileOptions(
           format = "image/png",
-          transparent = TRUE,
+          transparent = FALSE,
           version = "1.3.0"
         ),
         group = "Registre Parcellaire Graphique"
@@ -283,14 +357,86 @@ server <- function(input, output, session) {
         fillOpacity = 0.35,
         popup = ~paste(nom_du_pat,niveau,pop_hab, sep= "<br/>"),
         group = "Projet Alimentaire Territoriaux"
-      ) %>%
-      
-      # Menu couche
-      addLayersControl(
-        overlayGroups = c("Projet Alimentaire Territoriaux","Contrats locaux de santé","Communes","Departement","Registre Parcellaire Graphique","Plan IGN","Population communale","SAU","SAU bio"),
-        options = layersControlOptions(collapsed = FALSE)
-      )
+      ) 
   })
+  
+#Affichage des couches en fonction du choix utilisateur dans le menu de selection
+observe({
+  proxy <- leafletProxy("map")
+  
+  #pour cacher les fonds de plan
+  
+  proxy %>% hideGroup("Plan IGN")
+  proxy %>% hideGroup("Registre Parcellaire Graphique")
+  proxy %>% hideGroup("OSM")
+  
+  #Pour afficher la couche choisi par utilisateur 
+  if (input$fond == "ign"){
+    proxy %>% showGroup("Plan IGN")
+  }
+  
+  if (input$fond == "rpg"){
+    proxy %>% showGroup("Registre Parcellaire Graphique")
+  }
+  
+  if (input$fond == "osm"){
+    proxy %>% showGroup("OSM")
+  }
+})  
+
+#Affichage des couches de polygones (PAT; CLS; Communes ; Departement)
+
+observe({
+  proxy <- leafletProxy("map")
+  
+  if (input$pat_layer){
+    proxy %>% showGroup("Projet Alimentaire Territoriaux")
+  } else {
+    proxy %>%  hideGroup("Projet Alimentaire Territoriaux")
+  }
+  
+  if (input$cls_layer){
+    proxy %>% showGroup("Contrats locaux de santé")
+  } else {
+    proxy %>%  hideGroup("Contrats locaux de santé")
+  }
+  
+  if (input$com_layer){
+    proxy %>% showGroup("Communes")
+  } else {
+    proxy %>%  hideGroup("Communes")
+  }
+  
+  if(input$dep_layer){
+    proxy %>% showGroup("Departement")
+  }else{
+    proxy %>%  hideGroup("Departement")
+  }
+})
+
+#Affichage des couches d'indicateurs 
+
+observe({
+  proxy <- leafletProxy("map")
+  
+  proxy %>% hideGroup("Population communale")
+  proxy %>% hideGroup("SAU")
+  proxy %>% hideGroup("SAU bio")
+  
+  if (input$indicateur == "pop"){
+    proxy %>% showGroup("Population communale")
+  }
+  
+  if (input$indicateur == "sau"){
+    proxy %>% showGroup("SAU")
+  }
+  
+  if (input$indicateur == "bio"){
+    proxy %>%  showGroup("SAU bio")
+  }
+})
+
+  
   # ---- Filtrage dynamique PAT via liste déroulante (niveau)----
   # Filtrage combiné PAT (niveau + échelle)
   observe({
