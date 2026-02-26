@@ -101,6 +101,44 @@ ui <- fluidPage(
     br(),
     
     # Filtres au-dessus de la carte
+  # Filtres au-dessus de la carte
+  tags$div(
+    style = "display: flex; gap: 20px; margin: 50px 0 20px 0;",  # flex pour côte à côte
+  style = "display: flex; gap: 20px; margin: 50px 0 20px 0;",  # flex pour côte à côte
+  # Premier filtre
+  tags$div(
+    style = "width: 250px;",
+    tags$select(
+      id = "filtre_niveau",
+      class = "fr-select",
+      style = "background-color: #d3d3d3; color: black;",  # fond gris clair et texte noir tout le temps
+      tags$option("Sélectionner un niveau de labellisation", value = "", selected = TRUE, disabled = TRUE),
+      tags$option(value = "Tous", "Tous les niveaux"),
+      tags$option(value = "1", "Niveau 1"),
+      tags$option(value = "2", "Niveau 2")
+    )
+  ),
+  # Deuxième filtre
+  tags$div(
+    style = "width: 250px;",
+    tags$select(
+      id = "filtre_niveau_terri",
+      class = "fr-select",
+      style = "background-color: #d3d3d3; color: black;",  # fond gris clair et texte noir tout le temps
+      tags$option("Sélectionner l'échelle du territoire", value = "", selected = TRUE, disabled = TRUE),
+      tags$option(value = "Tous", "Toutes les échelles"),
+      tags$option(value = "PAT interterritorial (PAiT)", "Interterritorial (PAiT)"),
+      tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
+      tags$option(value = "PAT d'échelle départementale", "Départementale")
+    )
+  )
+),
+  # Carte pleine largeur
+  leafletOutput("map", height = "90vh"),
+  
+  # Footer officiel
+  tags$footer(
+    class = "fr-footer",
     tags$div(
       style = "display: flex; gap: 20px; margin: 50px 0 20px 0;",  # flex pour côte à côte
       style = "display: flex; gap: 20px; margin: 50px 0 20px 0;",  # flex pour côte à côte
@@ -414,10 +452,3 @@ server <- function(input, output, session) {
 
 #
 shinyApp(ui, server)
-
-
-
-
-
-
-
