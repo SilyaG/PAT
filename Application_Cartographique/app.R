@@ -170,8 +170,7 @@ ui <- fluidPage(
         )
       )
     ),
-    # Carte pleine largeur
-    leafletOutput("map", height = "90vh"),
+
     
     tags$footer(
       class = "fr-footer",
@@ -180,8 +179,8 @@ ui <- fluidPage(
         tags$p("© République Française - Tous droits réservés")
       )
     )
-  ))
-
+  )),
+)
 #Serveur
 server <- function(input, output, session) {
   
