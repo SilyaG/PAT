@@ -2,6 +2,8 @@ library(shiny)
 library(leaflet)
 library(sf)
 library(readr)
+library(leaflet.extras2)
+
 
 #Chargement des couches 
 couche_pat <- st_read("./data/pat_aura_112025.gpkg")
@@ -47,41 +49,58 @@ ui <- fluidPage(
         class = "fr-container",
         tags$div(
           class = "fr-header__body-row",
-          # Logo République Française
           tags$div(
             class = "fr-header__brand",
             tags$a(
               class = "fr-header__brand-link",
               href = "#",
-              tags$p(
-                class = "fr-logo",
-                "République\nFrançaise"
-              )
+              tags$p(class = "fr-logo","République\nFrançaise")
             )
           ),
-          # Titre de service
           tags$div(
             class = "fr-header__service",
-            tags$p(
-              class = "fr-header__service-title",
-              "Cartographie des Projets Alimentaires Territoriaux"
-            ),
-            tags$p(
-              class = "fr-header__service-tagline",
-              "Région Auvergne-Rhône-Alpes"
-            )
+            tags$p(class = "fr-header__service-title","Cartographie des Projets Alimentaires Territoriaux"),
+            tags$p(class = "fr-header__service-tagline","Région Auvergne-Rhône-Alpes")
           )
         )
       )
     )
   ),
   
-  # Contenu principal
-  tags$main(
-    class = "fr-container",
-    br(),
-    leafletOutput("map", height = "800px")
+  # Filtres au-dessus de la carte
+  tags$div(
+    style = "display: flex; gap: 20px; margin: 50px 0 20px 0;",  # flex pour côte à côte
+  style = "display: flex; gap: 20px; margin: 50px 0 20px 0;",  # flex pour côte à côte
+  # Premier filtre
+  tags$div(
+    style = "width: 250px;",
+    tags$select(
+      id = "filtre_niveau",
+      class = "fr-select",
+      style = "background-color: #d3d3d3; color: black;",  # fond gris clair et texte noir tout le temps
+      tags$option("Sélectionner un niveau de labellisation", value = "", selected = TRUE, disabled = TRUE),
+      tags$option(value = "Tous", "Tous les niveaux"),
+      tags$option(value = "1", "Niveau 1"),
+      tags$option(value = "2", "Niveau 2")
+    )
   ),
+  # Deuxième filtre
+  tags$div(
+    style = "width: 250px;",
+    tags$select(
+      id = "filtre_niveau_terri",
+      class = "fr-select",
+      style = "background-color: #d3d3d3; color: black;",  # fond gris clair et texte noir tout le temps
+      tags$option("Sélectionner l'échelle du territoire", value = "", selected = TRUE, disabled = TRUE),
+      tags$option(value = "Tous", "Toutes les échelles"),
+      tags$option(value = "PAT interterritorial (PAiT)", "Interterritorial (PAiT)"),
+      tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
+      tags$option(value = "PAT d'échelle départementale", "Départementale")
+    )
+  )
+),
+  # Carte pleine largeur
+  leafletOutput("map", height = "90vh"),
   
   # Footer officiel
   tags$footer(
@@ -92,9 +111,6 @@ ui <- fluidPage(
     )
   )
 )
-
-
-
 
 #Carte
 server <- function(input, output, session) {
@@ -118,6 +134,9 @@ server <- function(input, output, session) {
       addProviderTiles("OpenStreetMap", group = "OSM") %>%
       fitBounds(xmin, ymin, xmax, ymax) %>%
       setMaxBounds(xmin, ymin, xmax, ymax) %>%
+      
+    
+      
       
       # RGA landuse
       addWMSTiles(
@@ -153,8 +172,10 @@ server <- function(input, output, session) {
         fillColor = NA,
         fillOpacity = 0,
         popup = ~paste(nom_officiel, sep = "<br/>"),
-        group = "Communes"
+        group = "Communes",
+        label="nom_officiel"
       ) %>%
+
       
       # couche CLS
       addPolygons(
@@ -181,6 +202,37 @@ server <- function(input, output, session) {
         overlayGroups = c("Projet Alimentaire Territoriaux","Contrats locaux de santé","Communes","Departement","Registre Parcellaire Graphique"),
         options = layersControlOptions(collapsed = FALSE)
       )
+  })
+  # ---- Filtrage dynamique PAT via liste déroulante (niveau)----
+  # Filtrage combiné PAT (niveau + échelle)
+  observe({
+    proxy <- leafletProxy("map")
+    
+    # On enlève la couche PAT existante
+    proxy %>% clearGroup("Projet Alimentaire Territoriaux")
+    
+    # On commence avec toute la couche
+    pat_filtre <- couche_pat_4326
+    
+    # Filtre niveau
+    if (!is.null(input$filtre_niveau) && input$filtre_niveau != "Tous") {
+      pat_filtre <- pat_filtre[pat_filtre$niveau == input$filtre_niveau, ]
+    }
+    
+    # Filtre échelle
+    if (!is.null(input$filtre_niveau_terri) && input$filtre_niveau_terri != "Tous") {
+      pat_filtre <- pat_filtre[pat_filtre$echelle == input$filtre_niveau_terri, ]
+    }
+    
+    # Réaffichage
+    proxy %>% addPolygons(
+      data = pat_filtre,
+      color = "orange",
+      weight = 2,
+      fillOpacity = 0.4,
+      popup = ~paste(nom_du_pat, niveau, pop_hab, sep = "<br/>"),
+      group = "Projet Alimentaire Territoriaux"
+    )
   })
 }
 
