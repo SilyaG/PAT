@@ -2,31 +2,26 @@ library(shiny)
 library(leaflet)
 library(sf)
 library(readr)
+library(stringi)
 
-#Chargement des couches 
+# Chargement des couches 
 couche_pat <- st_read("./data/pat_aura_112025.gpkg")
-admin_express_com<- st_read("./data/communes.gpkg")
-couche_cls<- st_read("./data/cls_aura.gpkg")
+admin_express_com <- st_read("./data/communes.gpkg")
+couche_cls <- st_read("./data/cls_aura.gpkg")
 dep_aura <- st_read("./data/departement_aura.gpkg")
 
-#Chargement de la table pat_com
-pat_com<- read_csv("./data/pat_com.csv")
+# Chargement de la table pat_com
+pat_com <- read_csv("./data/pat_com.csv")
 
-
-
-#Reprojection
+# Reprojection
 couche_pat_4326 <- st_transform(couche_pat, crs = 4326)
-commune_aura<- st_transform(admin_express_com, crs = 4326)
-couche_cls_4326<- st_transform(couche_cls, crs = 4326)
+commune_aura <- st_transform(admin_express_com, crs = 4326)
+couche_cls_4326 <- st_transform(couche_cls, crs = 4326)
 dep_aura_4326 <- st_transform(dep_aura, crs = 4326)
 
-
-
-
-#ui
+# UI
 ui <- fluidPage(
   
-  # Inclusion DSFR depuis CDN
   tags$head(
     tags$link(
       rel = "stylesheet",
@@ -38,7 +33,7 @@ ui <- fluidPage(
     )
   ),
   
-  # Header officiel
+  
   tags$header(
     class = "fr-header",
     tags$div(
@@ -47,7 +42,6 @@ ui <- fluidPage(
         class = "fr-container",
         tags$div(
           class = "fr-header__body-row",
-          # Logo République Française
           tags$div(
             class = "fr-header__brand",
             tags$a(
@@ -59,7 +53,6 @@ ui <- fluidPage(
               )
             )
           ),
-          # Titre de service
           tags$div(
             class = "fr-header__service",
             tags$p(
@@ -76,14 +69,48 @@ ui <- fluidPage(
     )
   ),
   
-  # Contenu principal
   tags$main(
-    class = "fr-container",
+    class = "fr-container-fluid",
+    br(),
+    
+    
+    #Barre de recherche 
+    tags$div(
+      class = "fr-search-bar", #Stle barre de recherche
+      role = "search",  #Zone ou l'on tape l'objet recherche
+      style = "max-width: 300px; margin-left: auto;", #Taille et placement
+      
+      tags$label(   
+        class = "fr-label",
+        `for` = "nom_du_pat",
+      ),
+      
+      tags$input(
+        class = "fr-input",
+        id = "nom_du_pat",   #identifiant
+        type = "search",
+        placeholder = "Rechercher une Commune ou un PAT",
+        `aria-describedby` = "search_input_messages"
+      ),
+      
+      tags$div(
+        class = "fr-messages-group",
+        id = "search_input_messages",
+        `aria-live` = "polite"
+      ),
+      
+      #Bouton rechercher
+      actionButton(
+        inputId = "search_button",
+        label = "Rechercher",
+        class = "fr-btn"
+      )
+    ),
+    
     br(),
     leafletOutput("map", height = "800px")
   ),
   
-  # Footer officiel
   tags$footer(
     class = "fr-footer",
     tags$div(
@@ -93,22 +120,18 @@ ui <- fluidPage(
   )
 )
 
-
-
-
-#Carte
+# Serveur
 server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     
-    bbox <- st_bbox(commune_aura) #bbox caler sur commune aura
+    bbox <- st_bbox(commune_aura)
     
     xmin <- unname(bbox["xmin"])
     ymin <- unname(bbox["ymin"])
     xmax <- unname(bbox["xmax"])
     ymax <- unname(bbox["ymax"])
     
-    #Limitation du dézoom
     leaflet(
       options = leafletOptions(
         minZoom = 8,
@@ -119,7 +142,6 @@ server <- function(input, output, session) {
       fitBounds(xmin, ymin, xmax, ymax) %>%
       setMaxBounds(xmin, ymin, xmax, ymax) %>%
       
-      # RGA landuse
       addWMSTiles(
         baseUrl = "https://data.geopf.fr/wms-r/wms",
         layers  = "LANDUSE.AGRICULTURE2024",
@@ -131,7 +153,6 @@ server <- function(input, output, session) {
         group = "Registre Parcellaire Graphique"
       ) %>%
       
-      # Departement AURA
       addPolygons(
         data = dep_aura_4326,
         color = "black",
@@ -142,10 +163,6 @@ server <- function(input, output, session) {
         group = "Departement"
       ) %>%
       
-      
-      
-      
-      # Commune AURA
       addPolygons(
         data = commune_aura,
         color = "black",
@@ -156,7 +173,6 @@ server <- function(input, output, session) {
         group = "Communes"
       ) %>%
       
-      # couche CLS
       addPolygons(
         data = couche_cls_4326,
         color = "white",
@@ -166,30 +182,72 @@ server <- function(input, output, session) {
         group = "Contrats locaux de santé"
       ) %>%
       
-      # couche Pat
       addPolygons(
         data = couche_pat_4326,
         color = "orange",
         weight = 2,
         fillOpacity = 0.4,
-        popup = ~paste(nom_du_pat,niveau,pop_hab, sep= "<br/>"),
+        popup = ~paste(nom_du_pat, niveau, pop_hab, sep = "<br/>"),
         group = "Projet Alimentaire Territoriaux"
       ) %>%
       
-      # Menu couche
       addLayersControl(
-        overlayGroups = c("Projet Alimentaire Territoriaux","Contrats locaux de santé","Communes","Departement","Registre Parcellaire Graphique"),
+        overlayGroups = c("Projet Alimentaire Territoriaux", "Contrats locaux de santé", "Communes", "Departement", "Registre Parcellaire Graphique"),
         options = layersControlOptions(collapsed = FALSE)
       )
   })
+  
+  # Fonction pour barre de recherche PAT ou Commune
+  observeEvent(input$search_button, {
+    req(input$nom_du_pat)
+    
+    # Caractère particulier fonctionne (a conserver ?)
+    recherche <- tolower(trimws(input$nom_du_pat))
+    
+    # ) Recherche exacte du nom du PAT
+    selection_pat <- couche_pat_4326[
+      tolower(trimws(couche_pat_4326$nom_du_pat)) == recherche, #Recherche la valeur exacte dans le champ
+    ]
+    
+    if (nrow(selection_pat) > 0) {
+      
+      
+      # Zoom animé sur l'emprise du PAT trouvé
+      bb <- st_bbox(selection_pat)
+      
+      leafletProxy("map") %>% #prend les limites du polygones Pat
+        flyToBounds(
+          lng1 = unname(bb["xmin"]),
+          lat1 = unname(bb["ymin"]),
+          lng2 = unname(bb["xmax"]),
+          lat2 = unname(bb["ymax"])
+        ) 
+      
+      return()
+    }
+    
+    # Recherche exacte du nom de la commune 
+    selection_com <- commune_aura[
+      tolower(trimws(commune_aura$nom_officiel)) == recherche, #recherche le nom exact
+    ]
+    
+    if (nrow(selection_com) == 0) {
+      showNotification("PAT ou commune non trouvé", type = "warning")
+      return()
+    }
+    
+    bb <- st_bbox(selection_com) #prend en compte les limites du polygones pour le zoom (centroide impossible car multipolygones)
+    
+    leafletProxy("map") %>%
+      flyToBounds(  #zoom suivant les extremités du polygones
+        lng1 = unname(bb["xmin"]),
+        lat1 = unname(bb["ymin"]),
+        lng2 = unname(bb["xmax"]),
+        lat2 = unname(bb["ymax"])
+      ) 
+  })
 }
 
-#
 shinyApp(ui, server)
-
-
-
-
-
 
 
