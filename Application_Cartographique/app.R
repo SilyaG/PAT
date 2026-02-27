@@ -346,7 +346,7 @@ server <- function(input, output, session) {
           fillOpacity = 0.35,
           popup = ~paste(nom_du_pat,niveau,pop_hab, sep= "<br/>"),
           group = "Projet Alimentaire Territoriaux"
-        )
+        )%>%
         
 #Cercle population
         addCircleMarkers(
@@ -512,33 +512,34 @@ server <- function(input, output, session) {
           lat2 = unname(bb["ymax"])
         )})
     
-    #Filtrage dynamique PAT via liste déroulante (niveau)
-    # Filtrage combiné PAT (niveau + échelle)
+    
+#Paramétrages des filtres (combinés)
     observe({
       proxy <- leafletProxy("map")
       
+#Obligatoire de recréer la palette dans cet observe pour que elle soit effective
       pal_pat <- colorFactor(
         palette = c("#fbe769", "#E4794A"),
         domain = couche_pat_4326$niveau
       )
       
-      # On enlève la couche PAT existante
+#On enlève la couche PAT existante (évite superposition)
       proxy %>% clearGroup("Projet Alimentaire Territoriaux")
       
-      # On commence avec toute la couche
+#On duplique la couche des PAT pour filtrer soit à l'échelle soit au niveau sans modifier la couche initiale
       pat_filtre <- couche_pat_4326
       
-      # Filtre niveau
+#Filtre niveau : vérifie si l'utilisateur a choisi un niveau et affiche les PAT résultats 
       if (!is.null(input$filtre_niveau) && input$filtre_niveau != "Tous") {
-        pat_filtre <- pat_filtre[pat_filtre$niveau == input$filtre_niveau, ]
+        pat_filtre <- pat_filtre[pat_filtre$niveau == input$filtre_niveau, ] #combinaison des filtres
       }
       
-      # Filtre échelle
+#Filtre échelle : vérifie si l'utilisateur a choisi une échelle et affiche les PAT résultats 
       if (!is.null(input$filtre_niveau_terri) && input$filtre_niveau_terri != "Tous") {
-        pat_filtre <- pat_filtre[pat_filtre$echelle == input$filtre_niveau_terri, ]
+        pat_filtre <- pat_filtre[pat_filtre$echelle == input$filtre_niveau_terri, ]#combinaison des filtres
       }
       
-      # Réaffichage
+#Réaffichage uniquement de la sélection 
       proxy %>% addPolygons(
         data = pat_filtre,
         color = ~pal_pat(niveau),
@@ -552,6 +553,5 @@ server <- function(input, output, session) {
 }
     
 
-
-#
+#################################LANCEMENT DE L'APPLICATION#########################################################
 shinyApp(ui, server)
