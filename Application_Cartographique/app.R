@@ -257,7 +257,7 @@ server <- function(input, output, session) {
       communes_centroid <- st_centroid(commune_aura)
       
 #Calcul de la part en % de la SAU bio par communes 
-      part_bio <- communes_centroid$bio_ha_sum/2 / communes_centroid$rpg_ha_sum
+      part_bio <- communes_centroid$part_bio
       
 #Sécurisation (évite la division par 0 et les valeurs NA)
       part_bio[is.na(part_bio) | is.infinite(part_bio)] <- 0
@@ -278,7 +278,7 @@ server <- function(input, output, session) {
       rayon_brut_saubio <- sqrt(saubio_com)
       rayon_saubio <- scales::rescale(rayon_brut_saubio, to = c(1, 30))
       
-##Palettes de couleur des couches 
+##Palettes de couleur des couches
 #Palette PAT 
       pal_pat <- colorFactor(
         palette = c("#fbe769", "#E4794A"),
