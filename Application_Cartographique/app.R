@@ -16,6 +16,14 @@ couche_cls_4326 <- st_read("./data/cls_aura.gpkg")%>%
 dep_aura_4326 <- st_read("./data/departement_aura.gpkg")%>% 
   st_transform(dep_aura, crs = 4326)
 pat_com <- read_csv("./data/pat_com.csv")
+
+#  Autocomplétion : liste des valeurs possibles (PAT + communes) 
+autocomplete_choices <- sort(unique(na.omit(c(
+  couche_pat_4326$nom_du_pat,
+  commune_aura$nom_officiel
+))))  #sort valeurs unqique, supprime valeurs manquantes, combine les 2 colonnes en 1 seule
+
+
  
 
 
@@ -47,6 +55,63 @@ ui <- fluidPage(
     }
     "))
   ),
+# --- Autocomplétion (datalist) : relie la liste au champ DSFR sans modifier le champ existant ---
+tags$script(HTML("
+  document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('nom_du_pat'); // Récupère le champ input ayant l'id 'nom_du_pat'
+    if (input) {
+      input.setAttribute('list', 'autocomplete_pat_communes'); // Associe le champ au datalist ayant l'id 'autocomplete_pat_communes'
+      input.setAttribute('autocomplete', 'off');
+    }
+  });
+")),
+#  Liste des suggestions pour l'autocomplétion 
+tags$datalist(id = "autocomplete_pat_communes"),
+
+#  Autocomplétion (startsWith + insensible aux accents) 
+tags$script(HTML(sprintf("
+  document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('nom_du_pat');
+    var dl = document.getElementById('autocomplete_pat_communes'); // Récupère le datalist vide créé dans l’UI
+    if (!input || !dl) return;
+
+    // Relie le datalist au champ existant
+    input.setAttribute('list', 'autocomplete_pat_communes');
+    input.setAttribute('autocomplete', 'off');
+
+    var ALL = %s; // Injection des données R dans JavaScript
+    
+    // Fonction de normalisation :
+    function norm(s) {
+      return (s || '')
+        .toString()
+        .trim() // supprime espaces début/fin
+        .toLowerCase() // ignore majuscules/minuscules
+        .normalize('NFD') // sépare lettres + accents
+        .replace(/[\\u0300-\\u036f]/g, '') // supprime accents
+    }
+
+    input.addEventListener('input', function () {
+      var q = norm(input.value);
+
+      if (q.length === 0) {
+        dl.innerHTML = '';
+        return;
+      }
+
+      var matches = ALL.filter(function(x){
+        return norm(x).startsWith(q);
+      }).slice(0, 30);
+
+      dl.innerHTML = '';
+      for (var i = 0; i < matches.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = matches[i];
+        dl.appendChild(opt);
+      }
+    });
+  });
+", jsonlite::toJSON(autocomplete_choices, auto_unbox = TRUE)))),
   
 #Création des élements structurants/qui aparaissent sur la page (en-tête, début du contenu principal, 
 #pied de page, logo...) en utilisant les classes du Design System de l’État (DSFR)
@@ -79,6 +144,12 @@ tags$header(
   tags$main(
     class = "fr-container-fluid",
     br(),
+    
+    # --- Liste des suggestions pour l'autocomplétion ---
+    tags$datalist(
+      id = "autocomplete_pat_communes",
+      lapply(autocomplete_choices, function(x) tags$option(value = x))
+    ),
     
 #Placement filtre et barre de recherche
     tags$div(
