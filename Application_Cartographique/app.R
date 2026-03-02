@@ -16,6 +16,14 @@ couche_cls_4326 <- st_read("./data/cls_aura.gpkg")%>%
 dep_aura_4326 <- st_read("./data/departement_aura.gpkg")%>% 
   st_transform(dep_aura, crs = 4326)
 pat_com <- read_csv("./data/pat_com.csv")
+
+#  Autocomplétion : liste des valeurs possibles (PAT + communes) 
+autocomplete_choices <- sort(unique(na.omit(c(
+  couche_pat_4326$nom_du_pat,
+  commune_aura$nom_officiel
+))))  #sort valeurs unqique, supprime valeurs manquantes, combine les 2 colonnes en 1 seule
+
+
  
 
 
@@ -47,6 +55,63 @@ ui <- fluidPage(
     }
     "))
   ),
+# --- Autocomplétion (datalist) : relie la liste au champ DSFR sans modifier le champ existant ---
+tags$script(HTML("
+  document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('nom_du_pat'); // Récupère le champ input ayant l'id 'nom_du_pat'
+    if (input) {
+      input.setAttribute('list', 'autocomplete_pat_communes'); // Associe le champ au datalist ayant l'id 'autocomplete_pat_communes'
+      input.setAttribute('autocomplete', 'off');
+    }
+  });
+")),
+#  Liste des suggestions pour l'autocomplétion 
+tags$datalist(id = "autocomplete_pat_communes"),
+
+#  Autocomplétion (startsWith + insensible aux accents) 
+tags$script(HTML(sprintf("
+  document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('nom_du_pat');
+    var dl = document.getElementById('autocomplete_pat_communes'); // Récupère le datalist vide créé dans l’UI
+    if (!input || !dl) return;
+
+    // Relie le datalist au champ existant
+    input.setAttribute('list', 'autocomplete_pat_communes');
+    input.setAttribute('autocomplete', 'off');
+
+    var ALL = %s; // Injection des données R dans JavaScript
+    
+    // Fonction de normalisation :
+    function norm(s) {
+      return (s || '')
+        .toString()
+        .trim() // supprime espaces début/fin
+        .toLowerCase() // ignore majuscules/minuscules
+        .normalize('NFD') // sépare lettres + accents
+        .replace(/[\\u0300-\\u036f]/g, '') // supprime accents
+    }
+
+    input.addEventListener('input', function () {
+      var q = norm(input.value);
+
+      if (q.length === 0) {
+        dl.innerHTML = '';
+        return;
+      }
+
+      var matches = ALL.filter(function(x){
+        return norm(x).startsWith(q);
+      }).slice(0, 30);
+
+      dl.innerHTML = '';
+      for (var i = 0; i < matches.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = matches[i];
+        dl.appendChild(opt);
+      }
+    });
+  });
+", jsonlite::toJSON(autocomplete_choices, auto_unbox = TRUE)))),
   
 #Création des élements structurants/qui aparaissent sur la page (en-tête, début du contenu principal, 
 #pied de page, logo...) en utilisant les classes du Design System de l’État (DSFR)
@@ -80,69 +145,100 @@ tags$header(
     class = "fr-container-fluid",
     br(),
     
-#Création de la barre de recherche en haut à droite de la page web 
-    tags$div(
-      class = "fr-search-bar", #Style officiel de la barre de recherche selon le DSFR
-      role = "search",  #Zone ou l'on tape l'objet recherche
-      style = "max-width: 300px; margin-left: auto;", #Taille et placement de la barre 
-      
-      tags$label(   
-        class = "fr-label",
-        `for` = "nom_du_pat",
-      ),
-      
-      tags$input( #ce qui est demandé à l'utilisateur 
-        class = "fr-input",
-        id = "nom_du_pat",   #identifiant du PAT 
-        type = "search",
-        placeholder = "Rechercher une Commune ou un PAT",
-        `aria-describedby` = "search_input_messages"
-      ),
-      
-      tags$div( #message d'erreur/d'aide à la compréhension 
-        class = "fr-messages-group",
-        id = "search_input_messages",
-        `aria-live` = "polite"
-      ),
-      
-      #Bouton rechercher
-      actionButton( #Création de la réactivité du bouton (lié au côté server)
-        inputId = "search_button",
-        label = "Rechercher",
-        class = "fr-btn"
-      )
+    # --- Liste des suggestions pour l'autocomplétion ---
+    tags$datalist(
+      id = "autocomplete_pat_communes",
+      lapply(autocomplete_choices, function(x) tags$option(value = x))
     ),
     
-# Création de deux filtres au-dessus de la carte
+#Placement filtre et barre de recherche
     tags$div(
-      style = "display: flex; gap: 20px; margin: 50px 0 20px 0;",  #permet que les filtres soient côte-à-côte
+      style = "display:flex; gap:20px; align-items:flex-end; margin:0px 0 20px 0; padding:0;", 
+      #Conteneur principal : aligne les filtres (gauche) et la barre de recherche (droite) et les placent sur la page
       
-      # Premier filtre
+# Bloc filtres à gauche
       tags$div(
-        style = "width: 250px;",
-        tags$select(
-          id = "filtre_niveau",
-          class = "fr-select",
-          style = "background-color: #d3d3d3; color: black;", #style du filtre 
-          tags$option("Sélectionner un niveau de labellisation", value = "", selected = TRUE, disabled = TRUE),
-          tags$option(value = "Tous", "Tous les niveaux"),
-          tags$option(value = "1", "Niveau 1"),
-          tags$option(value = "2", "Niveau 2")
+        style = "display:flex; gap:20px; margin:0; padding:0;", 
+        #Permet d'afficher les deux menus de sélection côte à côte
+        
+        tags$div(
+          style = "width:250px; margin:0; padding:0;", 
+          
+          tags$select( #Menu déroulant pour filtrer selon le niveau de labellisation
+            id = "filtre_niveau",  
+            class = "fr-select",   
+            style = "color:black; margin:0;",
+            
+            tags$option( #Option par défaut 
+              "Sélectionner un niveau de labellisation",
+              value = "",
+              selected = TRUE,
+              disabled = TRUE
+            ), #Options dans le menu déroulant 
+            tags$option(value = "Tous", "Tous les niveaux"),
+            tags$option(value = "1", "Niveau 1"),
+            tags$option(value = "2", "Niveau 2")
+          )
+        ),
+        
+        tags$div(
+          style = "width:250px; margin:0; padding:0;", 
+
+          tags$select( #Menu déroulant pour filtrer selon l’échelle territoriale
+            id = "filtre_niveau_terri", 
+            class = "fr-select",       
+            style = "color:black; margin:0;", #Personnalisation visuelle sans marge
+            
+            tags$option( #Option par défaut 
+              "Sélectionner l'échelle du territoire",
+              value = "",
+              selected = TRUE,
+              disabled = TRUE
+            ),#Options dans le menu déroulant 
+            tags$option(value = "Tous", "Toutes les échelles"),
+            tags$option(value = "PAT interterritorial (PAiT)", "Interterritorial (PAiT)"),
+            tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
+            tags$option(value = "PAT d'échelle départementale", "Départementale")
+          )
         )
       ),
-      # Deuxième filtre
+      
+# Barre de recherche à droite
       tags$div(
-        style = "width: 250px;",
-        tags$select(
-          id = "filtre_niveau_terri",
-          class = "fr-select",
-          style = "background-color: #d3d3d3; color: black;",  #style du filtre 
-          tags$option("Sélectionner l'échelle du territoire", value = "", selected = TRUE, disabled = TRUE),
-          tags$option(value = "Tous", "Toutes les échelles"),
-          tags$option(value = "PAT interterritorial (PAiT)", "Interterritorial (PAiT)"),
-          tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
-          tags$option(value = "PAT d'échelle départementale", "Départementale")
+        class = "fr-search-bar", #Style officiel de la barre de recherche selon le DSFR
+        role = "search",         #Zone où l'on tape l'objet recherché
+        style = "width:250px; margin-left:auto; margin-top:0; margin-bottom:0; padding:0;", #Taille et placement sans marges inutiles
+        
+        tags$label(   
+          class = "fr-label",
+          `for` = "nom_du_pat",
+        ),
+        
+        tags$input( #Champ dans lequel l'utilisateur saisit sa recherche
+          class = "fr-input",
+          id = "nom_du_pat",   #Identifiant du PAT (utilisé côté server)
+          type = "search",
+          placeholder = "Rechercher une Commune ou un PAT",
+          `aria-describedby` = "search_input_messages",
+          style = "margin:0;"
+        ),
+        
+        tags$div( #Message d'erreur / aide à la compréhension
+          class = "fr-messages-group",
+          id = "search_input_messages",
+          `aria-live` = "polite",
+          style = "margin:0;"
+        ),
+        
+#Bouton rechercher (loupe)
+        actionButton( #Création de la réactivité du bouton (lié au côté server)
+          inputId = "search_button",
+          label = "Rechercher",
+          class = "fr-btn",
+          style = "margin:0;"
         )
+        
+        #Bouton reinitialiser le filtre sur le zoom 
       )
     ),
     
