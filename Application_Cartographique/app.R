@@ -89,6 +89,7 @@ tags$script(HTML(sprintf("
         .toLowerCase() // ignore majuscules/minuscules
         .normalize('NFD') // sépare lettres + accents
         .replace(/[\\u0300-\\u036f]/g, '') // supprime accents
+        
     }
 
     input.addEventListener('input', function () {
@@ -112,6 +113,26 @@ tags$script(HTML(sprintf("
     });
   });
 ", jsonlite::toJSON(autocomplete_choices, auto_unbox = TRUE)))),
+
+
+# script pour lorsque l'on tape entrée ca actionne le bouton recherche
+tags$script(HTML("
+  document.addEventListener('DOMContentLoaded', function () {
+
+    var input = document.getElementById('nom_du_pat');
+    var btn   = document.getElementById('search_button');
+
+    if (!input || !btn) return;
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();   // évite comportement par défaut
+        btn.click();          // simule clic sur la loupe
+      }
+    });
+
+  });
+")),
   
 #Création des élements structurants/qui aparaissent sur la page (en-tête, début du contenu principal, 
 #pied de page, logo...) en utilisant les classes du Design System de l’État (DSFR)
