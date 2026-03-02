@@ -24,8 +24,6 @@ autocomplete_choices <- sort(unique(na.omit(c(
 ))))  #sort valeurs unqique, supprime valeurs manquantes, combine les 2 colonnes en 1 seule
 
 
- 
-
 
 ###########################################Partie UI#############################################################
 ui <- fluidPage(
@@ -40,6 +38,11 @@ ui <- fluidPage(
       src = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/dsfr.module.min.js",
       type = "module"
     ),
+    tags$link(
+      href = "https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css",
+      rel = "stylesheet"
+    ),
+    
 #Création d'un style pour le menu de sélection des couches 
     tags$style(HTML("
     .menu-couches {
@@ -52,6 +55,95 @@ ui <- fluidPage(
     .menu-couches h4 {
       font-weight: 600;
       margin-top: 15px;
+    }
+    .leaflet-control-scale-line {
+    text-align: center;  /* Centre le texte horizontalement */
+    font-size: 14px;     /* Ajuste la taille du texte */
+  }
+  .tutorial-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 9998;
+    display: none;
+  }
+  .tutorial-highlight {
+    position: absolute;
+    background-color: transparent;
+    border: 2px solid #000091;
+    border-radius: 6px;
+    box-shadow: 0 0 10px #6a6af4;
+    z-index: 9999;
+    pointer-events: none;
+    display: none;
+    transition: all 0.3s ease;
+  }
+  .tutorial-modal {
+    position: fixed;
+    z-index: 10000;
+    background: white;
+    border: 2px solid #e5e5e5;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    display: none;
+    transform: none !important;
+  }
+    .tutorial-modal p {
+    font-size: 14px; /* Augmente la taille des paragraphes */
+    }
+  
+/*STyle page d'introduction*/
+  .intro-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7); /* Assure que l'overlay est bien visible */
+    z-index: 9998;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+    border: 2px solid #e5e5e5;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+.intro-overlay .content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 90%; /* Donne une largeur relative à la fenêtre */
+  height: 60%; /* Donne une hauteur relative à la fenêtre */
+}
+
+  .intro-overlay p {
+    color: #333;  /* Couleur du texte pour s'assurer qu'il soit lisible */
+    font-size: 14px;  /* Taille de texte pour une meilleure lisibilité */
+    line-height: 1.5; /* Espacement entre les lignes */
+    margin-bottom: 20px;  /* Ajout d'une marge pour espacer les paragraphes */
+    text-align: center; /* Alignement des paragraphes au centre */
+  }
+
+  .intro-overlay h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;  /* Ajout d'un espacement pour aérer */
+    text-align: center; /* Assurez-vous que le titre est centré */
+  }
+    .intro-overlay button {
+    padding: 12px 24px;  /* Plus d'espace autour du texte */
+    font-size: 12px;  /* Taille de police plus grande */
+
     }
     "))
   ),
@@ -69,7 +161,7 @@ tags$script(HTML("
 tags$datalist(id = "autocomplete_pat_communes"),
 
 #  Autocomplétion (startsWith + insensible aux accents) 
-tags$script(HTML(sprintf("
+  tags$script(HTML(sprintf("
   document.addEventListener('DOMContentLoaded', function () {
     var input = document.getElementById('nom_du_pat');
     var dl = document.getElementById('autocomplete_pat_communes'); // Récupère le datalist vide créé dans l’UI
@@ -112,7 +204,39 @@ tags$script(HTML(sprintf("
     });
   });
 ", jsonlite::toJSON(autocomplete_choices, auto_unbox = TRUE)))),
-  
+
+#Création de la page introductive
+tags$div(
+  id = "intro_overlay",
+  class = "intro-overlay fr-overlay",  # Le style DSFR de l'overlay
+  tags$div(
+    class = "fr-container fr-container--fluid",  # Container fluide de DSFR
+    tags$div(
+      class = "fr-card fr-card--xl fr-p-5 fr-m-auto fr-text-center",  # Le container avec une carte DSFR, texte centré
+      # Titre de l'introduction
+      tags$h2(class = "fr-h2", "Bienvenue sur l'application des Projets Alimentaires Territoriaux"),
+      
+      # Texte d'introduction
+      tags$p(class = "fr-text fr-mb-3", "Cette application permet d'explorer les Projets Alimentaires Territoriaux (PAT) et leurs indicateurs. Vous pouvez filtrer les PAT, rechercher une commune ou un PAT, et visualiser des informations détaillées."),
+      tags$p(class = "fr-text fr-mb-3", "Cliquez sur le bouton ci-dessous pour commencer le tutoriel et apprendre à utiliser l'application."),
+      
+      # Boutons pour démarrer ou passer le tutoriel
+      tags$div(
+        style = "display: flex; gap: 20px; justify-content: center;",  # Alignement des boutons
+        tags$button(
+          class = "fr-btn fr-btn--primary",  # Bouton principal "Démarrer"
+          id = "start_tutorial",
+          "Démarrer le tutoriel"
+        ),
+        tags$button(
+          class = "fr-btn fr-btn--secondary",  # Bouton secondaire "Passer"
+          id = "skip_tutorial",
+          "Passer le tutoriel"
+        )
+      )
+    )
+  )
+),
 #Création des élements structurants/qui aparaissent sur la page (en-tête, début du contenu principal, 
 #pied de page, logo...) en utilisant les classes du Design System de l’État (DSFR)
 tags$header(
@@ -203,44 +327,54 @@ tags$header(
         )
       ),
       
-# Barre de recherche à droite
-      tags$div(
-        class = "fr-search-bar", #Style officiel de la barre de recherche selon le DSFR
-        role = "search",         #Zone où l'on tape l'objet recherché
-        style = "width:250px; margin-left:auto; margin-top:0; margin-bottom:0; padding:0;", #Taille et placement sans marges inutiles
-        
-        tags$label(   
-          class = "fr-label",
-          `for` = "nom_du_pat",
-        ),
-        
-        tags$input( #Champ dans lequel l'utilisateur saisit sa recherche
-          class = "fr-input",
-          id = "nom_du_pat",   #Identifiant du PAT (utilisé côté server)
-          type = "search",
-          placeholder = "Rechercher une Commune ou un PAT",
-          `aria-describedby` = "search_input_messages",
-          style = "margin:0;"
-        ),
-        
-        tags$div( #Message d'erreur / aide à la compréhension
-          class = "fr-messages-group",
-          id = "search_input_messages",
-          `aria-live` = "polite",
-          style = "margin:0;"
-        ),
-        
-#Bouton rechercher (loupe)
-        actionButton( #Création de la réactivité du bouton (lié au côté server)
-          inputId = "search_button",
-          label = "Rechercher",
-          class = "fr-btn",
-          style = "margin:0;"
-        )
-        
-        #Bouton reinitialiser le filtre sur le zoom 
-      )
+# Barre de recherche à droite + bouton info 
+# Bloc recherche + bouton info
+tags$div(
+  style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
+  
+  # 🔹 Bouton information DSFR (à gauche)
+  # Bouton information DSFR robuste (SVG natif)
+  tags$button(
+    id = "info_tutorial",
+    class = "fr-btn--tooltip fr-btn",
+    type = "button",
+    title = "Lancer le tutoriel",
+    `aria-label` = "Lancer le tutoriel"
+  ),
+  
+  # 🔹 Barre de recherche DSFR
+  tags$div(
+    class = "fr-search-bar",
+    role = "search",
+    style = "width:250px; margin:0;",
+    
+    tags$label(
+      class = "fr-label",
+      `for` = "nom_du_pat"
     ),
+    
+    tags$input(
+      class = "fr-input",
+      id = "nom_du_pat",
+      type = "search",
+      placeholder = "Rechercher une Commune ou un PAT",
+      `aria-describedby` = "search_input_messages"
+    ),
+    
+    tags$div(
+      class = "fr-messages-group",
+      id = "search_input_messages",
+      `aria-live` = "polite"
+    ),
+    
+    actionButton(
+      inputId = "search_button",
+      label = "Rechercher",
+      class = "fr-btn"
+    )
+  )
+)
+),
     
 #Création des colonnes pour ajouter le menu de sélection des couches à gauche de la carte 
 #Menu de sélection des couches (lateral gauche)
@@ -295,7 +429,7 @@ tags$header(
 #Intégration de la carte dans la colonne de droite 
       column(
         width = 9,
-        leafletOutput("map", height = "90vh")
+        leafletOutput("map", height = "80vh")
       )
     )
   ),
@@ -307,8 +441,136 @@ tags$header(
       class = "fr-container",
       tags$p("© République Française - Tous droits réservés")
     )
-  )
-)
+  ),
+
+#Création du tutotiel 
+tags$div(id = "tutorial_overlay", class = "tutorial-overlay"),
+tags$div(id = "tutorial_highlight", class = "tutorial-highlight"),
+tags$div(id = "tutorial_modal", class = "tutorial-modal",
+         tags$button(
+           id = "tutorial_close",
+           class = "fr-btn fr-btn--tertiary-no-outline",
+           style = "position:absolute; top:10px; right:10px;",
+           "✕"
+         ),
+         tags$h3(id="tutorial_title", "Titre"),
+         tags$p(id="tutorial_text", "Texte de description"),
+         tags$div(style="text-align:right; margin-top:10px;",
+                  tags$button(class="fr-btn", id="tutorial_prev", "Précédent"),
+                  tags$button(class="fr-btn", id="tutorial_next", "Suivant")
+         )
+),
+tags$script(HTML("
+                 document.addEventListener('DOMContentLoaded', function() {
+                   // Lorsque l'utilisateur clique sur 'Démarrer le tutoriel'
+      document.getElementById('start_tutorial').addEventListener('click', function() {
+        // Masquer l'overlay d'introduction
+        document.getElementById('intro_overlay').style.display = 'none';
+        
+        // Lancer le tutoriel
+        startTutorial();
+      });
+
+      // Lorsque l'utilisateur clique sur 'Passer'
+                   document.getElementById('skip_tutorial').addEventListener('click', function() {
+                     // Masquer l'overlay d'introduction sans lancer le tutoriel
+                     document.getElementById('intro_overlay').style.display = 'none';
+                   });
+                 });
+                 
+                 // Fonction pour démarrer le tutoriel
+                 function startTutorial() {
+                   var tutorialSteps = [
+                     {el:'.menu-couches', title:'Menu des couches', text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.'},
+                     {el:'#filtre_niveau', title:'Filtre niveau', text:'Utilisez ce filtre pour sélectionner le niveau des PAT.'},
+                     {el:'#filtre_niveau_terri', title:'Filtre échelle', text:'Filtrez selon l’échelle territoriale.'},
+                     {el:'#nom_du_pat', title:'Barre de recherche', text:'Recherchez un PAT ou une commune ici.', position:{ top: 130, left: 1600 }},
+                     {el:'#map', title:'Carte', text:'La carte centrale affiche les PAT et indicateurs.', position:{ top: 750, left: 10 }},
+                     {el:'#info_tutorial', title:'Relancer le tutoriel', text:'Vous pouvez relancer le tutoriel à tout moment en cliquant sur cette icône.', position:{ top: 130, left: 1600 }}
+                   ];
+                   
+                   var currentStep = 0;
+                                     
+                function showStep(step){
+                  var s = tutorialSteps[step];
+                  var el = document.querySelector(s.el);
+                  if(!el) return;
+                
+                  var rect = el.getBoundingClientRect();
+                
+                  var overlay = document.getElementById('tutorial_overlay');
+                  overlay.style.display='block';
+                
+                  var hl = document.getElementById('tutorial_highlight');
+                  hl.style.display='block';
+                  hl.style.top = (rect.top - 5) + 'px';
+                  hl.style.left = (rect.left - 5) + 'px';
+                  hl.style.width = (rect.width + 10) + 'px';
+                  hl.style.height = (rect.height + 10) + 'px';
+                
+                  var modal = document.getElementById('tutorial_modal');
+                  modal.style.display='block';
+                
+                  if(s.position){
+                    modal.style.top = s.position.top + 'px';
+                    modal.style.left = s.position.left + 'px';
+                  } else {
+                    modal.style.top = (rect.bottom + 10) + 'px';
+                    modal.style.left = rect.left + 'px';
+                  }
+                
+                  document.getElementById('tutorial_title').innerText = s.title;
+                  document.getElementById('tutorial_text').innerText = s.text;
+                
+                  var prevBtn = document.getElementById('tutorial_prev');
+                  var nextBtn = document.getElementById('tutorial_next');
+                
+                  if(step === 0){
+                    prevBtn.style.display = 'none';
+                  } else {
+                    prevBtn.style.display = 'inline-block';
+                  }
+                
+                  if(step === tutorialSteps.length - 1){
+                    nextBtn.innerText = 'Fin';
+                  } else {
+                    nextBtn.innerText = 'Suivant';
+                  }
+                }
+                   document.getElementById('tutorial_next').addEventListener('click', function(){
+                     if(currentStep < tutorialSteps.length-1){currentStep++; showStep(currentStep);}
+                     else {
+                       document.getElementById('tutorial_overlay').style.display='none';
+                       document.getElementById('tutorial_highlight').style.display='none';
+                       document.getElementById('tutorial_modal').style.display='none';
+                     }
+                   });
+                   
+                   document.getElementById('tutorial_prev').addEventListener('click', function(){
+                     if(currentStep > 0){currentStep--; showStep(currentStep);}
+                   });
+                   
+                   // Affiche le premier step
+                   showStep(currentStep);
+                 }
+                 
+                 function closeTutorial(){
+  document.getElementById('tutorial_overlay').style.display='none';
+  document.getElementById('tutorial_highlight').style.display='none';
+  document.getElementById('tutorial_modal').style.display='none';
+                 }
+document.getElementById('tutorial_close').addEventListener('click', function(){
+  closeTutorial();
+})
+
+var infoBtn = document.getElementById('info_tutorial');
+if (infoBtn) {
+  infoBtn.addEventListener('click', function () {
+    startTutorial();
+  });
+};
+                 "))
+)#fermeture de l'UI
   
   
 ###########################################Partie SERVER###########################################################
@@ -373,6 +635,15 @@ server <- function(input, output, session) {
         fitBounds(xmin, ymin, xmax, ymax) %>%
         setMaxBounds(xmin, ymin, xmax, ymax) %>%
         
+        addScaleBar(
+          position = "bottomleft",
+          options = scaleBarOptions(
+            metric = TRUE,
+            imperial = FALSE,
+            updateWhenIdle = TRUE,
+            maxWidth = 150  # Longueur
+          )
+        )%>%
 
 #Ajout/Appel des couches à la carte 
 #Plan IGN
