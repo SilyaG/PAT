@@ -17,11 +17,9 @@ dep_aura_4326 <- st_read("./data/departement_aura.gpkg")%>%
   st_transform(dep_aura, crs = 4326)
 pat_com <- read_csv("./data/pat_com.csv")
 
-#  Autocomplétion : liste des valeurs possibles (PAT + communes) 
-autocomplete_choices <- sort(unique(na.omit(c(
-  couche_pat_4326$nom_du_pat,
-  commune_aura$nom_officiel
-))))  #sort valeurs unqique, supprime valeurs manquantes, combine les 2 colonnes en 1 seule
+#  Autocomplétion : listes séparées (Communes vs PAT) 
+autocomplete_communes <- sort(unique(na.omit(commune_aura$nom_officiel))) #liste nom_officiel
+autocomplete_pats     <- sort(unique(na.omit(couche_pat_4326$nom_du_pat))) #liste nom_du_pat
 
 
  
@@ -53,86 +51,186 @@ ui <- fluidPage(
       font-weight: 600;
       margin-top: 15px;
     }
-    "))
-  ),
-# --- Autocomplétion (datalist) : relie la liste au champ DSFR sans modifier le champ existant ---
-tags$script(HTML("
-  document.addEventListener('DOMContentLoaded', function () {
-    var input = document.getElementById('nom_du_pat'); // Récupère le champ input ayant l'id 'nom_du_pat'
-    if (input) {
-      input.setAttribute('list', 'autocomplete_pat_communes'); // Associe le champ au datalist ayant l'id 'autocomplete_pat_communes'
-      input.setAttribute('autocomplete', 'off');
+    
+    .fr-search-bar { position: relative; } /* place le menu sous la barre de recherche */
+    
+    .autocomplete-panel{   /* design du menu déroulant barre de recherche*/
+      display:none;
+      position:absolute;
+      left:0;
+      right:0;
+      top: calc(100% + 4px);
+      z-index: 9999;
     }
-  });
-")),
-#  Liste des suggestions pour l'autocomplétion 
-tags$datalist(id = "autocomplete_pat_communes"),
+    
+    .autocomplete-card{  /* style visuel du panneau déroulant */
+      background:#fff;
+      border:1px solid #e5e5e5;
+      border-radius:8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      padding:8px;
+    }
+    
+    .autocomplete-title{  /* design du titre */
+      font-size:12px;
+      font-weight:600;
+      margin:2px 0 6px 0;
+      color:#000091;;
+    }
+    
+    .autocomplete-sep{  /* ligne de séparation */
+      height:1px;
+      background:#eee;
+      margin:8px 0;
+    }
+    
+    .autocomplete-list{
+      list-style:none;
+      padding:0;
+      margin:0;
+      max-height:140px;
+      overflow:auto;
+    }
+    
+    .autocomplete-list li{
+      font-size:12px;
+      padding:6px 8px;
+      border-radius:6px;
+      cursor:pointer;
+      line-height:1.2;
+      color:#161616;
+      user-select:none;
+    }
+    
+    .autocomplete-list li:hover{
+      background:#f6f6f6;
+    }
+    
+    .autocomplete-empty{
+      cursor:default;
+      opacity:0.7;
+    }
+        "))
+      ),
 
-#  Autocomplétion (startsWith + insensible aux accents) 
 tags$script(HTML(sprintf("
   document.addEventListener('DOMContentLoaded', function () {
-    var input = document.getElementById('nom_du_pat');
-    var dl = document.getElementById('autocomplete_pat_communes'); // Récupère le datalist vide créé dans l’UI
-    if (!input || !dl) return;
 
-    // Relie le datalist au champ existant
-    input.setAttribute('list', 'autocomplete_pat_communes');
-    input.setAttribute('autocomplete', 'off');
+    var input  = document.getElementById('nom_du_pat'); // Entrer de recherche
+    var panel  = document.getElementById('autocomplete_panel'); // Recupere les éléments du panneau déroulant
+    var ulCom  = document.getElementById('suggest_communes'); // Liste des communes issues du champs communes 
+    var ulPat  = document.getElementById('suggest_pats'); // Liste des pat issus du champ nom_du_pat
+    var btn    = document.getElementById('search_button'); // Bouton rechercher
 
-    var ALL = %s; // Injection des données R dans JavaScript
+    if (!input || !panel || !ulCom || !ulPat || !btn) return;
+
+    var COMMUNES = %s;  // Variable table communes 
+    var PATS     = %s; // Variable table PAT
     
-    // Fonction de normalisation :
+    // Fonction de normalisation
+
     function norm(s) {
       return (s || '')
-        .toString()
-        .trim() // supprime espaces début/fin
-        .toLowerCase() // ignore majuscules/minuscules
-        .normalize('NFD') // sépare lettres + accents
-        .replace(/[\\u0300-\\u036f]/g, '') // supprime accents
-        
+        .trim() // supprime les espaces
+        .toLowerCase() //Ne prend pas en compte les Majuscules et minuscule
+        .normalize('NFD')  // Sépare lettre et accents 
+        .replace(/[\\u0300-\\u036f]/g, '')   //supprime accents
+        .replace(/[’']/g, '')               // supprime apostrophes
+        .replace(/[-‐-‒–—―]/g, '')           //supprime tous les tirets
+        .replace(/\\s+/g, '');              // supprime tous les espaces
     }
 
-    input.addEventListener('input', function () {
-      var q = norm(input.value);
+    function clearList(ul) { ul.innerHTML = ''; }
+
+    function addItem(ul, label, clickable) {
+  var li = document.createElement('li');
+  li.textContent = label;
+
+  if (clickable) {
+    li.addEventListener('click', function () {
+
+      input.value = label;
+
+      // informe Shiny que la valeur a changé
+      if (window.Shiny && Shiny.setInputValue) {
+        Shiny.setInputValue('nom_du_pat', label, { priority: 'event' });
+      }
+
+      panel.style.display = 'none';
+
+      // Lance la recherche après que Shiny ait bien reçu la valeur
+      setTimeout(function () {
+        btn.click();
+      }, 50);
+
+    });
+  } else {
+    li.classList.add('autocomplete-empty');
+  }
+
+  ul.appendChild(li);
+}
+    
+     // fonction de mise a jour suivant entrée
+    function updatePanel() {
+      var q = norm(input.value);  // Récupere la saisie de l'utilisateur
 
       if (q.length === 0) {
-        dl.innerHTML = '';
+        panel.style.display = 'none';
+        clearList(ulCom);
+        clearList(ulPat);
         return;
       }
+      // Filtrage saisie commune commence par X
+      var comMatches = COMMUNES.filter(function(x){ return norm(x).startsWith(q); }).slice(0, 20);
+      
+      // Filtrage saisie PAT contient x
+      var patMatches = PATS.filter(function(x){ return norm(x).includes(q); }).slice(0, 20);
+      
+      // Affichage des nouvelles listes
+      clearList(ulCom);
+      clearList(ulPat);
 
-      var matches = ALL.filter(function(x){
-        return norm(x).startsWith(q);
-      }).slice(0, 30);
+      if (comMatches.length === 0) addItem(ulCom, 'Aucun résultat', false);
+      for (var i = 0; i < comMatches.length; i++) addItem(ulCom, comMatches[i], true);
 
-      dl.innerHTML = '';
-      for (var i = 0; i < matches.length; i++) {
-        var opt = document.createElement('option');
-        opt.value = matches[i];
-        dl.appendChild(opt);
-      }
-    });
-  });
-", jsonlite::toJSON(autocomplete_choices, auto_unbox = TRUE)))),
+      if (patMatches.length === 0) addItem(ulPat, 'Aucun résultat', false);
+      for (var j = 0; j < patMatches.length; j++) addItem(ulPat, patMatches[j], true);
 
+      panel.style.display = 'block';
+    }
 
-# script pour lorsque l'on tape entrée ca actionne le bouton recherche
-tags$script(HTML("
-  document.addEventListener('DOMContentLoaded', function () {
+    input.addEventListener('input', updatePanel);
 
-    var input = document.getElementById('nom_du_pat');
-    var btn   = document.getElementById('search_button');
-
-    if (!input || !btn) return;
-
-    input.addEventListener('keydown', function(e) {
+    // Entrée = recherche 
+    input.addEventListener('keydown', function(e){
       if (e.key === 'Enter') {
-        e.preventDefault();   // évite comportement par défaut
-        btn.click();          // simule clic sur la loupe
+        e.preventDefault();
+        btn.click();
+        panel.style.display = 'none';
+      }
+      if (e.key === 'Escape') {
+        panel.style.display = 'none';
       }
     });
 
+    // clic ailleurs => masque
+    document.addEventListener('click', function(e){
+      if (e.target === input || panel.contains(e.target)) return;
+      panel.style.display = 'none';
+    });
+
   });
-")),
+",
+                         jsonlite::toJSON(autocomplete_communes, auto_unbox = TRUE),
+                         jsonlite::toJSON(autocomplete_pats, auto_unbox = TRUE)
+))),
+
+
+
+
+
+
   
 #Création des élements structurants/qui aparaissent sur la page (en-tête, début du contenu principal, 
 #pied de page, logo...) en utilisant les classes du Design System de l’État (DSFR)
@@ -166,10 +264,7 @@ tags$header(
     class = "fr-container-fluid",
     br(),
     
-    # --- Liste des suggestions pour l'autocomplétion ---
-    tags$datalist(
-      id = "autocomplete_pat_communes",
-      lapply(autocomplete_choices, function(x) tags$option(value = x))
+
     ),
     
 #Placement filtre et barre de recherche
@@ -233,6 +328,29 @@ tags$header(
         tags$label(   
           class = "fr-label",
           `for` = "nom_du_pat",
+        ),
+        
+        #  Panneau de suggestions (Communes et PAT)
+        tags$div(
+          id = "autocomplete_panel",
+          class = "autocomplete-panel",
+          tags$div(
+            class = "autocomplete-card",
+            
+            tags$div(
+              class = "autocomplete-title",
+              "Communes"
+            ),
+            tags$ul(id = "suggest_communes", class = "autocomplete-list"),
+            
+            tags$div(class = "autocomplete-sep"),
+            
+            tags$div(
+              class = "autocomplete-title",
+              "PAT"
+            ),
+            tags$ul(id = "suggest_pats", class = "autocomplete-list")
+          )
         ),
         
         tags$input( #Champ dans lequel l'utilisateur saisit sa recherche
@@ -319,7 +437,7 @@ tags$header(
         leafletOutput("map", height = "90vh")
       )
     )
-  ),
+  )
 
 #Création du pied de page officiel (DSFR)
   tags$footer(
@@ -329,7 +447,7 @@ tags$header(
       tags$p("© République Française - Tous droits réservés")
     )
   )
-)
+
   
   
 ###########################################Partie SERVER###########################################################
