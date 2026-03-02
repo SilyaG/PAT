@@ -576,6 +576,24 @@ if (infoBtn) {
   
 ###########################################Partie SERVER###########################################################
 server <- function(input, output, session) {
+  
+  #Permet de réafficher tous les PAT suite à une sélection
+  pat_actif <- reactiveVal(NULL)
+  
+  #pour afficher uniquement le PAT sur lequel on as cliqué 
+  clic_sur_pat <- reactiveVal(FALSE)
+  
+  #Creation d'un fonction permettant de créer le Pop-up de la couche PAT (A AMELIORER)
+  popup_pat <- function(pat){
+    paste0(
+      "<strong>",pat$nom_du_pat,"</strong><br/>",
+      "Niveau :", pat$niveau, "<br/>",
+      "Population :",pat$pop_hab, "<br/>",
+      "<hr>",
+      "<strong>Indicateurs :</strong><br/>",
+      "Indicateur 1 : ...<br/>"
+    )
+  }
     
     output$map <- renderLeaflet({#affichage de la carte et paramétrages de la BBOX
       
@@ -708,11 +726,11 @@ server <- function(input, output, session) {
 #PAT 
         addPolygons(
           data = couche_pat_4326,
+          layerId = ~nom_du_pat,
           color = ~pal_pat(niveau),
           fillColor = ~pal_pat(niveau),
           weight = 3,
           fillOpacity = 0.35,
-          popup = ~paste(nom_du_pat,niveau,pop_hab, sep= "<br/>"),
           group = "Projet Alimentaire Territoriaux"
         )%>%
         
@@ -883,6 +901,9 @@ server <- function(input, output, session) {
     
 #Paramétrages des filtres (combinés)
     observe({
+      
+      pat_actif()
+      
       proxy <- leafletProxy("map")
       
 #Obligatoire de recréer la palette dans cet observe pour que elle soit effective
@@ -907,17 +928,144 @@ server <- function(input, output, session) {
         pat_filtre <- pat_filtre[pat_filtre$echelle == input$filtre_niveau_terri, ]#combinaison des filtres
       }
       
+#Filtre d'affichage à la sélection du PAT 
+      if(!is.null(pat_actif())){
+        pat_filtre <- pat_filtre[pat_filtre$nom_du_pat == pat_actif(),]
+      }
+      
 #Réaffichage uniquement de la sélection 
       proxy %>% addPolygons(
         data = pat_filtre,
+        layerId  = ~nom_du_pat, 
         color = ~pal_pat(niveau),
         fillColor = ~pal_pat(niveau),
         weight = 3,
         fillOpacity = 0.35,
-        popup = ~paste(nom_du_pat,niveau,pop_hab, sep= "<br/>"),
         group = "Projet Alimentaire Territoriaux"
       )
   })
+
+#Interception des clics sur la couche PAT pour l'affichage de pop-up 
+observeEvent(input$map_shape_click, {
+  
+  clic_sur_pat(TRUE)
+  
+  click <- input$map_shape_click
+  req(click)
+  
+  #point cliqué 
+  point <- st_sfc(
+    st_point(c(click$lng, click$lat)),
+    crs = 4326
+  )
+  
+  #Recherche des PAT qui s'intersectent
+  pat_click <- couche_pat_4326[
+    st_intersects(couche_pat_4326, point, sparse = FALSE),
+  ]
+  
+  #Cas 1 : aucun PAT présent à l'endroit du clic
+  if (nrow(pat_click)== 0) return()
+  
+  #Cas 2 : un seul PAT present à l'endroit du clic 
+  if (nrow(pat_click)==1){
+    
+    pat <- pat_click[1,]
+    
+    pat_actif(pat$nom_du_pat)
+    
+    contenu <- popup_pat(pat)
+    
+    leafletProxy("map") %>% 
+      clearPopups() %>% 
+      addPopups(
+        lng = click$lng,
+        lat = click$lat,
+        popup = contenu
+      )
+  } else {
+    
+    #Cas 3 : Plusieurs PAT à l'endroit du clic
+    liens <- paste0(
+      "<li><a href='#' onclick=\"Shiny.setInputValue('pat_selectionne','",
+      pat_click$nom_du_pat,
+      "', {priority:'event'})\">",
+      pat_click$nom_du_pat,
+      "</a></li>",
+      collapse = ""
+    )
+    
+    contenu <- paste0(
+      "<strong>Plusieurs PAT à cet endroit :</strong><br/>",
+      "<ul>", liens, "</ul>"
+    )
+    
+    leafletProxy("map") %>% 
+      clearPopups() %>% 
+      addPopups(
+        lng = click$lng,
+        lat = click$lat,
+        popup = contenu
+      )
+  }
+})
+
+#Gerer le clic sur un PAT de la liste 
+observeEvent(input$pat_selectionne, {
+  
+  clic_sur_pat(TRUE)
+  
+  req(input$pat_selectionne)
+  
+  pat_actif(input$pat_selectionne)
+  
+  pat_select <- couche_pat_4326[
+    couche_pat_4326$nom_du_pat == input$pat_selectionne,
+  ] 
+  
+  if (nrow(pat_select)== 0)return()
+  
+  #Zoom sur le PAT choisi
+  bb <- st_bbox(pat_select)
+  
+  leafletProxy("map") %>% 
+    flyToBounds(
+      lng1 = unname(bb["xmin"]),
+      lat1 = unname(bb["ymin"]),
+      lng2 = unname(bb["xmax"]),
+      lat2 = unname(bb["ymax"])
+    )
+  
+  #popup détaillé avec indicateurs (à améliorer)
+  contenu <- popup_pat(pat_select)
+  
+  centre <- st_centroid(pat_select)
+  coords <- st_coordinates(centre)
+  
+  leafletProxy("map") %>% 
+    clearPopups() %>% 
+    addPopups(
+      lng = coords[1],
+      lat = coords[2],
+      popup = contenu
+    )
+})
+
+#Reset si on clic ailleurs sur la carte (tous les PAT se réaffiche)
+observeEvent(input$map_click, {
+  
+  #si on clique sur le polygone d'un PAT on ignore le reset
+  if (clic_sur_pat()){
+    clic_sur_pat(FALSE)
+    return()
+  }
+  #sinon on reset
+  if(!is.null(pat_actif())){
+    pat_actif(NULL)
+    leafletProxy("map") %>% 
+      clearPopups()
+  }
+})
 }
     
 
