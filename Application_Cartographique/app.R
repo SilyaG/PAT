@@ -181,6 +181,7 @@ tags$datalist(id = "autocomplete_pat_communes"),
         .toLowerCase() // ignore majuscules/minuscules
         .normalize('NFD') // sépare lettres + accents
         .replace(/[\\u0300-\\u036f]/g, '') // supprime accents
+        
     }
 
     input.addEventListener('input', function () {
