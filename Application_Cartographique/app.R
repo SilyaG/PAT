@@ -34,7 +34,7 @@ autocomplete_pats     <- sort(unique(na.omit(couche_pat_4326$nom_du_pat))) #list
 ###########################################Partie UI#############################################################
 ui <- fluidPage(
   
-  #Appel des éléments nécessaires à la stylisation/mise en page (DSFR)
+#Appel des éléments nécessaires à la stylisation/mise en page (DSFR)
   tags$head(
     tags$link(
       rel = "stylesheet",
@@ -48,9 +48,12 @@ ui <- fluidPage(
       href = "https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css",
       rel = "stylesheet"
     ),
-
+    tags$link(
+      href = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@latest/dist/dsfr.min.css",
+      rel = "stylesheet"
+    ),
     
-    #Création des divers styles nécessaires à la mise en page 
+#Création des divers styles nécessaires à la mise en page 
     tags$style(HTML("
     .menu-couches {
       background-color:#f6f6f6;
@@ -1316,6 +1319,9 @@ server <- function(input, output, session) {
         pat_affiche$nom_du_pat == pat_actif(),
       ]
     }
+  
+     #Si aucun PAT après filtre on affiche rien 
+     if(nrow(pat_affiche)==0)return()
     
     #Si aucun PAT après filtre on affiche rien 
     if(nrow(pat_affiche)==0)return()
