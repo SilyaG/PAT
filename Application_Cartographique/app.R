@@ -207,6 +207,13 @@ ui <- fluidPage(
       cursor:default;
       opacity:0.7;
     }
+    select.fr-select,
+    .fr-select {
+      border-bottom: 2px solid #000091 !important;
+      box-shadow: none !important;
+    }
+    
+    
     
     
 // CHARLOTTE ET OLIVIER 
@@ -255,7 +262,125 @@ ui <- fluidPage(
     }
 // FIN DU BLOC DE STYLISATION DES ZOOM/DEZOOM/PLEIN ECRAN
     
+//Style de la légende 
+    .map-legend {
+      display: none;
+      background: #ffffff;
+      padding: 14px 16px;
+      border-radius: 6px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      min-width: 240px;
+      font-size: 13px;
+      line-height: 1.5;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
     
+    .map-legend h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #000091;
+    }
+    
+    .leg-cat {
+      font-weight: 600;
+      font-size: 12.5px;
+      margin: 10px 0 6px 0;
+      color: #161616;
+    }
+    
+    .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+      font-size: 12px;
+    }
+    
+    .leg-sep {
+      height: 1px;
+      background: #e5e5e5;
+      margin: 10px 0;
+    }
+    
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    
+    .swatch-line {
+      width: 18px;
+      height: 3px;
+      flex-shrink: 0;
+    }
+    
+    .swatch-circle {
+      border-radius: 50%;
+    }
+    
+    .swatch-grad {
+      width: 40px;
+      height: 10px;
+      background: linear-gradient(to right, #bcd9a3, #306600);
+      border-radius: 3px;
+    }
+    
+    .map-legend h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #000091;
+    }
+    .leaflet-bar {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    #legend_toggle {
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
+      text-align: center;
+      padding: 0;
+    }
+    
+    #legend_toggle i {
+      font-size: 14px;
+    }
+    /* Supprime le padding par défaut du conteneur addControl() */
+    #legend_toggle.leaflet-control {
+      margin: 0 !important;
+    }
+    /* Réduit le bouton légende à la même taille que zoom/fullscreen */
+    #legend_toggle {
+      width: 36px !important;
+      height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: #fff !important;
+      border: 1px solid #e5e5e5 !important;
+      border-radius: 4px !important;
+      color: #000091 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      text-decoration: none !important;
+    }
+    
+    #legend_toggle i {
+      font-size: 18px !important;
+      line-height: 1 !important;
+      display: block !important;
+    }
+    .leaflet-control:has(#legend_toggle) {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
     ")),
 
 
@@ -370,7 +495,30 @@ ui <- fluidPage(
     ",
                              jsonlite::toJSON(autocomplete_communes, auto_unbox = TRUE),
                              jsonlite::toJSON(autocomplete_pats, auto_unbox = TRUE)
-    )))
+    ))),
+
+          tags$script(HTML("
+            document.addEventListener('click', function(e){
+              var btn = e.target.closest('#legend_toggle');
+              if(!btn) return;
+              e.preventDefault();
+              var legend = document.getElementById('map_legend');
+              if(!legend) return;
+              if(legend.style.display === 'none' || legend.style.display === ''){
+                legend.style.display = 'block';
+                legend.classList.add('open');
+              } else {
+                legend.style.display = 'none';
+                legend.classList.remove('open');
+              }
+            });
+          
+            // Reçoit le HTML de la légende depuis R
+            Shiny.addCustomMessageHandler('update_legende', function(html) {
+              var legend = document.getElementById('map_legend');
+              if(legend) legend.innerHTML = html;
+            });
+          "))
   ), # FIN tags$head
   
 
@@ -881,6 +1029,13 @@ server <- function(input, output, session) {
           maxWidth = 150  # Longueur
         )
       )%>%
+      # Bouton légende (haut gauche)
+      addControl(
+        html = "<a id='legend_toggle' href='#' title='Afficher la légende'>
+            <i class='ri-list-check-2'></i>
+          </a>",
+        position = "topleft"
+      ) %>%
       
 ##aJOUT PLEIN ECRAN/ZOOM/DEZOOM
       addFullscreenControl(position = "topright")%>%
@@ -1066,6 +1221,96 @@ server <- function(input, output, session) {
     if (input$indicateur == "bio"){
       proxy %>% showGroup("SAU bio")
     }
+  })
+##Légende
+  observe({
+    
+    sections <- list()
+    
+    # ===== PAT =====
+    if (isTRUE(input$pat_layer)) {
+      sections <- append(sections, list("
+      <div class='leg-cat'>Projets Alimentaires Territoriaux</div>
+      <div class='leg-item'><span class='swatch' style='background:#fbe769;'></span>Niveau 1</div>
+      <div class='leg-item'><span class='swatch' style='background:#E4794A;'></span>Niveau 2</div>
+    "))
+    }
+    
+    # ===== CLS =====
+    if (isTRUE(input$cls_layer)) {
+      sections <- append(sections, list("
+      <div class='leg-cat'>Contrats Locaux de Santé</div>
+      <div class='leg-item'><span class='swatch' style='background:#869ECE;'></span>CLS</div>
+    "))
+    }
+    
+    # ===== Départements =====
+    if (isTRUE(input$dep_layer)) {
+      sections <- append(sections, list("
+      <div class='leg-cat'>Départements</div>
+      <div class='leg-item'><span class='swatch-line' style='background:#7b7b7b;'></span>Limite départementale</div>
+    "))
+    }
+    
+    # ===== Communes =====
+    if (isTRUE(input$com_layer)) {
+      
+      sections <- append(sections, list("
+      <div class='leg-cat'>Communes</div>
+      <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limite communale</div>
+    "))
+      
+      # ===== Indicateurs =====
+      if (!is.null(input$indicateur) && input$indicateur != "none") {
+        
+        if (input$indicateur == "pop") {
+          sections <- append(sections, list("
+          <div class='leg-cat'>Population communale</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:8px;height:8px;'></span>Faible</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:14px;height:14px;'></span>Moyenne</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:20px;height:20px;'></span>Forte</div>
+        "))
+        }
+        
+        if (input$indicateur == "sau") {
+          sections <- append(sections, list("
+          <div class='leg-cat'>Surface Agricole Utile (ha)</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:8px;height:8px;'></span>&lt; 500 ha</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:14px;height:14px;'></span>500–2000 ha</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:20px;height:20px;'></span>&gt; 2000 ha</div>
+        "))
+        }
+        
+        if (input$indicateur == "bio") {
+          sections <- append(sections, list("
+          <div class='leg-cat'>Part de SAU Bio (%)</div>
+          <div class='leg-item'><span class='swatch-grad'></span>
+          <span style='font-size:11px;color:#666;'>0% → 100%</span></div>
+        "))
+        }
+      }
+    }
+    
+    # ===== Assemblage final =====
+    if (length(sections) == 0) {
+      content <- "<div style='font-size:12px;color:#888;font-style:italic;'>Aucune couche active.</div>"
+    } else {
+      content <- paste(sections, collapse = "<div class='leg-sep'></div>")
+    }
+    
+    html <- paste0(
+      "<h4>Légende</h4>",
+      content
+    )
+    
+    leafletProxy("map") %>%
+      removeControl("legend_control") %>%
+      addControl(
+        html = html,
+        position = "topleft",
+        layerId = "legend_control"
+      )
+    
   })
   
 # Paramétrages de l'action déclenchée par le bouton recherche
