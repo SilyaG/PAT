@@ -2,11 +2,13 @@
 ##APPEL AUX LIBRAIRIES NECÉSSAIRES À LA CRÉATION DE LA CARTE INTERACTIVE##
 library(shiny)
 library(leaflet)
+library(leaflet.extras)
 library(sf)
 library(readr)
 library(stringi)
 library(jsonlite)  
 library(scales)   
+#remotes::install_github("trafficonese/leaflet.extras")
 
 # Chargement des couches et reprojection en 4326
 # (Correction technique) : st_transform() doit recevoir directement le CRS cible (ex: 4326)
@@ -44,6 +46,10 @@ ui <- fluidPage(
     ),
     tags$link(
       href = "https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css",
+      rel = "stylesheet"
+    ),
+    tags$link(
+      href = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@latest/dist/dsfr.min.css",
       rel = "stylesheet"
     ),
     
@@ -201,7 +207,57 @@ ui <- fluidPage(
       cursor:default;
       opacity:0.7;
     }
+    
+    
+// CHARLOTTE ET OLIVIER 
+// Style des boutons zoom/dezoom/plein écran
+    .leaflet-control-zoom.leaflet-bar {
+      border: none !important;
+      box-shadow: none !important;
+      background: none !important;
+    }
+    
+    .leaflet-control-zoom a {
+      background-color: #ffffff !important; /* Couleur de fond souhaitée */
+      border: 1px solid #e5e5e5 !important; /* Bordure légère type DSFR */
+      color: #000091 !important; /* Bleu France */
+      background-image: none !important; 
+      text-indent: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 36px !important;
+      width: 36px !important;
+      font-size: 24px !important; /* Taille du + et - */
+      font-weight: normal !important;
+      text-decoration: none !important;
+    }
+
+    .leaflet-control-fullscreen a {
+      border-radius: 4px !important;
+      border: 1px solid #e5e5e5 !important;
+      box-shadow: none !important;
+      height: 36px !important;
+      width: 36px !important;
+      justify-content: center !important;
+      display: flex !important;
+      align-items: center !important;
+      padding: 0 !important; 
+      line-height: 1 !important; 
+      background-size: 30px 58px !important;
+      background-repeat: no-repeat !important;
+    }
+    
+    .leaflet-control-fullscreen a:hover,
+    .leaflet-control-zoom a:hover{
+      background-color: #eeeeee !important;
+      color: #000091 !important;
+    }
+// FIN DU BLOC DE STYLISATION DES ZOOM/DEZOOM/PLEIN ECRAN
+    
+    
     ")),
+
 
 #Script autocomplétion : panneau (Communes/PAT) + clic => lance la recherche
     tags$script(HTML(sprintf("
@@ -771,6 +827,16 @@ server <- function(input, output, session) {
           maxWidth = 150  # Longueur
         )
       )%>%
+      
+##aJOUT PLEIN ECRAN/ZOOM/DEZOOM
+      addFullscreenControl(position = "topright")%>%
+      addTiles() %>%
+      htmlwidgets::onRender("
+    function(el, x) {
+      this.zoomControl.setPosition('topright');
+    }
+  ")%>%
+      
       
 #Ajout/Appel des couches à la carte
 #Plan IGN 
