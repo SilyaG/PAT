@@ -5,8 +5,8 @@ library(leaflet)
 library(sf)
 library(readr)
 library(stringi)
-library(jsonlite)  # (2e code) injection des listes R -> JS (toJSON)
-library(scales)    # (1er code implicite) utilisé pour rescale des rayons
+library(jsonlite)  
+library(scales)   
 
 # Chargement des couches et reprojection en 4326
 # (Correction technique) : st_transform() doit recevoir directement le CRS cible (ex: 4326)
@@ -24,13 +24,7 @@ dep_aura_4326 <- st_read("./data/departement_aura.gpkg") %>%
 
 pat_com <- read_csv("./data/pat_com.csv")
 
-# (1er code) Autocomplétion : liste des valeurs possibles (PAT + communes)
-# autocomplete_choices <- sort(unique(na.omit(c(
-#   couche_pat_4326$nom_du_pat,
-#   commune_aura$nom_officiel
-# ))))
-
-# (2e code) Autocomplétion : listes séparées (Communes vs PAT)
+#Autocomplétion : listes séparées (Communes vs PAT)
 autocomplete_communes <- sort(unique(na.omit(commune_aura$nom_officiel))) #liste nom_officiel
 autocomplete_pats     <- sort(unique(na.omit(couche_pat_4326$nom_du_pat))) #liste nom_du_pat
 
@@ -38,7 +32,7 @@ autocomplete_pats     <- sort(unique(na.omit(couche_pat_4326$nom_du_pat))) #list
 ###########################################Partie UI#############################################################
 ui <- fluidPage(
   
-  #Appel des éléments nécessaires à la stylisation/mise en page (DSFR)
+#Appel des éléments nécessaires à la stylisation/mise en page (DSFR)
   tags$head(
     tags$link(
       rel = "stylesheet",
@@ -53,7 +47,7 @@ ui <- fluidPage(
       rel = "stylesheet"
     ),
     
-    #Création d'un style pour le menu de sélection des couches (1er code)
+#Création des divers styles nécessaires à la mise en page 
     tags$style(HTML("
     .menu-couches {
       background-color:#f6f6f6;
@@ -102,8 +96,6 @@ ui <- fluidPage(
     .tutorial-modal p {
       font-size: 14px; /* Augmente la taille des paragraphes */
     }
-
-    /*STyle page d'introduction (1er code)*/
     .intro-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -119,7 +111,6 @@ ui <- fluidPage(
       padding: 20px;
       border-radius: 8px;
     }
-
     .intro-overlay .content {
       background-color: white;
       padding: 30px;
@@ -135,7 +126,6 @@ ui <- fluidPage(
       width: 90%; /* Donne une largeur relative à la fenêtre */
       height: 60%; /* Donne une hauteur relative à la fenêtre */
     }
-
     .intro-overlay p {
       color: #333;  /* Couleur du texte pour s'assurer qu'il soit lisible */
       font-size: 14px;  /* Taille de texte pour une meilleure lisibilité */
@@ -143,7 +133,6 @@ ui <- fluidPage(
       margin-bottom: 20px;  /* Ajout d'une marge pour espacer les paragraphes */
       text-align: center; /* Alignement des paragraphes au centre */
     }
-
     .intro-overlay h2 {
       color: #333;
       font-size: 24px;
@@ -154,11 +143,10 @@ ui <- fluidPage(
       padding: 12px 24px;  /* Plus d'espace autour du texte */
       font-size: 12px;  /* Taille de police plus grande */
     }
-
-    /* (2e code) Autocomplete panel : place le menu sous la barre de recherche */
+    /* Autocomplete panel : place le menu sous la barre de recherche */
     .fr-search-bar { position: relative; }
 
-    /* (2e code) design du menu déroulant barre de recherche */
+    /* design du menu déroulant barre de recherche */
     .autocomplete-panel{
       display:none;
       position:absolute;
@@ -168,7 +156,7 @@ ui <- fluidPage(
       z-index: 9999;
     }
 
-    /* (2e code) style visuel du panneau déroulant */
+    /* style visuel du panneau déroulant */
     .autocomplete-card{
       background:#fff;
       border:1px solid #e5e5e5;
@@ -177,21 +165,19 @@ ui <- fluidPage(
       padding:8px;
     }
 
-    /* (2e code) design du titre */
+    /* Design du titre */
     .autocomplete-title{
       font-size:12px;
       font-weight:600;
       margin:2px 0 6px 0;
       color:#000091;;
     }
-
-    /* (2e code) ligne de séparation */
+    /*ligne de séparation */
     .autocomplete-sep{
       height:1px;
       background:#eee;
       margin:8px 0;
     }
-
     .autocomplete-list{
       list-style:none;
       padding:0;
@@ -199,7 +185,6 @@ ui <- fluidPage(
       max-height:140px;
       overflow:auto;
     }
-
     .autocomplete-list li{
       font-size:12px;
       padding:6px 8px;
@@ -209,25 +194,16 @@ ui <- fluidPage(
       color:#161616;
       user-select:none;
     }
-
     .autocomplete-list li:hover{
       background:#f6f6f6;
     }
-
     .autocomplete-empty{
       cursor:default;
       opacity:0.7;
     }
     ")),
-    
-    ############################################################################################################
-    # (1er code) Autocomplétion (datalist) : relie la liste au champ DSFR sans modifier le champ existant
-    # -> REMPLACÉ par le panel (2e code), donc on ne garde pas le datalist.
-    ############################################################################################################
-    
-    ############################################################################################################
-    # (2e code) Script autocomplétion : panneau (Communes/PAT) + clic => lance la recherche
-    ############################################################################################################
+
+#Script autocomplétion : panneau (Communes/PAT) + clic => lance la recherche
     tags$script(HTML(sprintf("
       document.addEventListener('DOMContentLoaded', function () {
 
@@ -242,7 +218,7 @@ ui <- fluidPage(
         var COMMUNES = %s;  // (2e) Variable table communes 
         var PATS     = %s;  // (2e) Variable table PAT
 
-        // Fonction de normalisation (2e code)
+        // Fonction de normalisation 
         function norm(s) {
           return (s || '')
             .trim() // supprime les espaces
@@ -285,7 +261,7 @@ ui <- fluidPage(
           ul.appendChild(li);
         }
 
-        // fonction de mise a jour suivant entrée (2e code)
+// fonction de mise a jour suivant entrée 
         function updatePanel() {
           var q = norm(input.value);  // Récupere la saisie de l'utilisateur
 
@@ -296,13 +272,13 @@ ui <- fluidPage(
             return;
           }
 
-          // Filtrage saisie commune commence par X
+  // Filtrage saisie commune commence par X
           var comMatches = COMMUNES.filter(function(x){ return norm(x).startsWith(q); }).slice(0, 20);
 
-          // Filtrage saisie PAT contient x
+// Filtrage saisie PAT contient x
           var patMatches = PATS.filter(function(x){ return norm(x).includes(q); }).slice(0, 20);
 
-          // Affichage des nouvelles listes
+// Affichage des nouvelles listes
           clearList(ulCom);
           clearList(ulPat);
 
@@ -317,7 +293,7 @@ ui <- fluidPage(
 
         input.addEventListener('input', updatePanel);
 
-        // Entrée = recherche (2e code)
+// Entrée = recherche 
         input.addEventListener('keydown', function(e){
           if (e.key === 'Enter') {
             e.preventDefault();
@@ -328,8 +304,7 @@ ui <- fluidPage(
             panel.style.display = 'none';
           }
         });
-
-        // clic ailleurs => masque (2e code)
+// clic ailleurs => masque 
         document.addEventListener('click', function(e){
           if (e.target === input || panel.contains(e.target)) return;
           panel.style.display = 'none';
@@ -342,11 +317,8 @@ ui <- fluidPage(
     )))
   ), # FIN tags$head
   
-  
-  
-  ###########################################
-  # (1er code) Création de la page introductive
-  ###########################################
+
+#Création de la page introductive (1ère page du tutoriel)
   tags$div(
     id = "intro_overlay",
     class = "intro-overlay fr-overlay",  # Le style DSFR de l'overlay
@@ -367,9 +339,7 @@ ui <- fluidPage(
   ),
   
   
-  ###########################################
-  # (1er code) En-tête DSFR
-  ###########################################
+#En-tête DSFR
   tags$header(
     class = "fr-header",
     tags$div(
@@ -401,13 +371,10 @@ ui <- fluidPage(
     class = "fr-container-fluid",
     br(),
     
-    ###########################################
-    # (1er code) Placement filtre et barre de recherche
-    ###########################################
+#Placement filtre et barre de recherche
     tags$div(
       style = "display:flex; gap:20px; align-items:flex-end; margin:0px 0 20px 0; padding:0;",
-      
-      # Bloc filtres à gauche (1er code)
+# Bloc filtres à gauche
       tags$div(
         style = "display:flex; gap:20px; margin:0; padding:0;",
         
@@ -453,14 +420,13 @@ ui <- fluidPage(
         )
       ),
       
-      ###########################################
-      # (1er code) Barre de recherche à droite + bouton info
-      # (2e code) Ajout du panneau de suggestions (Communes et PAT)
-      ###########################################
+
+#Barre de recherche à droite + bouton info
+#Ajout du panneau de suggestions (Communes et PAT)
       tags$div(
         style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
         
-        # Bouton information DSFR (1er code)
+# Bouton information DSFR
         tags$button(
           id = "info_tutorial",
           class = "fr-btn--tooltip fr-btn",
@@ -469,7 +435,7 @@ ui <- fluidPage(
           `aria-label` = "Lancer le tutoriel"
         ),
         
-        # Barre de recherche DSFR (1er code) + panneau suggestions (2e code)
+# Barre de recherche DSFR + panneau suggestions 
         tags$div(
           class = "fr-search-bar",
           role = "search",
@@ -480,7 +446,7 @@ ui <- fluidPage(
             `for` = "nom_du_pat"
           ),
           
-          # (2e code) Panneau de suggestions (Communes et PAT)
+#Panneau de suggestions (Communes et PAT)
           tags$div(
             id = "autocomplete_panel",
             class = "autocomplete-panel",
@@ -520,9 +486,7 @@ ui <- fluidPage(
       )
     ),
     
-    ###########################################
-    # (1er code) Création des colonnes : menu couches + carte
-    ###########################################
+#Création des colonnes : menu couches + carte
     fluidRow(
       column(
         width = 2,
@@ -578,9 +542,7 @@ ui <- fluidPage(
   ),
   
   
-  ###########################################
-  # (1er code) Pied de page DSFR
-  ###########################################
+#Pied de page DSFR
   tags$footer(
     class = "fr-footer",
     tags$div(
@@ -589,9 +551,7 @@ ui <- fluidPage(
     )
   ),
   
-  
-  ###########################################
-  # (1er code) Création du tutoriel
+#Création du tutoriel
   ###########################################
   tags$div(id = "tutorial_overlay", class = "tutorial-overlay"),
   tags$div(id = "tutorial_highlight", class = "tutorial-highlight"),
@@ -599,7 +559,7 @@ ui <- fluidPage(
     id = "tutorial_modal", class = "tutorial-modal",
     tags$button(
       id = "tutorial_close",
-      class = "fr-btn fr-btn--tertiary-no-outline",
+      class = "fr-btn fr-btn--tertiary-no-outline", #bouton "?"
       style = "position:absolute; top:10px; right:10px;",
       "✕"
     ),
@@ -611,25 +571,25 @@ ui <- fluidPage(
     )
   ),
   
-  # (1er code) Script tutoriel
+#Script tutoriel
   tags$script(HTML("
     document.addEventListener('DOMContentLoaded', function() {
-      // Lorsque l'utilisateur clique sur 'Démarrer le tutoriel'
+// Lorsque l'utilisateur clique sur 'Démarrer le tutoriel'
       document.getElementById('start_tutorial').addEventListener('click', function() {
-        // Masquer l'overlay d'introduction
+// Masquer l'overlay d'introduction
         document.getElementById('intro_overlay').style.display = 'none';
-        // Lancer le tutoriel
+// Lancer le tutoriel
         startTutorial();
       });
 
-      // Lorsque l'utilisateur clique sur 'Passer'
+// Lorsque l'utilisateur clique sur 'Passer'
       document.getElementById('skip_tutorial').addEventListener('click', function() {
-        // Masquer l'overlay d'introduction sans lancer le tutoriel
+// Masquer l'overlay d'introduction sans lancer le tutoriel
         document.getElementById('intro_overlay').style.display = 'none';
       });
     });
 
-    // Fonction pour démarrer le tutoriel
+// Fonction pour démarrer le tutoriel
     function startTutorial() {
       var tutorialSteps = [
         {el:'.menu-couches', title:'Menu des couches', text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.'},
@@ -702,7 +662,7 @@ ui <- fluidPage(
         if(currentStep > 0){currentStep--; showStep(currentStep);}
       });
 
-      // Affiche le premier step
+// Affiche le premier step
       showStep(currentStep);
     }
 
@@ -730,13 +690,13 @@ ui <- fluidPage(
 ###########################################Partie SERVER###########################################################
 server <- function(input, output, session) {
   
-  #Permet de réafficher tous les PAT suite à une sélection (1er code)
+#Permet de réafficher tous les PAT suite à une sélection (suite à un clic)
   pat_actif <- reactiveVal(NULL)
   
-  #pour afficher uniquement le PAT sur lequel on as cliqué (1er code)
+#pour afficher uniquement le PAT sur lequel on as cliqué 
   clic_sur_pat <- reactiveVal(FALSE)
   
-  #Creation d'un fonction permettant de créer le Pop-up de la couche PAT (A AMELIORER) (1er code)
+#Creation d'un fonction permettant de créer le Pop-up de la couche PAT (A AMELIORER) 
   popup_pat <- function(pat){
     paste0(
       "<strong>",pat$nom_du_pat,"</strong><br/>",
@@ -748,8 +708,8 @@ server <- function(input, output, session) {
     )
   }
   
-  output$map <- renderLeaflet({ #affichage de la carte et paramétrages de la BBOX (1er code)
-    
+#L'affichage de la carte en elle-même paramétrages de la BBOX 
+  output$map <- renderLeaflet({
     bbox <- st_bbox(commune_aura)
     
     xmin <- unname(bbox["xmin"])
@@ -757,47 +717,41 @@ server <- function(input, output, session) {
     xmax <- unname(bbox["xmax"])
     ymax <- unname(bbox["ymax"])
     
-    #Préparation des indicateurs (SAU, SAU BIO, Population) (1er code)
-    #Recherche du centroïdes des communes (1er code)
+#Préparation des indicateurs (SAU, SAU BIO, Population) 
+#Recherche du centroïdes des communes
     communes_centroid <- st_centroid(commune_aura)
     
-    #Calcul de la part en % de la SAU bio par communes (1er code)
+#Calcul de la part en % de la SAU bio par communes 
     part_bio <- communes_centroid$part_bio
     
-    #Sécurisation (évite la division par 0 et les valeurs NA) (1er code)
+#Sécurisation (évite la division par 0 et les valeurs NA) 
     part_bio[is.na(part_bio) | is.infinite(part_bio)] <- 0
     
-    #Création des valeurs permettant la création des cercles proportionnels (1er code)
-    #Création des cercles proportionnels du nombre d'habitants par communes (1er code)
+#Création des valeurs permettant la création des cercles proportionnels 
+#Création des cercles proportionnels du nombre d'habitants par communes 
     pop_com <- communes_centroid$population
     rayon_brut_pop <- sqrt(pop_com)
     rayon_pop <- scales::rescale(rayon_brut_pop, to = c(1, 50))
     
-    #Création des cercles proportionnels du nombre d'hectares de SAU par communes (1er code)
+#Création des cercles proportionnels du nombre d'hectares de SAU par communes
     sau_com <- communes_centroid$rpg_ha_sum
     rayon_brut_sau <- sqrt(sau_com)
     rayon_sau <- scales::rescale(rayon_brut_sau, to = c(1, 30))
     
-    #Création des cercles proportionnels du nombre d'hectares de SAU BIO par communes (1er code)
+#Création des cercles proportionnels du nombre d'hectares de SAU BIO par communes 
     saubio_com <- communes_centroid$bio_ha_sum
     rayon_brut_saubio <- sqrt(saubio_com)
     rayon_saubio <- scales::rescale(rayon_brut_saubio, to = c(1, 30))
     
-    ##Palettes de couleur des couches (1er code)
-    #Palette PAT (1er code)
-    pal_pat <- colorFactor(
-      palette = c("#fbe769", "#E4794A"),
-      domain = couche_pat_4326$niveau
-    )
-    
-    #Palette % SAU bio (la couleur des cercles proportionnels) (1er code)
+##Palettes de couleur des couches 
+#Palette % SAU bio (la couleur des cercles proportionnels) 
     pal_bio <- colorNumeric(
       palette = c("#bcd9a3","#306600"),
       domain = part_bio,
       na.color = "transparent"
     )
     
-    #Limitation du dézoom maximal de la carte (1er code)
+#Limitation du dézoom maximal de la carte 
     leaflet(
       options = leafletOptions(
         minZoom = 6,
@@ -818,8 +772,8 @@ server <- function(input, output, session) {
         )
       )%>%
       
-      #Ajout/Appel des couches à la carte (1er code)
-      #Plan IGN (1er code)
+#Ajout/Appel des couches à la carte
+#Plan IGN 
       addWMSTiles(
         baseUrl = "https://data.geopf.fr/wms-r/wms",
         layers  = "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
@@ -831,7 +785,7 @@ server <- function(input, output, session) {
         group = "Plan IGN"
       ) %>%
       
-      #RPG (1er code)
+#RPG 
       addWMSTiles(
         baseUrl = "https://data.geopf.fr/wms-r/wms",
         layers  = "LANDUSE.AGRICULTURE2024",
@@ -843,7 +797,7 @@ server <- function(input, output, session) {
         group = "Registre Parcellaire Graphique"
       ) %>%
       
-      #Départements (1er code)
+#Départements 
       addPolygons(
         data = dep_aura_4326,
         color = "#7b7b7b",
@@ -854,7 +808,7 @@ server <- function(input, output, session) {
         group = "Departement"
       ) %>%
       
-      #Communes AURA (1er code)
+#Communes AURA
       addPolygons(
         data = commune_aura,
         color = "#929292",
@@ -866,7 +820,7 @@ server <- function(input, output, session) {
         label="nom_officiel"
       ) %>%
       
-      #CLS (1er code)
+#CLS 
       addPolygons(
         data = couche_cls_4326,
         color = "#869ECE",
@@ -876,18 +830,8 @@ server <- function(input, output, session) {
         group = "Contrats locaux de santé"
       ) %>%
       
-      #PAT (1er code) (avec layerId pour gérer les clics)
-      addPolygons(
-        data = couche_pat_4326,
-        layerId = ~nom_du_pat,
-        color = ~pal_pat(niveau),
-        fillColor = ~pal_pat(niveau),
-        weight = 3,
-        fillOpacity = 0.35,
-        group = "Projet Alimentaire Territoriaux"
-      )%>%
       
-      #Cercle population (1er code)
+#Cercle population
       addCircleMarkers(
         data = communes_centroid,
         radius = rayon_pop,
@@ -902,7 +846,7 @@ server <- function(input, output, session) {
         group = "Population communale"
       ) %>%
       
-      #Cercle SAU (1er code)
+#Cercle SAU
       addCircleMarkers(
         data = communes_centroid,
         radius = rayon_sau,
@@ -917,7 +861,7 @@ server <- function(input, output, session) {
         group = "SAU"
       ) %>%
       
-      #Cercle SAU BIO (1er code)
+#Cercle SAU BIO 
       addCircleMarkers(
         data = communes_centroid,
         radius = rayon_saubio,
@@ -934,19 +878,17 @@ server <- function(input, output, session) {
       )
   })
   
-  ###########################################
-  # Paramétrages du sélecteur de couches (1er code)
-  ###########################################
-  #Fonds de plans (1er code)
+# Paramétrages du sélecteur de couches
+  #Fonds de plans 
   observe({
     proxy <- leafletProxy("map")
     
-    #Cache les fonds de plan à l'ouverture de la carte (1er code)
+    #Cache les fonds de plan à l'ouverture de la carte 
     proxy %>% hideGroup("Plan IGN")
     proxy %>% hideGroup("Registre Parcellaire Graphique")
     proxy %>% hideGroup("OSM")
     
-    #Pour afficher la couche choisi par utilisateur (1er code)
+    #Pour ensuite afficher la couche choisi par utilisateur 
     if (input$fond == "ign"){
       proxy %>% showGroup("Plan IGN")
     }
@@ -958,7 +900,7 @@ server <- function(input, output, session) {
     }
   })
   
-  #Polygones (1er code)
+#Polygones 
   observe({
     proxy <- leafletProxy("map")
     
@@ -987,7 +929,7 @@ server <- function(input, output, session) {
     }
   })
   
-  #Indicateurs (1er code)
+#Indicateurs 
   observe({
     proxy <- leafletProxy("map")
     
@@ -1006,24 +948,21 @@ server <- function(input, output, session) {
     }
   })
   
-  
-  ###########################################
-  # Paramétrages de l'action déclenchée par le bouton recherche (1er + 2e)
-  # (2e code) l'autocomplétion déclenche le bouton via btn.click()
-  ###########################################
+# Paramétrages de l'action déclenchée par le bouton recherche
+# l'autocomplétion déclenche le bouton via btn.click()
   observeEvent(input$search_button, {
     req(input$nom_du_pat)
     
-    #Normalise la recherche (évite la sensibilité à la casse notamment) (1er code)
+#Normalise la recherche (évite la sensibilité à la casse notamment) 
     recherche <- tolower(trimws(input$nom_du_pat))
     
-    #Recherche exacte du nom du PAT (1er code)
+#Recherche exacte du nom du PAT 
     selection_pat <- couche_pat_4326[
       tolower(trimws(couche_pat_4326$nom_du_pat)) == recherche,
     ]
     
     if (nrow(selection_pat) > 0) {
-      #Zoom animé sur l'emprise du PAT trouvé (1er code)
+#Zoom animé sur l'emprise du PAT trouvé
       bb <- st_bbox(selection_pat)
       leafletProxy("map") %>%
         flyToBounds(
@@ -1035,18 +974,18 @@ server <- function(input, output, session) {
       return()
     }
     
-    #Recherche exacte du nom de la commune (1er code)
+#Recherche exacte du nom de la commune 
     selection_com <- commune_aura[
       tolower(trimws(commune_aura$nom_officiel)) == recherche,
     ]
     
     if (nrow(selection_com) == 0) {
-      #Si aucune réponse trouvée, affiche un message d'erreur (1er code)
+#Si aucune réponse trouvée, affiche un message d'erreur
       showNotification("PAT ou commune non trouvé", type = "warning")
       return()
     }
     
-    #prend en compte les limites du polygones pour le zoom (centroide impossible car multipolygones) (1er code)
+#prend en compte les limites du polygones pour le zoom (centroide impossible car multipolygones)
     bb <- st_bbox(selection_com)
     
     leafletProxy("map") %>%
@@ -1059,43 +998,38 @@ server <- function(input, output, session) {
   })
   
   
-  ###########################################
-  # Paramétrages des filtres (combinés) (1er code)
-  ###########################################
+# Paramétrages des filtres (combinés) 
   observe({
-    
     pat_actif()
-    
     proxy <- leafletProxy("map")
-    
-    #Obligatoire de recréer la palette dans cet observe pour que elle soit effective (1er code)
+#Obligatoire de recréer la palette dans cet observe pour que elle soit effective 
     pal_pat <- colorFactor(
       palette = c("#fbe769", "#E4794A"),
       domain = couche_pat_4326$niveau
     )
     
-    #On enlève la couche PAT existante (évite superposition) (1er code)
+#On enlève la couche PAT existante (évite superposition)
     proxy %>% clearGroup("Projet Alimentaire Territoriaux")
     
-    #On duplique la couche des PAT pour filtrer soit à l'échelle soit au niveau sans modifier la couche initiale (1er code)
+#On duplique la couche des PAT pour filtrer soit à l'échelle soit au niveau sans modifier la couche initiale 
     pat_filtre <- couche_pat_4326
     
-    #Filtre niveau : vérifie si l'utilisateur a choisi un niveau et affiche les PAT résultats (1er code)
+#Filtre niveau : vérifie si l'utilisateur a choisi un niveau et affiche les PAT résultats 
     if (!is.null(input$filtre_niveau) && input$filtre_niveau != "Tous") {
       pat_filtre <- pat_filtre[pat_filtre$niveau == input$filtre_niveau, ]
     }
     
-    #Filtre échelle : vérifie si l'utilisateur a choisi une échelle et affiche les PAT résultats (1er code)
+#Filtre échelle : vérifie si l'utilisateur a choisi une échelle et affiche les PAT résultats 
     if (!is.null(input$filtre_niveau_terri) && input$filtre_niveau_terri != "Tous") {
       pat_filtre <- pat_filtre[pat_filtre$echelle == input$filtre_niveau_terri, ]
     }
     
-    #Filtre d'affichage à la sélection du PAT (1er code)
+#Filtre d'affichage à la sélection du PAT 
     if(!is.null(pat_actif())){
       pat_filtre <- pat_filtre[pat_filtre$nom_du_pat == pat_actif(),]
     }
     
-    #Réaffichage uniquement de la sélection (1er code)
+#Réaffichage uniquement de la sélection
     proxy %>% addPolygons(
       data = pat_filtre,
       layerId  = ~nom_du_pat,
@@ -1108,9 +1042,7 @@ server <- function(input, output, session) {
   })
   
   
-  ###########################################
-  # Interception des clics sur la couche PAT pour l'affichage de pop-up (1er code)
-  ###########################################
+# Interception des clics sur la couche PAT pour l'affichage de pop-up 
   observeEvent(input$map_shape_click, {
     
     clic_sur_pat(TRUE)
@@ -1118,21 +1050,21 @@ server <- function(input, output, session) {
     click <- input$map_shape_click
     req(click)
     
-    #point cliqué (1er code)
+    #point cliqué 
     point <- st_sfc(
       st_point(c(click$lng, click$lat)),
       crs = 4326
     )
     
-    #Recherche des PAT qui s'intersectent (1er code)
+#Recherche des PAT qui s'intersectent 
     pat_click <- couche_pat_4326[
       st_intersects(couche_pat_4326, point, sparse = FALSE),
     ]
     
-    #Cas 1 : aucun PAT présent à l'endroit du clic (1er code)
+#Cas 1 : aucun PAT présent à l'endroit du clic 
     if (nrow(pat_click)== 0) return()
     
-    #Cas 2 : un seul PAT present à l'endroit du clic (1er code)
+#Cas 2 : un seul PAT present à l'endroit du clic
     if (nrow(pat_click)==1){
       
       pat <- pat_click[1,]
@@ -1150,7 +1082,7 @@ server <- function(input, output, session) {
         )
     } else {
       
-      #Cas 3 : Plusieurs PAT à l'endroit du clic (1er code)
+#Cas 3 : Plusieurs PAT à l'endroit du clic 
       liens <- paste0(
         "<li><a href='#' onclick=\"Shiny.setInputValue('pat_selectionne','",
         pat_click$nom_du_pat,
@@ -1175,7 +1107,7 @@ server <- function(input, output, session) {
     }
   })
   
-  #Gerer le clic sur un PAT de la liste (1er code)
+#Gerer le clic sur un PAT de la liste 
   observeEvent(input$pat_selectionne, {
     
     clic_sur_pat(TRUE)
@@ -1190,7 +1122,7 @@ server <- function(input, output, session) {
     
     if (nrow(pat_select)== 0) return()
     
-    #Zoom sur le PAT choisi (1er code)
+#Zoom sur le PAT choisi 
     bb <- st_bbox(pat_select)
     
     leafletProxy("map") %>%
@@ -1201,7 +1133,7 @@ server <- function(input, output, session) {
         lat2 = unname(bb["ymax"])
       )
     
-    #popup détaillé avec indicateurs (à améliorer) (1er code)
+#popup détaillé avec indicateurs (à améliorer) 
     contenu <- popup_pat(pat_select)
     
     centre <- st_centroid(pat_select)
@@ -1216,16 +1148,16 @@ server <- function(input, output, session) {
       )
   })
   
-  #Reset si on clic ailleurs sur la carte (tous les PAT se réaffiche) (1er code)
+#Reset si on clic ailleurs sur la carte (tous les PAT se réaffiche) 
   observeEvent(input$map_click, {
     
-    #si on clique sur le polygone d'un PAT on ignore le reset (1er code)
+#si on clique sur le polygone d'un PAT on ignore le reset 
     if (clic_sur_pat()){
       clic_sur_pat(FALSE)
       return()
     }
     
-    #sinon on reset (1er code)
+#sinon on reset 
     if(!is.null(pat_actif())){
       pat_actif(NULL)
       leafletProxy("map") %>%
