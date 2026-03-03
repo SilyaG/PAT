@@ -789,6 +789,7 @@ server <- function(input, output, session) {
   }
   
   zoom_pat <- function(pat){
+    req(input$pat_layer)
     req(nrow(pat) > 0)
     pat_actif(pat$nom_du_pat)
     
@@ -1143,6 +1144,10 @@ server <- function(input, output, session) {
       domain = couche_pat_4326$niveau
     )
     
+  #evite l'affichage des popup quand la couche n'est pas coché
+    proxy %>% clearGroup("Projet Alimentaire Territoriaux")
+    proxy %>% clearPopups()
+    
 #Réaffichage uniquement de la sélection
     proxy %>% addPolygons(
       data = pat_affiche,
@@ -1158,6 +1163,8 @@ server <- function(input, output, session) {
   
 # Interception des clics sur la couche PAT pour l'affichage de pop-up 
   observeEvent(input$map_shape_click, {
+    
+    if(!input$pat_layer) return()
     
     clic_sur_pat(TRUE)
     
