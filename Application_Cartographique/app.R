@@ -690,11 +690,35 @@ ui <- fluidPage(
 ###########################################Partie SERVER###########################################################
 server <- function(input, output, session) {
   
-#Permet de réafficher tous les PAT suite à une sélection (suite à un clic)
+  
+  ## début Silya##
+  
+#Permet de réafficher tous les PAT suite à un clic
   pat_actif <- reactiveVal(NULL)
   
 #pour afficher uniquement le PAT sur lequel on as cliqué 
   clic_sur_pat <- reactiveVal(FALSE)
+  
+#pour que les popup des PAT filtrer ne s'affiche plus au clic quand ils ne sont pas afficher
+  pat_filtre <- reactive({
+    pat <- couche_pat_4326
+    
+    #en fonction du filtre niveau
+    if(!is.null(input$filtre_niveau)&&
+        input$filtre_niveau != "Tous" &&
+        input$filtre_niveau !=""){
+      pat <- pat[pat$niveau == input$filtre_niveau,]
+    }
+    
+    #en fonction du filtre échelle
+    if(!is.null(input$filtre_niveau_terri) &&
+       input$filtre_niveau_terri != "Tous" &&
+       input$filtre_niveau_terri !=""){
+      pat <- pat[pat$echelle == input$filtre_niveau_terri,]
+    }
+  
+    return(pat)
+  })
   
 #Creation d'un fonction permettant de créer le Pop-up de la couche PAT (A AMELIORER) 
   popup_pat <- function(pat){
@@ -707,6 +731,35 @@ server <- function(input, output, session) {
       "Indicateur 1 : ...<br/>"
     )
   }
+  
+  zoom_pat <- function(pat){
+    req(nrow(pat) > 0)
+    pat_actif(pat$nom_du_pat)
+    
+    bb <- st_bbox(pat)
+    
+    centre <- st_centroid(pat)
+    coords <- st_coordinates(centre)
+    
+    leafletProxy("map") %>% 
+      flyToBounds(
+        lng1 = unname(bb["xmin"]),
+        lat1 = unname(bb["ymin"]),
+        lng2 = unname(bb["xmax"]),
+        lat2 = unname(bb["ymax"])
+      ) %>% 
+      clearPopups() %>% 
+      addPopups(
+        lng = coords[1],
+        lat = coords[2],
+        popup = popup_pat(pat)
+      )
+  }
+  
+  
+  ### fin silya ###
+  
+  
   
 #L'affichage de la carte en elle-même paramétrages de la BBOX 
   output$map <- renderLeaflet({
@@ -1000,38 +1053,33 @@ server <- function(input, output, session) {
   
 # Paramétrages des filtres (combinés) 
   observe({
-    pat_actif()
+    
     proxy <- leafletProxy("map")
+    
+    #on vide la couche 
+    proxy %>% clearGroup("Projet Alimentaire Territoriaux")
+    
+    pat_affiche <- pat_filtre()
+    
+    #Si un PAT est cliqué on affiche uniquement celui la 
+    if(!is.null(pat_actif())){
+      pat_affiche <- pat_affiche[
+        pat_affiche$nom_du_pat == pat_actif(),
+      ]
+    }
+  
+     #Si aucun PAT après filtre on affiche rien 
+     if(nrow(pat_affiche)==0)return()
+    
 #Obligatoire de recréer la palette dans cet observe pour que elle soit effective 
     pal_pat <- colorFactor(
       palette = c("#fbe769", "#E4794A"),
       domain = couche_pat_4326$niveau
     )
     
-#On enlève la couche PAT existante (évite superposition)
-    proxy %>% clearGroup("Projet Alimentaire Territoriaux")
-    
-#On duplique la couche des PAT pour filtrer soit à l'échelle soit au niveau sans modifier la couche initiale 
-    pat_filtre <- couche_pat_4326
-    
-#Filtre niveau : vérifie si l'utilisateur a choisi un niveau et affiche les PAT résultats 
-    if (!is.null(input$filtre_niveau) && input$filtre_niveau != "Tous") {
-      pat_filtre <- pat_filtre[pat_filtre$niveau == input$filtre_niveau, ]
-    }
-    
-#Filtre échelle : vérifie si l'utilisateur a choisi une échelle et affiche les PAT résultats 
-    if (!is.null(input$filtre_niveau_terri) && input$filtre_niveau_terri != "Tous") {
-      pat_filtre <- pat_filtre[pat_filtre$echelle == input$filtre_niveau_terri, ]
-    }
-    
-#Filtre d'affichage à la sélection du PAT 
-    if(!is.null(pat_actif())){
-      pat_filtre <- pat_filtre[pat_filtre$nom_du_pat == pat_actif(),]
-    }
-    
 #Réaffichage uniquement de la sélection
     proxy %>% addPolygons(
-      data = pat_filtre,
+      data = pat_affiche,
       layerId  = ~nom_du_pat,
       color = ~pal_pat(niveau),
       fillColor = ~pal_pat(niveau),
@@ -1057,30 +1105,18 @@ server <- function(input, output, session) {
     )
     
 #Recherche des PAT qui s'intersectent 
-    pat_click <- couche_pat_4326[
-      st_intersects(couche_pat_4326, point, sparse = FALSE),
-    ]
+    pat_sf <- pat_filtre()
+    intersect <- st_intersects(pat_sf, point, sparse = FALSE)
+    pat_click <- pat_sf[unlist(intersect),]
     
 #Cas 1 : aucun PAT présent à l'endroit du clic 
     if (nrow(pat_click)== 0) return()
     
 #Cas 2 : un seul PAT present à l'endroit du clic
     if (nrow(pat_click)==1){
-      
-      pat <- pat_click[1,]
-      
-      pat_actif(pat$nom_du_pat)
-      
-      contenu <- popup_pat(pat)
-      
-      leafletProxy("map") %>%
-        clearPopups() %>%
-        addPopups(
-          lng = click$lng,
-          lat = click$lat,
-          popup = contenu
-        )
-    } else {
+      zoom_pat(pat_click[1,])
+      return()
+    }
       
 #Cas 3 : Plusieurs PAT à l'endroit du clic 
       liens <- paste0(
@@ -1091,7 +1127,6 @@ server <- function(input, output, session) {
         "</a></li>",
         collapse = ""
       )
-      
       contenu <- paste0(
         "<strong>Plusieurs PAT à cet endroit :</strong><br/>",
         "<ul>", liens, "</ul>"
@@ -1104,7 +1139,6 @@ server <- function(input, output, session) {
           lat = click$lat,
           popup = contenu
         )
-    }
   })
   
 #Gerer le clic sur un PAT de la liste 
@@ -1114,38 +1148,13 @@ server <- function(input, output, session) {
     
     req(input$pat_selectionne)
     
-    pat_actif(input$pat_selectionne)
-    
-    pat_select <- couche_pat_4326[
-      couche_pat_4326$nom_du_pat == input$pat_selectionne,
+    pat_select <- pat_filtre()[
+      pat_filtre()$nom_du_pat == input$pat_selectionne,
     ]
     
     if (nrow(pat_select)== 0) return()
     
-#Zoom sur le PAT choisi 
-    bb <- st_bbox(pat_select)
-    
-    leafletProxy("map") %>%
-      flyToBounds(
-        lng1 = unname(bb["xmin"]),
-        lat1 = unname(bb["ymin"]),
-        lng2 = unname(bb["xmax"]),
-        lat2 = unname(bb["ymax"])
-      )
-    
-#popup détaillé avec indicateurs (à améliorer) 
-    contenu <- popup_pat(pat_select)
-    
-    centre <- st_centroid(pat_select)
-    coords <- st_coordinates(centre)
-    
-    leafletProxy("map") %>%
-      clearPopups() %>%
-      addPopups(
-        lng = coords[1],
-        lat = coords[2],
-        popup = contenu
-      )
+    zoom_pat(pat_select)
   })
   
 #Reset si on clic ailleurs sur la carte (tous les PAT se réaffiche) 
