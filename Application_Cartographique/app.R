@@ -208,9 +208,35 @@ ui <- fluidPage(
       opacity:0.7;
     }
     
+    /* Style liste et placement PAUL ///////////////////////////////////////////////////////////////////////////////////////*/
+        .right-panel{
+      background-color:#f6f6f6;
+      padding:10px;
+      border-radius:8px;
+      height: calc(80vh - 20px);
+      margin-top: 20px;
+      overflow-y:auto;
+    }
+    .right-panel .fr-sidemenu__link{
+      font-size: 12px;
+      line-height: 1.2;
+      padding: 6px 8px;
+    }
+    .hidden-sidebar{
+      transform: translateX(100%);
+      opacity: 0;
+      transition: all 0.4s ease-in-out;
+      pointer-events: none;
+    }
+    .visible-sidebar{
+      transform: translateX(0%);
+      opacity: 1;
+      pointer-events: auto;
+    }
     
-// CHARLOTTE ET OLIVIER 
-// Style des boutons zoom/dezoom/plein écran
+////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+/* CHARLOTTE ET OLIVIER*/ 
+/* Style des boutons zoom/dezoom/plein écran*/
     .leaflet-control-zoom.leaflet-bar {
       border: none !important;
       box-shadow: none !important;
@@ -253,13 +279,13 @@ ui <- fluidPage(
       background-color: #eeeeee !important;
       color: #000091 !important;
     }
-// FIN DU BLOC DE STYLISATION DES ZOOM/DEZOOM/PLEIN ECRAN
+/* FIN DU BLOC DE STYLISATION DES ZOOM/DEZOOM/PLEIN ECRAN */
     
     
     ")),
-
-
-#Script autocomplétion : panneau (Communes/PAT) + clic => lance la recherche
+    
+    
+    #Script autocomplétion : panneau (Communes/PAT) + clic => lance la recherche
     tags$script(HTML(sprintf("
       document.addEventListener('DOMContentLoaded', function () {
 
@@ -370,11 +396,25 @@ ui <- fluidPage(
     ",
                              jsonlite::toJSON(autocomplete_communes, auto_unbox = TRUE),
                              jsonlite::toJSON(autocomplete_pats, auto_unbox = TRUE)
-    )))
+    ))), 
+    
+    #mODIF PAUL###########################################################################################################
+    # Script clic sur PAT de la sidebar
+    tags$script(HTML("
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.classList.contains('pat-link')){
+      e.preventDefault();
+      var pat = e.target.getAttribute('data-pat');
+      if(window.Shiny){
+        Shiny.setInputValue('pat_selectionne', pat, {priority: 'event'});
+      }
+    }
+  });
+"))
   ), # FIN tags$head
   
-
-#Création de la page introductive (1ère page du tutoriel)
+ ############################################################################################################### 
+  #Création de la page introductive (1ère page du tutoriel)
   tags$div(
     id = "intro_overlay",
     class = "intro-overlay fr-overlay",  # Le style DSFR de l'overlay
@@ -395,7 +435,7 @@ ui <- fluidPage(
   ),
   
   
-#En-tête DSFR
+  #En-tête DSFR
   tags$header(
     class = "fr-header",
     tags$div(
@@ -427,10 +467,10 @@ ui <- fluidPage(
     class = "fr-container-fluid",
     br(),
     
-#Placement filtre et barre de recherche
+    #Placement filtre et barre de recherche
     tags$div(
       style = "display:flex; gap:20px; align-items:flex-end; margin:0px 0 20px 0; padding:0;",
-# Bloc filtres à gauche
+      # Bloc filtres à gauche
       tags$div(
         style = "display:flex; gap:20px; margin:0; padding:0;",
         
@@ -476,13 +516,13 @@ ui <- fluidPage(
         )
       ),
       
-
-#Barre de recherche à droite + bouton info
-#Ajout du panneau de suggestions (Communes et PAT)
+      
+      #Barre de recherche à droite + bouton info
+      #Ajout du panneau de suggestions (Communes et PAT)
       tags$div(
         style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
         
-# Bouton information DSFR
+        # Bouton information DSFR
         tags$button(
           id = "info_tutorial",
           class = "fr-btn--tooltip fr-btn",
@@ -491,7 +531,7 @@ ui <- fluidPage(
           `aria-label` = "Lancer le tutoriel"
         ),
         
-# Barre de recherche DSFR + panneau suggestions 
+        # Barre de recherche DSFR + panneau suggestions 
         tags$div(
           class = "fr-search-bar",
           role = "search",
@@ -502,7 +542,7 @@ ui <- fluidPage(
             `for` = "nom_du_pat"
           ),
           
-#Panneau de suggestions (Communes et PAT)
+          #Panneau de suggestions (Communes et PAT)
           tags$div(
             id = "autocomplete_panel",
             class = "autocomplete-panel",
@@ -542,7 +582,7 @@ ui <- fluidPage(
       )
     ),
     
-#Création des colonnes : menu couches + carte
+    #Création des colonnes : menu couches + carte
     fluidRow(
       column(
         width = 2,
@@ -591,14 +631,21 @@ ui <- fluidPage(
       ),
       
       column(
-        width = 9,
+        width = 8, #Modif Paul
         leafletOutput("map", height = "80vh")
+      ),
+      ###Ajout Liste a droite PAUL ###################################################
+      column(
+        width = 2,
+        div(
+          id = "right_sidebar",
+          class = "right-panel visible-sidebar",
+          uiOutput("pat_sidemenu")
+        )
       )
-    )
-  ),
-  
-  
-#Pied de page DSFR
+    ),
+ ##################################################################################### 
+  #Pied de page DSFR
   tags$footer(
     class = "fr-footer",
     tags$div(
@@ -607,7 +654,7 @@ ui <- fluidPage(
     )
   ),
   
-#Création du tutoriel
+  #Création du tutoriel
   ###########################################
   tags$div(id = "tutorial_overlay", class = "tutorial-overlay"),
   tags$div(id = "tutorial_highlight", class = "tutorial-highlight"),
@@ -627,7 +674,7 @@ ui <- fluidPage(
     )
   ),
   
-#Script tutoriel
+  #Script tutoriel
   tags$script(HTML("
     document.addEventListener('DOMContentLoaded', function() {
 // Lorsque l'utilisateur clique sur 'Démarrer le tutoriel'
@@ -739,7 +786,7 @@ ui <- fluidPage(
       });
     };
   "))
-) # fermeture UI
+))  # fermeture UI
 
 
 
@@ -749,20 +796,20 @@ server <- function(input, output, session) {
   
   ## début Silya##
   
-#Permet de réafficher tous les PAT suite à un clic
+  #Permet de réafficher tous les PAT suite à un clic
   pat_actif <- reactiveVal(NULL)
   
-#pour afficher uniquement le PAT sur lequel on as cliqué 
+  #pour afficher uniquement le PAT sur lequel on as cliqué 
   clic_sur_pat <- reactiveVal(FALSE)
   
-#pour que les popup des PAT filtrer ne s'affiche plus au clic quand ils ne sont pas afficher
+  #pour que les popup des PAT filtrer ne s'affiche plus au clic quand ils ne sont pas afficher
   pat_filtre <- reactive({
     pat <- couche_pat_4326
     
     #en fonction du filtre niveau
     if(!is.null(input$filtre_niveau)&&
-        input$filtre_niveau != "Tous" &&
-        input$filtre_niveau !=""){
+       input$filtre_niveau != "Tous" &&
+       input$filtre_niveau !=""){
       pat <- pat[pat$niveau == input$filtre_niveau,]
     }
     
@@ -772,11 +819,11 @@ server <- function(input, output, session) {
        input$filtre_niveau_terri !=""){
       pat <- pat[pat$echelle == input$filtre_niveau_terri,]
     }
-  
+    
     return(pat)
   })
   
-#Creation d'un fonction permettant de créer le Pop-up de la couche PAT (A AMELIORER) 
+  #Creation d'un fonction permettant de créer le Pop-up de la couche PAT (A AMELIORER) 
   popup_pat <- function(pat){
     paste0(
       "<strong>",pat$nom_du_pat,"</strong><br/>",
@@ -816,9 +863,147 @@ server <- function(input, output, session) {
   
   ### fin silya ###
   
+  ##modif paul ####
+  
+  output$pat_sidemenu <- renderUI({
+    pat <- pat_filtre()
+    pats <- sort(unique(na.omit(pat$nom_du_pat)))
+    
+    if (length(pats) == 0) return(tags$p("Aucun PAT ne correspond aux filtres."))
+    
+    tags$nav(
+      class = "fr-sidemenu",
+      role = "navigation",
+      `aria-labelledby` = "sidemenu-title",
+      tags$div(
+        class = "fr-sidemenu__inner",
+        
+        tags$button(
+          class = "fr-sidemenu__btn",
+          type = "button",
+          `aria-expanded` = "true",
+          `aria-controls` = "sidemenu-collapse-pat",
+          "PAT affichés"
+        ),
+        
+        tags$div(
+          id = "sidemenu-collapse-pat",
+          class = "fr-collapse fr-collapse--expanded",
+          
+          tags$p(
+            class = "fr-sidemenu__title",
+            id = "sidemenu-title",
+            paste0("PAT affichés : ", length(pats))
+          ),
+          
+          tags$ul(
+            class = "fr-sidemenu__list",
+            lapply(pats, function(nm) {
+              nm_js <- jsonlite::toJSON(nm, auto_unbox = TRUE)
+              tags$li(
+                class = "fr-sidemenu__item",
+                tags$a(
+                  href = "#",
+                  class = "fr-sidemenu__link",
+                  nm,
+                  onclick = sprintf(
+                    "Shiny.setInputValue('pat_selectionne', %s, {priority:'event'}); return false;",
+                    nm_js
+                  )
+                )
+              )
+            })
+          )
+        )
+      )
+    )
+  })
+  
+  #Cohérence PAT LISTE 
+  pat_visibles_dans_vue <- reactive({
+    # si la couche PAT n'est pas affichée -> liste vide
+    if (isFALSE(input$pat_layer)) return(couche_pat_4326[0, ])
+    
+    pat <- pat_filtre()  # tes filtres niveau/échelle
+    
+    # si un PAT est "actif" (après clic) et que tu n'affiches que lui sur la carte
+    if (!is.null(pat_actif())) {
+      pat <- pat[pat$nom_du_pat == pat_actif(), ]
+    }
+    
+    # Si pas encore de bounds (au chargement)
+    b <- input$map_bounds
+    if (is.null(b)) return(pat)
+    
+    # bbox de la vue leaflet -> polygon sf
+    bbox_view <- sf::st_bbox(
+      c(xmin = b$west, ymin = b$south, xmax = b$east, ymax = b$north),
+      crs = 4326
+    )
+    poly_view <- sf::st_as_sfc(bbox_view)
+    
+    # garde uniquement ceux qui touchent la vue
+    idx <- sf::st_intersects(pat, poly_view, sparse = FALSE)
+    pat[idx[, 1], ]
+  })
+  
+  #Met a jour la liste suivant les polygone présent sur la carte 
+  output$pat_sidemenu <- renderUI({
+  pat <- pat_visibles_dans_vue()
+  pats <- sort(unique(na.omit(pat$nom_du_pat)))
+
+  if (length(pats) == 0) {
+    return(tags$p("Aucun PAT visible dans la vue (ou couche PAT masquée)."))
+  }
+
+  tags$nav(
+    class = "fr-sidemenu",
+    role = "navigation",
+    `aria-labelledby` = "sidemenu-title",
+    tags$div(
+      class = "fr-sidemenu__inner",
+
+      tags$button(
+        class = "fr-sidemenu__btn",
+        type = "button",
+        `aria-expanded` = "true",
+        `aria-controls` = "sidemenu-collapse-pat",
+        "PAT visibles"
+      ),
+
+      tags$div(
+        id = "sidemenu-collapse-pat",
+        class = "fr-collapse fr-collapse--expanded",
+
+        tags$p(
+          class = "fr-sidemenu__title",
+          id = "sidemenu-title",
+          paste0("PAT visibles : ", length(pats))
+        ),
+
+        tags$ul(
+          class = "fr-sidemenu__list",
+          lapply(pats, function(nm) {
+            tags$li(
+              class = "fr-sidemenu__item",
+              tags$a(
+                href = "#",
+                class = "fr-sidemenu__link pat-link",
+                `data-pat` = nm,
+                nm
+              )
+            )
+          })
+        )
+      )
+    )
+  )
+})
+  ####Fin modifs paul####
   
   
-#L'affichage de la carte en elle-même paramétrages de la BBOX 
+  
+  #L'affichage de la carte en elle-même paramétrages de la BBOX 
   output$map <- renderLeaflet({
     bbox <- st_bbox(commune_aura)
     
@@ -827,41 +1012,41 @@ server <- function(input, output, session) {
     xmax <- unname(bbox["xmax"])
     ymax <- unname(bbox["ymax"])
     
-#Préparation des indicateurs (SAU, SAU BIO, Population) 
-#Recherche du centroïdes des communes
+    #Préparation des indicateurs (SAU, SAU BIO, Population) 
+    #Recherche du centroïdes des communes
     communes_centroid <- st_centroid(commune_aura)
     
-#Calcul de la part en % de la SAU bio par communes 
+    #Calcul de la part en % de la SAU bio par communes 
     part_bio <- communes_centroid$part_bio
     
-#Sécurisation (évite la division par 0 et les valeurs NA) 
+    #Sécurisation (évite la division par 0 et les valeurs NA) 
     part_bio[is.na(part_bio) | is.infinite(part_bio)] <- 0
     
-#Création des valeurs permettant la création des cercles proportionnels 
-#Création des cercles proportionnels du nombre d'habitants par communes 
+    #Création des valeurs permettant la création des cercles proportionnels 
+    #Création des cercles proportionnels du nombre d'habitants par communes 
     pop_com <- communes_centroid$population
     rayon_brut_pop <- sqrt(pop_com)
     rayon_pop <- scales::rescale(rayon_brut_pop, to = c(1, 50))
     
-#Création des cercles proportionnels du nombre d'hectares de SAU par communes
+    #Création des cercles proportionnels du nombre d'hectares de SAU par communes
     sau_com <- communes_centroid$rpg_ha_sum
     rayon_brut_sau <- sqrt(sau_com)
     rayon_sau <- scales::rescale(rayon_brut_sau, to = c(1, 30))
     
-#Création des cercles proportionnels du nombre d'hectares de SAU BIO par communes 
+    #Création des cercles proportionnels du nombre d'hectares de SAU BIO par communes 
     saubio_com <- communes_centroid$bio_ha_sum
     rayon_brut_saubio <- sqrt(saubio_com)
     rayon_saubio <- scales::rescale(rayon_brut_saubio, to = c(1, 30))
     
-##Palettes de couleur des couches 
-#Palette % SAU bio (la couleur des cercles proportionnels) 
+    ##Palettes de couleur des couches 
+    #Palette % SAU bio (la couleur des cercles proportionnels) 
     pal_bio <- colorNumeric(
       palette = c("#bcd9a3","#306600"),
       domain = part_bio,
       na.color = "transparent"
     )
     
-#Limitation du dézoom maximal de la carte 
+    #Limitation du dézoom maximal de la carte 
     leaflet(
       options = leafletOptions(
         minZoom = 6,
@@ -882,7 +1067,7 @@ server <- function(input, output, session) {
         )
       )%>%
       
-##aJOUT PLEIN ECRAN/ZOOM/DEZOOM
+      ##aJOUT PLEIN ECRAN/ZOOM/DEZOOM
       addFullscreenControl(position = "topright")%>%
       addTiles() %>%
       htmlwidgets::onRender("
@@ -892,8 +1077,8 @@ server <- function(input, output, session) {
   ")%>%
       
       
-#Ajout/Appel des couches à la carte
-#Plan IGN 
+      #Ajout/Appel des couches à la carte
+      #Plan IGN 
       addWMSTiles(
         baseUrl = "https://data.geopf.fr/wms-r/wms",
         layers  = "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
@@ -905,7 +1090,7 @@ server <- function(input, output, session) {
         group = "Plan IGN"
       ) %>%
       
-#RPG 
+      #RPG 
       addWMSTiles(
         baseUrl = "https://data.geopf.fr/wms-r/wms",
         layers  = "LANDUSE.AGRICULTURE2024",
@@ -917,7 +1102,7 @@ server <- function(input, output, session) {
         group = "Registre Parcellaire Graphique"
       ) %>%
       
-#Départements 
+      #Départements 
       addPolygons(
         data = dep_aura_4326,
         color = "#7b7b7b",
@@ -928,7 +1113,7 @@ server <- function(input, output, session) {
         group = "Departement"
       ) %>%
       
-#Communes AURA
+      #Communes AURA
       addPolygons(
         data = commune_aura,
         color = "#929292",
@@ -940,7 +1125,7 @@ server <- function(input, output, session) {
         label="nom_officiel"
       ) %>%
       
-#CLS 
+      #CLS 
       addPolygons(
         data = couche_cls_4326,
         color = "#869ECE",
@@ -951,7 +1136,7 @@ server <- function(input, output, session) {
       ) %>%
       
       
-#Cercle population
+      #Cercle population
       addCircleMarkers(
         data = communes_centroid,
         radius = rayon_pop,
@@ -966,7 +1151,7 @@ server <- function(input, output, session) {
         group = "Population communale"
       ) %>%
       
-#Cercle SAU
+      #Cercle SAU
       addCircleMarkers(
         data = communes_centroid,
         radius = rayon_sau,
@@ -981,7 +1166,7 @@ server <- function(input, output, session) {
         group = "SAU"
       ) %>%
       
-#Cercle SAU BIO 
+      #Cercle SAU BIO 
       addCircleMarkers(
         data = communes_centroid,
         radius = rayon_saubio,
@@ -998,7 +1183,7 @@ server <- function(input, output, session) {
       )
   })
   
-# Paramétrages du sélecteur de couches
+  # Paramétrages du sélecteur de couches
   #Fonds de plans 
   observe({
     proxy <- leafletProxy("map")
@@ -1020,7 +1205,7 @@ server <- function(input, output, session) {
     }
   })
   
-#Polygones 
+  #Polygones 
   observe({
     proxy <- leafletProxy("map")
     
@@ -1049,7 +1234,7 @@ server <- function(input, output, session) {
     }
   })
   
-#Indicateurs 
+  #Indicateurs 
   observe({
     proxy <- leafletProxy("map")
     
@@ -1068,21 +1253,21 @@ server <- function(input, output, session) {
     }
   })
   
-# Paramétrages de l'action déclenchée par le bouton recherche
-# l'autocomplétion déclenche le bouton via btn.click()
+  # Paramétrages de l'action déclenchée par le bouton recherche
+  # l'autocomplétion déclenche le bouton via btn.click()
   observeEvent(input$search_button, {
     req(input$nom_du_pat)
     
-#Normalise la recherche (évite la sensibilité à la casse notamment) 
+    #Normalise la recherche (évite la sensibilité à la casse notamment) 
     recherche <- tolower(trimws(input$nom_du_pat))
     
-#Recherche exacte du nom du PAT 
+    #Recherche exacte du nom du PAT 
     selection_pat <- couche_pat_4326[
       tolower(trimws(couche_pat_4326$nom_du_pat)) == recherche,
     ]
     
     if (nrow(selection_pat) > 0) {
-#Zoom animé sur l'emprise du PAT trouvé
+      #Zoom animé sur l'emprise du PAT trouvé
       bb <- st_bbox(selection_pat)
       leafletProxy("map") %>%
         flyToBounds(
@@ -1094,18 +1279,18 @@ server <- function(input, output, session) {
       return()
     }
     
-#Recherche exacte du nom de la commune 
+    #Recherche exacte du nom de la commune 
     selection_com <- commune_aura[
       tolower(trimws(commune_aura$nom_officiel)) == recherche,
     ]
     
     if (nrow(selection_com) == 0) {
-#Si aucune réponse trouvée, affiche un message d'erreur
+      #Si aucune réponse trouvée, affiche un message d'erreur
       showNotification("PAT ou commune non trouvé", type = "warning")
       return()
     }
     
-#prend en compte les limites du polygones pour le zoom (centroide impossible car multipolygones)
+    #prend en compte les limites du polygones pour le zoom (centroide impossible car multipolygones)
     bb <- st_bbox(selection_com)
     
     leafletProxy("map") %>%
@@ -1118,7 +1303,7 @@ server <- function(input, output, session) {
   })
   
   
-# Paramétrages des filtres (combinés) 
+  # Paramétrages des filtres (combinés) 
   observe({
     
     proxy <- leafletProxy("map")
@@ -1138,17 +1323,20 @@ server <- function(input, output, session) {
      #Si aucun PAT après filtre on affiche rien 
      if(nrow(pat_affiche)==0)return()
     
-#Obligatoire de recréer la palette dans cet observe pour que elle soit effective 
+    #Si aucun PAT après filtre on affiche rien 
+    if(nrow(pat_affiche)==0)return()
+    
+    #Obligatoire de recréer la palette dans cet observe pour que elle soit effective 
     pal_pat <- colorFactor(
       palette = c("#fbe769", "#E4794A"),
       domain = couche_pat_4326$niveau
     )
     
-  #evite l'affichage des popup quand la couche n'est pas coché
+    #evite l'affichage des popup quand la couche n'est pas coché
     proxy %>% clearGroup("Projet Alimentaire Territoriaux")
     proxy %>% clearPopups()
     
-#Réaffichage uniquement de la sélection
+    #Réaffichage uniquement de la sélection
     proxy %>% addPolygons(
       data = pat_affiche,
       layerId  = ~nom_du_pat,
@@ -1161,7 +1349,7 @@ server <- function(input, output, session) {
   })
   
   
-# Interception des clics sur la couche PAT pour l'affichage de pop-up 
+  # Interception des clics sur la couche PAT pour l'affichage de pop-up 
   observeEvent(input$map_shape_click, {
     
     if(!input$pat_layer) return()
@@ -1177,44 +1365,44 @@ server <- function(input, output, session) {
       crs = 4326
     )
     
-#Recherche des PAT qui s'intersectent 
+    #Recherche des PAT qui s'intersectent 
     pat_sf <- pat_filtre()
     intersect <- st_intersects(pat_sf, point, sparse = FALSE)
     pat_click <- pat_sf[unlist(intersect),]
     
-#Cas 1 : aucun PAT présent à l'endroit du clic 
+    #Cas 1 : aucun PAT présent à l'endroit du clic 
     if (nrow(pat_click)== 0) return()
     
-#Cas 2 : un seul PAT present à l'endroit du clic
+    #Cas 2 : un seul PAT present à l'endroit du clic
     if (nrow(pat_click)==1){
       zoom_pat(pat_click[1,])
       return()
     }
-      
-#Cas 3 : Plusieurs PAT à l'endroit du clic 
-      liens <- paste0(
-        "<li><a href='#' onclick=\"Shiny.setInputValue('pat_selectionne','",
-        pat_click$nom_du_pat,
-        "', {priority:'event'})\">",
-        pat_click$nom_du_pat,
-        "</a></li>",
-        collapse = ""
+    
+    #Cas 3 : Plusieurs PAT à l'endroit du clic 
+    liens <- paste0(
+      "<li><a href='#' onclick=\"Shiny.setInputValue('pat_selectionne','",
+      pat_click$nom_du_pat,
+      "', {priority:'event'})\">",
+      pat_click$nom_du_pat,
+      "</a></li>",
+      collapse = ""
+    )
+    contenu <- paste0(
+      "<strong>Plusieurs PAT à cet endroit :</strong><br/>",
+      "<ul>", liens, "</ul>"
+    )
+    
+    leafletProxy("map") %>%
+      clearPopups() %>%
+      addPopups(
+        lng = click$lng,
+        lat = click$lat,
+        popup = contenu
       )
-      contenu <- paste0(
-        "<strong>Plusieurs PAT à cet endroit :</strong><br/>",
-        "<ul>", liens, "</ul>"
-      )
-      
-      leafletProxy("map") %>%
-        clearPopups() %>%
-        addPopups(
-          lng = click$lng,
-          lat = click$lat,
-          popup = contenu
-        )
   })
   
-#Gerer le clic sur un PAT de la liste 
+  #Gerer le clic sur un PAT de la liste 
   observeEvent(input$pat_selectionne, {
     
     clic_sur_pat(TRUE)
@@ -1230,16 +1418,16 @@ server <- function(input, output, session) {
     zoom_pat(pat_select)
   })
   
-#Reset si on clic ailleurs sur la carte (tous les PAT se réaffiche) 
+  #Reset si on clic ailleurs sur la carte (tous les PAT se réaffiche) 
   observeEvent(input$map_click, {
     
-#si on clique sur le polygone d'un PAT on ignore le reset 
+    #si on clique sur le polygone d'un PAT on ignore le reset 
     if (clic_sur_pat()){
       clic_sur_pat(FALSE)
       return()
     }
     
-#sinon on reset 
+    #sinon on reset 
     if(!is.null(pat_actif())){
       pat_actif(NULL)
       leafletProxy("map") %>%
