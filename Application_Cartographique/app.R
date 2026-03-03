@@ -34,7 +34,7 @@ autocomplete_pats     <- sort(unique(na.omit(couche_pat_4326$nom_du_pat))) #list
 ###########################################Partie UI#############################################################
 ui <- fluidPage(
   
-#Appel des éléments nécessaires à la stylisation/mise en page (DSFR)
+  #Appel des éléments nécessaires à la stylisation/mise en page (DSFR)
   tags$head(
     tags$link(
       rel = "stylesheet",
@@ -53,7 +53,7 @@ ui <- fluidPage(
       rel = "stylesheet"
     ),
     
-#Création des divers styles nécessaires à la mise en page 
+    #Création des divers styles nécessaires à la mise en page 
     tags$style(HTML("
     .menu-couches {
       background-color:#f6f6f6;
@@ -207,8 +207,12 @@ ui <- fluidPage(
       cursor:default;
       opacity:0.7;
     }
-    
-    /* Style liste et placement PAUL ///////////////////////////////////////////////////////////////////////////////////////*/
+    select.fr-select,
+    .fr-select {
+      border-bottom: 2px solid #000091 !important;
+      box-shadow: none !important;
+    }
+// Style liste et placement 
         .right-panel{
       background-color:#f6f6f6;
       padding:10px;
@@ -233,10 +237,8 @@ ui <- fluidPage(
       opacity: 1;
       pointer-events: auto;
     }
-    
-////////////////////////////////////////////////////////////////////////////////////////////////////////////    
-/* CHARLOTTE ET OLIVIER*/ 
-/* Style des boutons zoom/dezoom/plein écran*/
+      
+//Style des boutons zoom/dezoom/plein écran
     .leaflet-control-zoom.leaflet-bar {
       border: none !important;
       box-shadow: none !important;
@@ -279,12 +281,128 @@ ui <- fluidPage(
       background-color: #eeeeee !important;
       color: #000091 !important;
     }
-/* FIN DU BLOC DE STYLISATION DES ZOOM/DEZOOM/PLEIN ECRAN */
+//Style de la légende 
+    .map-legend {
+      display: none;
+      background: #ffffff;
+      padding: 14px 16px;
+      border-radius: 6px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      min-width: 240px;
+      font-size: 13px;
+      line-height: 1.5;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
     
+    .map-legend h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #000091;
+    }
     
-    ")),
+    .leg-cat {
+      font-weight: 600;
+      font-size: 12.5px;
+      margin: 10px 0 6px 0;
+      color: #161616;
+    }
     
+    .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+      font-size: 12px;
+    }
     
+    .leg-sep {
+      height: 1px;
+      background: #e5e5e5;
+      margin: 10px 0;
+    }
+    
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    
+    .swatch-line {
+      width: 18px;
+      height: 3px;
+      flex-shrink: 0;
+    }
+    
+    .swatch-circle {
+      border-radius: 50%;
+    }
+    
+    .swatch-grad {
+      width: 40px;
+      height: 10px;
+      background: linear-gradient(to right, #bcd9a3, #306600);
+      border-radius: 3px;
+    }
+    
+    .map-legend h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #000091;
+    }
+    .leaflet-bar {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    #legend_toggle {
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
+      text-align: center;
+      padding: 0;
+    }
+    
+    #legend_toggle i {
+      font-size: 14px;
+    }
+    /* Supprime le padding par défaut du conteneur addControl() */
+    #legend_toggle.leaflet-control {
+      margin: 0 !important;
+    }
+    /* Réduit le bouton légende à la même taille que zoom/fullscreen */
+    #legend_toggle {
+      width: 36px !important;
+      height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: #fff !important;
+      border: 1px solid #e5e5e5 !important;
+      border-radius: 4px !important;
+      color: #000091 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      text-decoration: none !important;
+    }
+    
+    #legend_toggle i {
+      font-size: 18px !important;
+      line-height: 1 !important;
+      display: block !important;
+    }
+    .leaflet-control:has(#legend_toggle) {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+    ")), 
+    
+    ##Fin du bloc de style     
     #Script autocomplétion : panneau (Communes/PAT) + clic => lance la recherche
     tags$script(HTML(sprintf("
       document.addEventListener('DOMContentLoaded', function () {
@@ -354,7 +472,7 @@ ui <- fluidPage(
             return;
           }
 
-  // Filtrage saisie commune commence par X
+// Filtrage saisie commune commence par X
           var comMatches = COMMUNES.filter(function(x){ return norm(x).startsWith(q); }).slice(0, 20);
 
 // Filtrage saisie PAT contient x
@@ -396,11 +514,35 @@ ui <- fluidPage(
     ",
                              jsonlite::toJSON(autocomplete_communes, auto_unbox = TRUE),
                              jsonlite::toJSON(autocomplete_pats, auto_unbox = TRUE)
-    ))), 
+    ))),
     
-    #mODIF PAUL###########################################################################################################
-    # Script clic sur PAT de la sidebar
     tags$script(HTML("
+
+  // ===== TOGGLE LÉGENDE =====
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('#legend_toggle');
+    if(!btn) return;
+    e.preventDefault();
+
+    var legend = document.getElementById('map_legend');
+    if(!legend) return;
+
+    if(legend.style.display === 'none' || legend.style.display === ''){
+      legend.style.display = 'block';
+      legend.classList.add('open');
+    } else {
+      legend.style.display = 'none';
+      legend.classList.remove('open');
+    }
+  });
+
+  // ===== Mise à jour dynamique de la légende =====
+  Shiny.addCustomMessageHandler('update_legende', function(html) {
+    var legend = document.getElementById('map_legend');
+    if(legend) legend.innerHTML = html;
+  });
+
+  // ===== Clic sur PAT dans la sidebar =====
   document.addEventListener('click', function(e){
     if(e.target && e.target.classList.contains('pat-link')){
       e.preventDefault();
@@ -410,241 +552,242 @@ ui <- fluidPage(
       }
     }
   });
+
 "))
-  ), # FIN tags$head
-  
- ############################################################################################################### 
-  #Création de la page introductive (1ère page du tutoriel)
+    ), # FIN tags$head
+
+############################################################################################################### 
+#Création de la page introductive (1ère page du tutoriel)
+tags$div(
+  id = "intro_overlay",
+  class = "intro-overlay fr-overlay",  # Le style DSFR de l'overlay
   tags$div(
-    id = "intro_overlay",
-    class = "intro-overlay fr-overlay",  # Le style DSFR de l'overlay
+    class = "fr-container fr-container--fluid",  # Container fluide de DSFR
     tags$div(
-      class = "fr-container fr-container--fluid",  # Container fluide de DSFR
+      class = "fr-card fr-card--xl fr-p-5 fr-m-auto fr-text-center",  # Le container avec une carte DSFR, texte centré
+      tags$h2(class = "fr-h2", "Bienvenue sur l'application des Projets Alimentaires Territoriaux"),
+      tags$p(class = "fr-text fr-mb-3", "Cette application permet d'explorer les Projets Alimentaires Territoriaux (PAT) et leurs indicateurs. Vous pouvez filtrer les PAT, rechercher une commune ou un PAT, et visualiser des informations détaillées."),
+      tags$p(class = "fr-text fr-mb-3", "Cliquez sur le bouton ci-dessous pour commencer le tutoriel et apprendre à utiliser l'application."),
       tags$div(
-        class = "fr-card fr-card--xl fr-p-5 fr-m-auto fr-text-center",  # Le container avec une carte DSFR, texte centré
-        tags$h2(class = "fr-h2", "Bienvenue sur l'application des Projets Alimentaires Territoriaux"),
-        tags$p(class = "fr-text fr-mb-3", "Cette application permet d'explorer les Projets Alimentaires Territoriaux (PAT) et leurs indicateurs. Vous pouvez filtrer les PAT, rechercher une commune ou un PAT, et visualiser des informations détaillées."),
-        tags$p(class = "fr-text fr-mb-3", "Cliquez sur le bouton ci-dessous pour commencer le tutoriel et apprendre à utiliser l'application."),
-        tags$div(
-          style = "display: flex; gap: 20px; justify-content: center;",
-          tags$button(class = "fr-btn fr-btn--primary", id = "start_tutorial", "Démarrer le tutoriel"),
-          tags$button(class = "fr-btn fr-btn--secondary", id = "skip_tutorial", "Passer le tutoriel")
-        )
+        style = "display: flex; gap: 20px; justify-content: center;",
+        tags$button(class = "fr-btn fr-btn--primary", id = "start_tutorial", "Démarrer le tutoriel"),
+        tags$button(class = "fr-btn fr-btn--secondary", id = "skip_tutorial", "Passer le tutoriel")
       )
     )
-  ),
-  
-  
-  #En-tête DSFR
-  tags$header(
-    class = "fr-header",
+  )
+),
+
+
+#En-tête DSFR
+tags$header(
+  class = "fr-header",
+  tags$div(
+    class = "fr-header__body",
     tags$div(
-      class = "fr-header__body",
+      class = "fr-container",
       tags$div(
-        class = "fr-container",
+        class = "fr-header__body-row",
         tags$div(
-          class = "fr-header__body-row",
-          tags$div(
-            class = "fr-header__brand",
-            tags$a(
-              class = "fr-header__brand-link",
-              href = "#",
-              tags$p(class = "fr-logo","République\nFrançaise")
-            )
-          ),
-          tags$div(
-            class = "fr-header__service",
-            tags$p(class = "fr-header__service-title","Cartographie des Projets Alimentaires Territoriaux"),
-            tags$p(class = "fr-header__service-tagline","Région Auvergne-Rhône-Alpes")
-          )
-        )
-      )
-    )
-  ),
-  
-  
-  tags$main(
-    class = "fr-container-fluid",
-    br(),
-    
-    #Placement filtre et barre de recherche
-    tags$div(
-      style = "display:flex; gap:20px; align-items:flex-end; margin:0px 0 20px 0; padding:0;",
-      # Bloc filtres à gauche
-      tags$div(
-        style = "display:flex; gap:20px; margin:0; padding:0;",
-        
-        tags$div(
-          style = "width:250px; margin:0; padding:0;",
-          
-          tags$select( #Menu déroulant pour filtrer selon le niveau de labellisation
-            id = "filtre_niveau",
-            class = "fr-select",
-            style = "color:black; margin:0;",
-            
-            tags$option(
-              "Sélectionner un niveau de labellisation",
-              value = "",
-              selected = TRUE,
-              disabled = TRUE
-            ),
-            tags$option(value = "Tous", "Tous les niveaux"),
-            tags$option(value = "1", "Niveau 1"),
-            tags$option(value = "2", "Niveau 2")
+          class = "fr-header__brand",
+          tags$a(
+            class = "fr-header__brand-link",
+            href = "#",
+            tags$p(class = "fr-logo","République\nFrançaise")
           )
         ),
-        
         tags$div(
-          style = "width:250px; margin:0; padding:0;",
+          class = "fr-header__service",
+          tags$p(class = "fr-header__service-title","Cartographie des Projets Alimentaires Territoriaux"),
+          tags$p(class = "fr-header__service-tagline","Région Auvergne-Rhône-Alpes")
+        )
+      )
+    )
+  )
+),
+
+
+tags$main(
+  class = "fr-container-fluid",
+  br(),
+  
+  #Placement filtre et barre de recherche
+  tags$div(
+    style = "display:flex; gap:20px; align-items:flex-end; margin:0px 0 20px 0; padding:0;",
+    # Bloc filtres à gauche
+    tags$div(
+      style = "display:flex; gap:20px; margin:0; padding:0;",
+      
+      tags$div(
+        style = "width:250px; margin:0; padding:0;",
+        
+        tags$select( #Menu déroulant pour filtrer selon le niveau de labellisation
+          id = "filtre_niveau",
+          class = "fr-select",
+          style = "color:black; margin:0;",
           
-          tags$select( #Menu déroulant pour filtrer selon l’échelle territoriale
-            id = "filtre_niveau_terri",
-            class = "fr-select",
-            style = "color:black; margin:0;",
-            
-            tags$option(
-              "Sélectionner l'échelle du territoire",
-              value = "",
-              selected = TRUE,
-              disabled = TRUE
-            ),
-            tags$option(value = "Tous", "Toutes les échelles"),
-            tags$option(value = "PAT interterritorial (PAiT)", "Interterritorial (PAiT)"),
-            tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
-            tags$option(value = "PAT d'échelle départementale", "Départementale")
-          )
+          tags$option(
+            "Sélectionner un niveau de labellisation",
+            value = "",
+            selected = TRUE,
+            disabled = TRUE
+          ),
+          tags$option(value = "Tous", "Tous les niveaux"),
+          tags$option(value = "1", "Niveau 1"),
+          tags$option(value = "2", "Niveau 2")
         )
       ),
       
-      
-      #Barre de recherche à droite + bouton info
-      #Ajout du panneau de suggestions (Communes et PAT)
       tags$div(
-        style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
+        style = "width:250px; margin:0; padding:0;",
         
-        # Bouton information DSFR
-        tags$button(
-          id = "info_tutorial",
-          class = "fr-btn--tooltip fr-btn",
-          type = "button",
-          title = "Lancer le tutoriel",
-          `aria-label` = "Lancer le tutoriel"
-        ),
-        
-        # Barre de recherche DSFR + panneau suggestions 
-        tags$div(
-          class = "fr-search-bar",
-          role = "search",
-          style = "width:250px; margin:0;",
+        tags$select( #Menu déroulant pour filtrer selon l’échelle territoriale
+          id = "filtre_niveau_terri",
+          class = "fr-select",
+          style = "color:black; margin:0;",
           
-          tags$label(
-            class = "fr-label",
-            `for` = "nom_du_pat"
+          tags$option(
+            "Sélectionner l'échelle du territoire",
+            value = "",
+            selected = TRUE,
+            disabled = TRUE
           ),
-          
-          #Panneau de suggestions (Communes et PAT)
-          tags$div(
-            id = "autocomplete_panel",
-            class = "autocomplete-panel",
-            tags$div(
-              class = "autocomplete-card",
-              
-              tags$div(class = "autocomplete-title", "Communes"),
-              tags$ul(id = "suggest_communes", class = "autocomplete-list"),
-              
-              tags$div(class = "autocomplete-sep"),
-              
-              tags$div(class = "autocomplete-title", "PAT"),
-              tags$ul(id = "suggest_pats", class = "autocomplete-list")
-            )
-          ),
-          
-          tags$input(
-            class = "fr-input",
-            id = "nom_du_pat",
-            type = "search",
-            placeholder = "Rechercher une Commune ou un PAT",
-            `aria-describedby` = "search_input_messages"
-          ),
-          
-          tags$div(
-            class = "fr-messages-group",
-            id = "search_input_messages",
-            `aria-live` = "polite"
-          ),
-          
-          actionButton(
-            inputId = "search_button",
-            label = "Rechercher",
-            class = "fr-btn"
-          )
+          tags$option(value = "Tous", "Toutes les échelles"),
+          tags$option(value = "PAT interterritorial (PAiT)", "Interterritorial (PAiT)"),
+          tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
+          tags$option(value = "PAT d'échelle départementale", "Départementale")
         )
       )
     ),
     
-    #Création des colonnes : menu couches + carte
-    fluidRow(
-      column(
-        width = 2,
-        div(class = "menu-couches",
-            h4("Fond cartographique"),
+    
+    #Barre de recherche à droite + bouton info
+    #Ajout du panneau de suggestions (Communes et PAT)
+    tags$div(
+      style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
+      
+      # Bouton information DSFR
+      tags$button(
+        id = "info_tutorial",
+        class = "fr-btn--tooltip fr-btn",
+        type = "button",
+        title = "Lancer le tutoriel",
+        `aria-label` = "Lancer le tutoriel"
+      ),
+      
+      # Barre de recherche DSFR + panneau suggestions 
+      tags$div(
+        class = "fr-search-bar",
+        role = "search",
+        style = "width:250px; margin:0;",
+        
+        tags$label(
+          class = "fr-label",
+          `for` = "nom_du_pat"
+        ),
+        
+        #Panneau de suggestions (Communes et PAT)
+        tags$div(
+          id = "autocomplete_panel",
+          class = "autocomplete-panel",
+          tags$div(
+            class = "autocomplete-card",
+            
+            tags$div(class = "autocomplete-title", "Communes"),
+            tags$ul(id = "suggest_communes", class = "autocomplete-list"),
+            
+            tags$div(class = "autocomplete-sep"),
+            
+            tags$div(class = "autocomplete-title", "PAT"),
+            tags$ul(id = "suggest_pats", class = "autocomplete-list")
+          )
+        ),
+        
+        tags$input(
+          class = "fr-input",
+          id = "nom_du_pat",
+          type = "search",
+          placeholder = "Rechercher une Commune ou un PAT",
+          `aria-describedby` = "search_input_messages"
+        ),
+        
+        tags$div(
+          class = "fr-messages-group",
+          id = "search_input_messages",
+          `aria-live` = "polite"
+        ),
+        
+        actionButton(
+          inputId = "search_button",
+          label = "Rechercher",
+          class = "fr-btn"
+        )
+      )
+    )
+  ),
+  
+  #Création des colonnes : menu couches + carte
+  fluidRow(
+    column(
+      width = 2,
+      div(class = "menu-couches",
+          h4("Fond cartographique"),
+          radioButtons(
+            "fond",
+            label = NULL,
+            choices = c(
+              "Plan IGN" = "ign",
+              "Registre Parcellaire Graphique" = "rpg",
+              "OpenStreetMap" = "osm"
+            ),
+            selected = "ign"
+          ),
+          
+          hr(),
+          
+          h4("Couches"),
+          
+          checkboxInput("pat_layer", "Projet Alimentaire Territoriaux", TRUE),
+          checkboxInput("cls_layer", "Contrat Locaux de Santé", FALSE),
+          checkboxInput("dep_layer", "Départements", FALSE),
+          checkboxInput("com_layer", "Communes",FALSE),
+          
+          hr(),
+          
+          conditionalPanel(
+            condition = "input.com_layer == true",
+            
+            h4("Indicateurs communaux"),
+            
             radioButtons(
-              "fond",
+              "indicateur",
               label = NULL,
               choices = c(
-                "Plan IGN" = "ign",
-                "Registre Parcellaire Graphique" = "rpg",
-                "OpenStreetMap" = "osm"
+                "Aucun" = "none",
+                "Population" = "pop",
+                "surface agricole utile (ha)" = "sau",
+                "surface agricole utile bio" = "bio"
               ),
-              selected = "ign"
-            ),
-            
-            hr(),
-            
-            h4("Couches"),
-            
-            checkboxInput("pat_layer", "Projet Alimentaire Territoriaux", TRUE),
-            checkboxInput("cls_layer", "Contrat Locaux de Santé", FALSE),
-            checkboxInput("dep_layer", "Départements", FALSE),
-            checkboxInput("com_layer", "Communes",FALSE),
-            
-            hr(),
-            
-            conditionalPanel(
-              condition = "input.com_layer == true",
-              
-              h4("Indicateurs communaux"),
-              
-              radioButtons(
-                "indicateur",
-                label = NULL,
-                choices = c(
-                  "Aucun" = "none",
-                  "Population" = "pop",
-                  "surface agricole utile (ha)" = "sau",
-                  "surface agricole utile bio" = "bio"
-                ),
-                selected = "none"
-              )
+              selected = "none"
             )
-        )
-      ),
-      
-      column(
-        width = 8, #Modif Paul
-        leafletOutput("map", height = "80vh")
-      ),
-      ###Ajout Liste a droite PAUL ###################################################
-      column(
-        width = 2,
-        div(
-          id = "right_sidebar",
-          class = "right-panel visible-sidebar",
-          uiOutput("pat_sidemenu")
-        )
+          )
       )
     ),
- ##################################################################################### 
+    
+    column(
+      width = 8, #Modif Paul
+      leafletOutput("map", height = "80vh")
+    ),
+    ###Ajout Liste a droite PAUL ###################################################
+    column(
+      width = 2,
+      div(
+        id = "right_sidebar",
+        class = "right-panel visible-sidebar",
+        uiOutput("pat_sidemenu")
+      )
+    )
+  ),
+  ##################################################################################### 
   #Pied de page DSFR
   tags$footer(
     class = "fr-footer",
@@ -949,56 +1092,56 @@ server <- function(input, output, session) {
   
   #Met a jour la liste suivant les polygone présent sur la carte 
   output$pat_sidemenu <- renderUI({
-  pat <- pat_visibles_dans_vue()
-  pats <- sort(unique(na.omit(pat$nom_du_pat)))
-
-  if (length(pats) == 0) {
-    return(tags$p("Aucun PAT visible dans la vue (ou couche PAT masquée)."))
-  }
-
-  tags$nav(
-    class = "fr-sidemenu",
-    role = "navigation",
-    `aria-labelledby` = "sidemenu-title",
-    tags$div(
-      class = "fr-sidemenu__inner",
-
-      tags$button(
-        class = "fr-sidemenu__btn",
-        type = "button",
-        `aria-expanded` = "true",
-        `aria-controls` = "sidemenu-collapse-pat",
-        "PAT visibles"
-      ),
-
+    pat <- pat_visibles_dans_vue()
+    pats <- sort(unique(na.omit(pat$nom_du_pat)))
+    
+    if (length(pats) == 0) {
+      return(tags$p("Aucun PAT visible dans la vue (ou couche PAT masquée)."))
+    }
+    
+    tags$nav(
+      class = "fr-sidemenu",
+      role = "navigation",
+      `aria-labelledby` = "sidemenu-title",
       tags$div(
-        id = "sidemenu-collapse-pat",
-        class = "fr-collapse fr-collapse--expanded",
-
-        tags$p(
-          class = "fr-sidemenu__title",
-          id = "sidemenu-title",
-          paste0("PAT visibles : ", length(pats))
+        class = "fr-sidemenu__inner",
+        
+        tags$button(
+          class = "fr-sidemenu__btn",
+          type = "button",
+          `aria-expanded` = "true",
+          `aria-controls` = "sidemenu-collapse-pat",
+          "PAT(s) visibles"
         ),
-
-        tags$ul(
-          class = "fr-sidemenu__list",
-          lapply(pats, function(nm) {
-            tags$li(
-              class = "fr-sidemenu__item",
-              tags$a(
-                href = "#",
-                class = "fr-sidemenu__link pat-link",
-                `data-pat` = nm,
-                nm
+        
+        tags$div(
+          id = "sidemenu-collapse-pat",
+          class = "fr-collapse fr-collapse--expanded",
+          
+          tags$p(
+            class = "fr-sidemenu__title",
+            id = "sidemenu-title",
+            paste0("PAT visibles : ", length(pats))
+          ),
+          
+          tags$ul(
+            class = "fr-sidemenu__list",
+            lapply(pats, function(nm) {
+              tags$li(
+                class = "fr-sidemenu__item",
+                tags$a(
+                  href = "#",
+                  class = "fr-sidemenu__link pat-link",
+                  `data-pat` = nm,
+                  nm
+                )
               )
-            )
-          })
+            })
+          )
         )
       )
     )
-  )
-})
+  })
   ####Fin modifs paul####
   
   
@@ -1066,6 +1209,13 @@ server <- function(input, output, session) {
           maxWidth = 150  # Longueur
         )
       )%>%
+      # Bouton légende (haut gauche)
+      addControl(
+        html = "<a id='legend_toggle' href='#' title='Afficher la légende'>
+            <i class='ri-list-check-2'></i>
+          </a>",
+        position = "topleft"
+      ) %>%
       
       ##aJOUT PLEIN ECRAN/ZOOM/DEZOOM
       addFullscreenControl(position = "topright")%>%
@@ -1252,6 +1402,96 @@ server <- function(input, output, session) {
       proxy %>% showGroup("SAU bio")
     }
   })
+  ##Légende
+  observe({
+    
+    sections <- list()
+    
+    # ===== PAT =====
+    if (isTRUE(input$pat_layer)) {
+      sections <- append(sections, list("
+      <div class='leg-cat'>Projets Alimentaires Territoriaux</div>
+      <div class='leg-item'><span class='swatch' style='background:#fbe769;'></span>Niveau 1</div>
+      <div class='leg-item'><span class='swatch' style='background:#E4794A;'></span>Niveau 2</div>
+    "))
+    }
+    
+    # ===== CLS =====
+    if (isTRUE(input$cls_layer)) {
+      sections <- append(sections, list("
+      <div class='leg-cat'>Contrats Locaux de Santé</div>
+      <div class='leg-item'><span class='swatch' style='background:#869ECE;'></span>CLS</div>
+    "))
+    }
+    
+    # ===== Départements =====
+    if (isTRUE(input$dep_layer)) {
+      sections <- append(sections, list("
+      <div class='leg-cat'>Départements</div>
+      <div class='leg-item'><span class='swatch-line' style='background:#7b7b7b;'></span>Limite départementale</div>
+    "))
+    }
+    
+    # ===== Communes =====
+    if (isTRUE(input$com_layer)) {
+      
+      sections <- append(sections, list("
+      <div class='leg-cat'>Communes</div>
+      <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limite communale</div>
+    "))
+      
+      # ===== Indicateurs =====
+      if (!is.null(input$indicateur) && input$indicateur != "none") {
+        
+        if (input$indicateur == "pop") {
+          sections <- append(sections, list("
+          <div class='leg-cat'>Population communale</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:8px;height:8px;'></span>Faible</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:14px;height:14px;'></span>Moyenne</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:20px;height:20px;'></span>Forte</div>
+        "))
+        }
+        
+        if (input$indicateur == "sau") {
+          sections <- append(sections, list("
+          <div class='leg-cat'>Surface Agricole Utile (ha)</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:8px;height:8px;'></span>&lt; 500 ha</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:14px;height:14px;'></span>500–2000 ha</div>
+          <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:20px;height:20px;'></span>&gt; 2000 ha</div>
+        "))
+        }
+        
+        if (input$indicateur == "bio") {
+          sections <- append(sections, list("
+          <div class='leg-cat'>Part de SAU Bio (%)</div>
+          <div class='leg-item'><span class='swatch-grad'></span>
+          <span style='font-size:11px;color:#666;'>0% → 100%</span></div>
+        "))
+        }
+      }
+    }
+    
+    # ===== Assemblage final =====
+    if (length(sections) == 0) {
+      content <- "<div style='font-size:12px;color:#888;font-style:italic;'>Aucune couche active.</div>"
+    } else {
+      content <- paste(sections, collapse = "<div class='leg-sep'></div>")
+    }
+    
+    html <- paste0(
+      "<h4>Légende</h4>",
+      content
+    )
+    
+    leafletProxy("map") %>%
+      removeControl("legend_control") %>%
+      addControl(
+        html = html,
+        position = "topleft",
+        layerId = "legend_control"
+      )
+    
+  })
   
   # Paramétrages de l'action déclenchée par le bouton recherche
   # l'autocomplétion déclenche le bouton via btn.click()
@@ -1319,9 +1559,9 @@ server <- function(input, output, session) {
         pat_affiche$nom_du_pat == pat_actif(),
       ]
     }
-  
-     #Si aucun PAT après filtre on affiche rien 
-     if(nrow(pat_affiche)==0)return()
+    
+    #Si aucun PAT après filtre on affiche rien 
+    if(nrow(pat_affiche)==0)return()
     
     #Si aucun PAT après filtre on affiche rien 
     if(nrow(pat_affiche)==0)return()
