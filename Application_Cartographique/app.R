@@ -117,20 +117,14 @@ ui <- fluidPage(
       padding: 20px;
       border-radius: 8px;
     }
-    .intro-overlay .content {
-      background-color: white;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 600px;
-      text-align: center;
-      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      width: 90%; /* Donne une largeur relative à la fenêtre */
-      height: 60%; /* Donne une hauteur relative à la fenêtre */
+    #intro_overlay .fr-card {
+      padding: 20px 20px !important;
+      border-radius: 15px !important;
+      max-width: 900px !important;
+      width: 80% !important;
+      min-height: 300px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.25) !important;
+      transition: all 0.3s ease;
     }
     .intro-overlay p {
       color: #333;  /* Couleur du texte pour s'assurer qu'il soit lisible */
@@ -668,10 +662,10 @@ tags$main(
       # Bouton information DSFR
       tags$button(
         id = "info_tutorial",
-        class = "fr-btn--tooltip fr-btn",
+        class = "fr-btn fr-btn--secondary",
         type = "button",
-        title = "Lancer le tutoriel",
-        `aria-label` = "Lancer le tutoriel"
+        tags$i(class = "ri-question-line", style="margin-right:6px;"),
+        "Tutoriel"
       ),
       
       # Barre de recherche DSFR + panneau suggestions 
@@ -838,12 +832,15 @@ tags$main(
 // Fonction pour démarrer le tutoriel
     function startTutorial() {
       var tutorialSteps = [
-        {el:'.menu-couches', title:'Menu des couches', text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.'},
-        {el:'#filtre_niveau', title:'Filtre niveau', text:'Utilisez ce filtre pour sélectionner le niveau des PAT.'},
-        {el:'#filtre_niveau_terri', title:'Filtre échelle', text:'Filtrez selon l’échelle territoriale.'},
-        {el:'#nom_du_pat', title:'Barre de recherche', text:'Recherchez un PAT ou une commune ici.', position:{ top: 130, left: 1600 }},
-        {el:'#map', title:'Carte', text:'La carte centrale affiche les PAT et indicateurs.', position:{ top: 750, left: 10 }},
-        {el:'#info_tutorial', title:'Relancer le tutoriel', text:'Vous pouvez relancer le tutoriel à tout moment en cliquant sur cette icône.', position:{ top: 130, left: 1600 }}
+        {el:'.menu-couches', title:'Menu des couches', text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.', position:{ top: 520, left: 10 }},
+        {el:'#filtre_niveau', title:'Filtre niveau', text:'Utilisez ce filtre pour sélectionner le niveau des PAT.', position:{ top: 135, left: 10 }},
+        {el:'#filtre_niveau_terri', title:'Filtre échelle', text:'Filtrez selon l’échelle territoriale.', position:{ top: 135, left: 280 }},
+        {el:'#map', title:'Carte', text:'La carte centrale affiche les PAT et indicateurs.', position:{ top: 788, left: 10 }},
+        {el:'#legend_toggle', title:'Afficher la légende', text:'Cliquez sur ce bouton pour afficher ou masquer la légende des couches visibles.', position:{ top: 200, left: 337 }},
+        {el:'#map_legend', title:'Légende', text:'La légende intéragit avec la carte.', position:{ top: 320, left: 343 }},
+        {el:'#nom_du_pat', title:'Barre de recherche', text:'Recherchez un PAT ou une commune ici.', position:{ top: 140, left: 1570 }},
+        {el:'#right_sidebar', title:'Liste des PAT visibles', text:'Cette liste affiche uniquement les PAT visibles dans la vue actuelle de la carte. Cliquez sur un PAT pour zoomer dessus.', position:{ top: 140, left: 1290 }},
+        {el:'#info_tutorial', title:'Relancer le tutoriel', text:'Vous pouvez relancer le tutoriel à tout moment en cliquant sur cette icône.', position:{ top: 130, left: 1570 }}
       ];
 
       var currentStep = 0;
@@ -1407,7 +1404,7 @@ server <- function(input, output, session) {
     
     sections <- list()
     
-    # ===== PAT =====
+# ===== PAT =====
     if (isTRUE(input$pat_layer)) {
       sections <- append(sections, list("
       <div class='leg-cat'>Projets Alimentaires Territoriaux</div>
@@ -1416,7 +1413,7 @@ server <- function(input, output, session) {
     "))
     }
     
-    # ===== CLS =====
+# ===== CLS =====
     if (isTRUE(input$cls_layer)) {
       sections <- append(sections, list("
       <div class='leg-cat'>Contrats Locaux de Santé</div>
@@ -1424,7 +1421,7 @@ server <- function(input, output, session) {
     "))
     }
     
-    # ===== Départements =====
+# ===== Départements =====
     if (isTRUE(input$dep_layer)) {
       sections <- append(sections, list("
       <div class='leg-cat'>Départements</div>
@@ -1432,7 +1429,7 @@ server <- function(input, output, session) {
     "))
     }
     
-    # ===== Communes =====
+# ===== Communes =====
     if (isTRUE(input$com_layer)) {
       
       sections <- append(sections, list("
@@ -1440,7 +1437,7 @@ server <- function(input, output, session) {
       <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limite communale</div>
     "))
       
-      # ===== Indicateurs =====
+# ===== Indicateurs =====
       if (!is.null(input$indicateur) && input$indicateur != "none") {
         
         if (input$indicateur == "pop") {
@@ -1471,7 +1468,7 @@ server <- function(input, output, session) {
       }
     }
     
-    # ===== Assemblage final =====
+# ===== Assemblage final =====
     if (length(sections) == 0) {
       content <- "<div style='font-size:12px;color:#888;font-style:italic;'>Aucune couche active.</div>"
     } else {
@@ -1479,8 +1476,10 @@ server <- function(input, output, session) {
     }
     
     html <- paste0(
+      "<div id='map_legend'>",
       "<h4>Légende</h4>",
-      content
+      content,
+      "</div>"
     )
     
     leafletProxy("map") %>%
