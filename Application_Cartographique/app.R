@@ -1226,7 +1226,6 @@ server <- function(input, output, session) {
       
       ##aJOUT PLEIN ECRAN/ZOOM/DEZOOM
       addFullscreenControl(position = "topright")%>%
-      addTiles() %>%
       htmlwidgets::onRender("
     function(el, x) {
       this.zoomControl.setPosition('topright');
@@ -1533,12 +1532,6 @@ server <- function(input, output, session) {
       tolower(trimws(commune_aura$nom_officiel)) == recherche,
     ]
     
-    if (nrow(selection_com) == 0) {
-      #Si aucune réponse trouvée, affiche un message d'erreur
-      showNotification("PAT ou commune non trouvé", type = "warning")
-      return()
-    }
-    
     #prend en compte les limites du polygones pour le zoom (centroide impossible car multipolygones)
     bb <- st_bbox(selection_com)
     
@@ -1571,10 +1564,26 @@ server <- function(input, output, session) {
     
     #Si aucun PAT après filtre on affiche rien 
     if(nrow(pat_affiche)==0)return()
-    
-    #Si aucun PAT après filtre on affiche rien 
-    if(nrow(pat_affiche)==0)return()
-    
+
+    observeEvent(
+      list(input$filtre_niveau, input$filtre_niveau_terri),
+      {
+        pat <- pat_filtre()
+        
+        if (nrow(pat) == 0 &&
+            input$filtre_niveau != "" &&
+            input$filtre_niveau_terri != "") {
+          
+          showNotification(
+            "Aucun PAT correspondant aux filtres sélectionnés.",
+            type = "warning",
+            duration = 20,
+            id = "warning_pat"
+          )
+        }
+      },
+      ignoreInit = TRUE
+    )
     #Obligatoire de recréer la palette dans cet observe pour que elle soit effective 
     pal_pat <- colorFactor(
       palette = c("#fbe769", "#E4794A"),
