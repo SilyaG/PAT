@@ -48,11 +48,6 @@ ui <- fluidPage(
       href = "https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css",
       rel = "stylesheet"
     ),
-    tags$link(
-      href = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@latest/dist/dsfr.min.css",
-      rel = "stylesheet"
-    ),
-    
     #Création des divers styles nécessaires à la mise en page 
     tags$style(HTML("
     .menu-couches {
@@ -82,7 +77,7 @@ ui <- fluidPage(
       background-color: transparent;
       border: 2px solid #000091;
       border-radius: 6px;
-      box-shadow: 0 0 10px #6a6af4;
+      box-shadow: 0 0 2px #6a6af4;
       z-index: 9999;
       pointer-events: none;
       display: none;
@@ -101,6 +96,14 @@ ui <- fluidPage(
     }
     .tutorial-modal p {
       font-size: 14px; /* Augmente la taille des paragraphes */
+    }
+    #tutorial_close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 10px;
+      cursor: pointer;
+      transform: translate(10px, -10px);
     }
     .intro-overlay {
       position: fixed;
@@ -121,8 +124,7 @@ ui <- fluidPage(
       padding: 20px 20px !important;
       border-radius: 15px !important;
       max-width: 900px !important;
-      width: 80% !important;
-      min-height: 300px;
+      min-height: 500px;
       box-shadow: 0 30px 80px rgba(0,0,0,0.25) !important;
       transition: all 0.3s ease;
     }
@@ -206,13 +208,12 @@ ui <- fluidPage(
       border-bottom: 2px solid #000091 !important;
       box-shadow: none !important;
     }
-/* Style liste et placement */
+/* Style liste et placement*/
         .right-panel{
       background-color:#f6f6f6;
       padding:10px;
       border-radius:8px;
       height: calc(80vh - 20px);
-      margin-top: 20px;
       overflow-y:auto;
     }
     .right-panel .fr-sidemenu__link{
@@ -232,7 +233,7 @@ ui <- fluidPage(
       pointer-events: auto;
     }
       
-/*Style des boutons zoom/dezoom/plein écran */
+/*Style des boutons zoom/dezoom/plein écran*/
     .leaflet-control-zoom.leaflet-bar {
       border: none !important;
       box-shadow: none !important;
@@ -559,8 +560,12 @@ ui <- fluidPage(
       class = "fr-container fr-container--fluid",  # Container fluide de DSFR
       tags$div(
         class = "fr-card fr-card--xl fr-p-5 fr-m-auto fr-text-center",  # Le container avec une carte DSFR, texte centré
-        tags$h2(class = "fr-h2", "Bienvenue sur l'application des Projets Alimentaires Territoriaux"),
-        tags$p(class = "fr-text fr-mb-3", "Cette application permet d'explorer les Projets Alimentaires Territoriaux (PAT) et leurs indicateurs. Vous pouvez filtrer les PAT, rechercher une commune ou un PAT, et visualiser des informations détaillées."),
+        tags$h2(class = "fr-h2", "Bienvenue sur la carte des Projets Alimentaires Territoriaux (PAT) de la Région Auvergne-Rhône-Alpes" ),
+        tags$p(class = "fr-text fr-mb-3", "Issus de la Loi d’avenir (2014), les PAT ont pour objectif de relocaliser l’agriculture et l’alimentation dans les territoires en soutenant l’installation d’agriculteurs, les circuits courts ou les produits locaux dans les cantines. Ils sont élaborés de manière collective à l’initiative des acteurs d’un territoire (collectivités, entreprises agricoles et agroalimentaires, artisans, citoyens etc.)."),
+        tags$p(class = "fr-text fr-mb-3", "La région AuRA rassemble 64 PAT, dont 17 reconnus au niveau 1 et 47 reconnus au niveau 2. Le niveau 1 correspond à la reconnaissance de l’engagement dans une initiative de PAT, témoignant d’une mobilisation collective et d’un diagnostic territorial partagé. 
+        Le niveau 2 atteste de la mise en œuvre effective du PAT et de la structuration de sa gouvernance."),
+        tags$p(class = "fr-text fr-mb-3", "Les PAT peuvent ainsi couvrir plusieurs territoires représentant des échelles géographiques diverses, tels que des communes, des intercommunalités ou encore des départements. 
+        L’objectif de cette carte est de découvrir les PAT présents dans la région Auvergne-Rhône-Alpes mais également d’en savoir plus sur les données agricoles ou encore les données de santé."),
         tags$p(class = "fr-text fr-mb-3", "Cliquez sur le bouton ci-dessous pour commencer le tutoriel et apprendre à utiliser l'application."),
         tags$div(
           style = "display: flex; gap: 20px; justify-content: center;",
@@ -781,7 +786,7 @@ ui <- fluidPage(
         )
       )
     ),
-
+    
     #Pied de page DSFR
     tags$footer(
       class = "fr-footer",
@@ -833,13 +838,13 @@ ui <- fluidPage(
     function startTutorial() {
       var tutorialSteps = [
         {el:'.menu-couches', title:'Menu des couches', text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.', position:{ top: 520, left: 10 }},
-        {el:'#filtre_niveau', title:'Filtre niveau', text:'Utilisez ce filtre pour sélectionner le niveau des PAT.', position:{ top: 135, left: 10 }},
-        {el:'#filtre_niveau_terri', title:'Filtre échelle', text:'Filtrez selon l’échelle territoriale.', position:{ top: 135, left: 280 }},
-        {el:'#map', title:'Carte', text:'La carte centrale affiche les PAT et indicateurs.', position:{ top: 788, left: 10 }},
-        {el:'#legend_toggle', title:'Afficher la légende', text:'Cliquez sur ce bouton pour afficher ou masquer la légende des couches visibles.', position:{ top: 200, left: 337 }},
-        {el:'#map_legend', title:'Légende', text:'La légende intéragit avec la carte.', position:{ top: 320, left: 343 }},
-        {el:'#nom_du_pat', title:'Barre de recherche', text:'Recherchez un PAT ou une commune ici.', position:{ top: 140, left: 1570 }},
-        {el:'#right_sidebar', title:'Liste des PAT visibles', text:'Cette liste affiche uniquement les PAT visibles dans la vue actuelle de la carte. Cliquez sur un PAT pour zoomer dessus.', position:{ top: 140, left: 1290 }},
+        {el:'#filtre_niveau', title:'Filtre des niveaux de labellisation', text:'Utilisez ce filtre pour sélectionner le niveau de labellisation des PAT.', position:{ top: 135, left: 10 }},
+        {el:'#filtre_niveau_terri', title:'Filtre des échelles territoriales', text:'Vous pouvez aussi utiliser ce filtre pour sélectionner l’échelle territoriale des PAT.', position:{ top: 135, left: 280 }},
+        {el:'#map', title:'Carte', text:'La carte centrale affiche les couches et le fond de carte souhaités.', position:{ top: 788, left: 10 }},
+        {el:'#legend_toggle', title:'Afficher/Masquer la légende', text:'Cliquez sur ce bouton pour afficher ou masquer la légende des couches visibles sur la carte.', position:{ top: 200, left: 337 }},
+        {el:'#map_legend', title:'Légende', text:'La légende s’actualise en fonction des couches présentes sur la carte.', position:{ top: 320, left: 343 }},
+        {el:'#nom_du_pat', title:'Barre de recherche', text:'Vous piuvez recherchez un PAT ou une commune ici.', position:{ top: 140, left: 1570 }},
+        {el:'#right_sidebar', title:'Liste des PAT visibles', text:'Cette liste affiche uniquement les PAT visibles dans la vue actuelle de la carte. Cliquez sur un PAT pour zoomer dessus.', position:{ top: 140, left: 1300 }},
         {el:'#info_tutorial', title:'Relancer le tutoriel', text:'Vous pouvez relancer le tutoriel à tout moment en cliquant sur cette icône.', position:{ top: 130, left: 1570 }}
       ];
 
@@ -864,6 +869,7 @@ ui <- fluidPage(
 
         var modal = document.getElementById('tutorial_modal');
         modal.style.display='block';
+        
 
         if(s.position){
           modal.style.top = s.position.top + 'px';
@@ -987,7 +993,6 @@ server <- function(input, output, session) {
   })
   
   
-  
   zoom_pat <- function(pat){
     req(input$pat_layer)
     req(nrow(pat) > 0)
@@ -1008,7 +1013,7 @@ server <- function(input, output, session) {
   }
   
   
-# Paramètres de la liste suivant fil
+  # Paramètres de la liste suivant fil
   
   output$pat_sidemenu <- renderUI({
     pat <- pat_filtre()
