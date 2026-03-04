@@ -206,7 +206,7 @@ ui <- fluidPage(
       border-bottom: 2px solid #000091 !important;
       box-shadow: none !important;
     }
-// Style liste et placement 
+/* Style liste et placement */
         .right-panel{
       background-color:#f6f6f6;
       padding:10px;
@@ -232,7 +232,7 @@ ui <- fluidPage(
       pointer-events: auto;
     }
       
-//Style des boutons zoom/dezoom/plein écran
+/*Style des boutons zoom/dezoom/plein écran */
     .leaflet-control-zoom.leaflet-bar {
       border: none !important;
       box-shadow: none !important;
@@ -275,7 +275,7 @@ ui <- fluidPage(
       background-color: #eeeeee !important;
       color: #000091 !important;
     }
-//Style de la légende 
+/*Style de la légende */
     .map-legend {
       display: none;
       background: #ffffff;
@@ -548,271 +548,271 @@ ui <- fluidPage(
   });
 
 "))
-    ), # FIN tags$head
-
-############################################################################################################### 
-#Création de la page introductive (1ère page du tutoriel)
-tags$div(
-  id = "intro_overlay",
-  class = "intro-overlay fr-overlay",  # Le style DSFR de l'overlay
-  tags$div(
-    class = "fr-container fr-container--fluid",  # Container fluide de DSFR
-    tags$div(
-      class = "fr-card fr-card--xl fr-p-5 fr-m-auto fr-text-center",  # Le container avec une carte DSFR, texte centré
-      tags$h2(class = "fr-h2", "Bienvenue sur l'application des Projets Alimentaires Territoriaux"),
-      tags$p(class = "fr-text fr-mb-3", "Cette application permet d'explorer les Projets Alimentaires Territoriaux (PAT) et leurs indicateurs. Vous pouvez filtrer les PAT, rechercher une commune ou un PAT, et visualiser des informations détaillées."),
-      tags$p(class = "fr-text fr-mb-3", "Cliquez sur le bouton ci-dessous pour commencer le tutoriel et apprendre à utiliser l'application."),
-      tags$div(
-        style = "display: flex; gap: 20px; justify-content: center;",
-        tags$button(class = "fr-btn fr-btn--primary", id = "start_tutorial", "Démarrer le tutoriel"),
-        tags$button(class = "fr-btn fr-btn--secondary", id = "skip_tutorial", "Passer le tutoriel")
-      )
-    )
-  )
-),
-
-
-#En-tête DSFR
-tags$header(
-  class = "fr-header",
-  tags$div(
-    class = "fr-header__body",
-    tags$div(
-      class = "fr-container",
-      tags$div(
-        class = "fr-header__body-row",
-        tags$div(
-          class = "fr-header__brand",
-          tags$a(
-            class = "fr-header__brand-link",
-            href = "#",
-            tags$p(class = "fr-logo","République\nFrançaise")
-          )
-        ),
-        tags$div(
-          class = "fr-header__service",
-          tags$p(class = "fr-header__service-title","Cartographie des Projets Alimentaires Territoriaux"),
-          tags$p(class = "fr-header__service-tagline","Région Auvergne-Rhône-Alpes")
-        )
-      )
-    )
-  )
-),
-
-
-tags$main(
-  class = "fr-container-fluid",
-  br(),
+  ), # FIN tags$head
   
-  #Placement filtre et barre de recherche
+  ############################################################################################################### 
+  #Création de la page introductive (1ère page du tutoriel)
   tags$div(
-    style = "display:flex; gap:20px; align-items:flex-end; margin:0px 0 20px 0; padding:0;",
-    # Bloc filtres à gauche
+    id = "intro_overlay",
+    class = "intro-overlay fr-overlay",  # Le style DSFR de l'overlay
     tags$div(
-      style = "display:flex; gap:20px; margin:0; padding:0;",
-      
+      class = "fr-container fr-container--fluid",  # Container fluide de DSFR
       tags$div(
-        style = "width:250px; margin:0; padding:0;",
-        
-        tags$select( #Menu déroulant pour filtrer selon le niveau de labellisation
-          id = "filtre_niveau",
-          class = "fr-select",
-          style = "color:black; margin:0;",
-          
-          tags$option(
-            "Sélectionner un niveau de labellisation",
-            value = "",
-            selected = TRUE,
-            disabled = TRUE
-          ),
-          tags$option(value = "Tous", "Tous les niveaux"),
-          tags$option(value = "1", "Niveau 1"),
-          tags$option(value = "2", "Niveau 2")
-        )
-      ),
-      
-      tags$div(
-        style = "width:250px; margin:0; padding:0;",
-        
-        tags$select( #Menu déroulant pour filtrer selon l’échelle territoriale
-          id = "filtre_niveau_terri",
-          class = "fr-select",
-          style = "color:black; margin:0;",
-          
-          tags$option(
-            "Sélectionner l'échelle du territoire",
-            value = "",
-            selected = TRUE,
-            disabled = TRUE
-          ),
-          tags$option(value = "Tous", "Toutes les échelles"),
-          tags$option(value = "PAT interterritorial (PAiT)", "Interterritorial (PAiT)"),
-          tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
-          tags$option(value = "PAT d'échelle départementale", "Départementale")
-        )
-      )
-    ),
-    
-    
-    #Barre de recherche à droite + bouton info
-    #Ajout du panneau de suggestions (Communes et PAT)
-    tags$div(
-      style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
-      
-      # Bouton information DSFR
-      tags$button(
-        id = "info_tutorial",
-        class = "fr-btn fr-btn--secondary",
-        type = "button",
-        tags$i(class = "ri-question-line", style="margin-right:6px;"),
-        "Tutoriel"
-      ),
-      
-      # Barre de recherche DSFR + panneau suggestions 
-      tags$div(
-        class = "fr-search-bar",
-        role = "search",
-        style = "width:250px; margin:0;",
-        
-        tags$label(
-          class = "fr-label",
-          `for` = "nom_du_pat"
-        ),
-        
-        #Panneau de suggestions (Communes et PAT)
+        class = "fr-card fr-card--xl fr-p-5 fr-m-auto fr-text-center",  # Le container avec une carte DSFR, texte centré
+        tags$h2(class = "fr-h2", "Bienvenue sur l'application des Projets Alimentaires Territoriaux"),
+        tags$p(class = "fr-text fr-mb-3", "Cette application permet d'explorer les Projets Alimentaires Territoriaux (PAT) et leurs indicateurs. Vous pouvez filtrer les PAT, rechercher une commune ou un PAT, et visualiser des informations détaillées."),
+        tags$p(class = "fr-text fr-mb-3", "Cliquez sur le bouton ci-dessous pour commencer le tutoriel et apprendre à utiliser l'application."),
         tags$div(
-          id = "autocomplete_panel",
-          class = "autocomplete-panel",
-          tags$div(
-            class = "autocomplete-card",
-            
-            tags$div(class = "autocomplete-title", "Communes"),
-            tags$ul(id = "suggest_communes", class = "autocomplete-list"),
-            
-            tags$div(class = "autocomplete-sep"),
-            
-            tags$div(class = "autocomplete-title", "PAT"),
-            tags$ul(id = "suggest_pats", class = "autocomplete-list")
-          )
-        ),
-        
-        tags$input(
-          class = "fr-input",
-          id = "nom_du_pat",
-          type = "search",
-          placeholder = "Rechercher une Commune ou un PAT",
-          `aria-describedby` = "search_input_messages"
-        ),
-        
-        tags$div(
-          class = "fr-messages-group",
-          id = "search_input_messages",
-          `aria-live` = "polite"
-        ),
-        
-        actionButton(
-          inputId = "search_button",
-          label = "Rechercher",
-          class = "fr-btn"
+          style = "display: flex; gap: 20px; justify-content: center;",
+          tags$button(class = "fr-btn fr-btn--primary", id = "start_tutorial", "Démarrer le tutoriel"),
+          tags$button(class = "fr-btn fr-btn--secondary", id = "skip_tutorial", "Passer le tutoriel")
         )
       )
     )
   ),
   
-  #Création des colonnes : menu couches + carte
-  fluidRow(
-    column(
-      width = 2,
-      div(class = "menu-couches",
-          h4("Fond cartographique"),
-          radioButtons(
-            "fond",
-            label = NULL,
-            choices = c(
-              "Plan IGN" = "ign",
-              "Registre Parcellaire Graphique" = "rpg",
-              "OpenStreetMap" = "osm"
+  
+  #En-tête DSFR
+  tags$header(
+    class = "fr-header",
+    tags$div(
+      class = "fr-header__body",
+      tags$div(
+        class = "fr-container",
+        tags$div(
+          class = "fr-header__body-row",
+          tags$div(
+            class = "fr-header__brand",
+            tags$a(
+              class = "fr-header__brand-link",
+              href = "#",
+              tags$p(class = "fr-logo","République\nFrançaise")
+            )
+          ),
+          tags$div(
+            class = "fr-header__service",
+            tags$p(class = "fr-header__service-title","Cartographie des Projets Alimentaires Territoriaux"),
+            tags$p(class = "fr-header__service-tagline","Région Auvergne-Rhône-Alpes")
+          )
+        )
+      )
+    )
+  ),
+  
+  
+  tags$main(
+    class = "fr-container-fluid",
+    br(),
+    
+    #Placement filtre et barre de recherche
+    tags$div(
+      style = "display:flex; gap:20px; align-items:flex-end; margin:0px 0 20px 0; padding:0;",
+      # Bloc filtres à gauche
+      tags$div(
+        style = "display:flex; gap:20px; margin:0; padding:0;",
+        
+        tags$div(
+          style = "width:250px; margin:0; padding:0;",
+          
+          tags$select( #Menu déroulant pour filtrer selon le niveau de labellisation
+            id = "filtre_niveau",
+            class = "fr-select",
+            style = "color:black; margin:0;",
+            
+            tags$option(
+              "Sélectionner un niveau de labellisation",
+              value = "",
+              selected = TRUE,
+              disabled = TRUE
             ),
-            selected = "ign"
+            tags$option(value = "Tous", "Tous les niveaux"),
+            tags$option(value = "1", "Niveau 1"),
+            tags$option(value = "2", "Niveau 2")
+          )
+        ),
+        
+        tags$div(
+          style = "width:250px; margin:0; padding:0;",
+          
+          tags$select( #Menu déroulant pour filtrer selon l’échelle territoriale
+            id = "filtre_niveau_terri",
+            class = "fr-select",
+            style = "color:black; margin:0;",
+            
+            tags$option(
+              "Sélectionner l'échelle du territoire",
+              value = "",
+              selected = TRUE,
+              disabled = TRUE
+            ),
+            tags$option(value = "Tous", "Toutes les échelles"),
+            tags$option(value = "PAT interterritorial (PAiT)", "Interterritorial (PAiT)"),
+            tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
+            tags$option(value = "PAT d'échelle départementale", "Départementale")
+          )
+        )
+      ),
+      
+      
+      #Barre de recherche à droite + bouton info
+      #Ajout du panneau de suggestions (Communes et PAT)
+      tags$div(
+        style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
+        
+        # Bouton information DSFR
+        tags$button(
+          id = "info_tutorial",
+          class = "fr-btn fr-btn--secondary",
+          type = "button",
+          tags$i(class = "ri-question-line", style="margin-right:6px;"),
+          "Tutoriel"
+        ),
+        
+        # Barre de recherche DSFR + panneau suggestions 
+        tags$div(
+          class = "fr-search-bar",
+          role = "search",
+          style = "width:250px; margin:0;",
+          
+          tags$label(
+            class = "fr-label",
+            `for` = "nom_du_pat"
           ),
           
-          hr(),
+          #Panneau de suggestions (Communes et PAT)
+          tags$div(
+            id = "autocomplete_panel",
+            class = "autocomplete-panel",
+            tags$div(
+              class = "autocomplete-card",
+              
+              tags$div(class = "autocomplete-title", "Communes"),
+              tags$ul(id = "suggest_communes", class = "autocomplete-list"),
+              
+              tags$div(class = "autocomplete-sep"),
+              
+              tags$div(class = "autocomplete-title", "PAT"),
+              tags$ul(id = "suggest_pats", class = "autocomplete-list")
+            )
+          ),
           
-          h4("Couches"),
+          tags$input(
+            class = "fr-input",
+            id = "nom_du_pat",
+            type = "search",
+            placeholder = "Rechercher une Commune ou un PAT",
+            `aria-describedby` = "search_input_messages"
+          ),
           
-          checkboxInput("pat_layer", "Projet Alimentaire Territoriaux", TRUE),
-          checkboxInput("cls_layer", "Contrat Locaux de Santé", FALSE),
-          checkboxInput("dep_layer", "Départements", FALSE),
-          checkboxInput("com_layer", "Communes",FALSE),
+          tags$div(
+            class = "fr-messages-group",
+            id = "search_input_messages",
+            `aria-live` = "polite"
+          ),
           
-          hr(),
-          
-          conditionalPanel(
-            condition = "input.com_layer == true",
-            
-            h4("Indicateurs communaux"),
-            
+          actionButton(
+            inputId = "search_button",
+            label = "Rechercher",
+            class = "fr-btn"
+          )
+        )
+      )
+    ),
+    
+    #Création des colonnes : menu couches + carte
+    fluidRow(
+      column(
+        width = 2,
+        div(class = "menu-couches",
+            h4("Fond cartographique"),
             radioButtons(
-              "indicateur",
+              "fond",
               label = NULL,
               choices = c(
-                "Aucun" = "none",
-                "Population" = "pop",
-                "surface agricole utile (ha)" = "sau",
-                "surface agricole utile bio" = "bio"
+                "Plan IGN" = "ign",
+                "Registre Parcellaire Graphique" = "rpg",
+                "OpenStreetMap" = "osm"
               ),
-              selected = "none"
+              selected = "ign"
+            ),
+            
+            hr(),
+            
+            h4("Couches"),
+            
+            checkboxInput("pat_layer", "Projet Alimentaire Territoriaux", TRUE),
+            checkboxInput("cls_layer", "Contrat Locaux de Santé", FALSE),
+            checkboxInput("dep_layer", "Départements", FALSE),
+            checkboxInput("com_layer", "Communes",FALSE),
+            
+            hr(),
+            
+            conditionalPanel(
+              condition = "input.com_layer == true",
+              
+              h4("Indicateurs communaux"),
+              
+              radioButtons(
+                "indicateur",
+                label = NULL,
+                choices = c(
+                  "Aucun" = "none",
+                  "Population" = "pop",
+                  "surface agricole utile (ha)" = "sau",
+                  "surface agricole utile bio" = "bio"
+                ),
+                selected = "none"
+              )
             )
-          )
+        )
+      ),
+      
+      column(
+        width = 8, #Modif Paul
+        leafletOutput("map", height = "80vh")
+      ),
+      # Ajout Liste a droite 
+      column(
+        width = 2,
+        div(
+          id = "right_sidebar",
+          class = "right-panel visible-sidebar",
+          uiOutput("pat_sidemenu")
+        )
+      )
+    ),
+
+    #Pied de page DSFR
+    tags$footer(
+      class = "fr-footer",
+      tags$div(
+        class = "fr-container",
+        tags$p("© République Française - Tous droits réservés")
       )
     ),
     
-    column(
-      width = 8, #Modif Paul
-      leafletOutput("map", height = "80vh")
-    ),
-    ###Ajout Liste a droite PAUL ###################################################
-    column(
-      width = 2,
-      div(
-        id = "right_sidebar",
-        class = "right-panel visible-sidebar",
-        uiOutput("pat_sidemenu")
-      )
-    )
-  ),
-  ##################################################################################### 
-  #Pied de page DSFR
-  tags$footer(
-    class = "fr-footer",
+    #Création du tutoriel
+    ###########################################
+    tags$div(id = "tutorial_overlay", class = "tutorial-overlay"),
+    tags$div(id = "tutorial_highlight", class = "tutorial-highlight"),
     tags$div(
-      class = "fr-container",
-      tags$p("© République Française - Tous droits réservés")
-    )
-  ),
-  
-  #Création du tutoriel
-  ###########################################
-  tags$div(id = "tutorial_overlay", class = "tutorial-overlay"),
-  tags$div(id = "tutorial_highlight", class = "tutorial-highlight"),
-  tags$div(
-    id = "tutorial_modal", class = "tutorial-modal",
-    tags$button(
-      id = "tutorial_close",
-      class = "fr-btn fr-btn--tertiary-no-outline", #bouton "?"
-      style = "position:absolute; top:10px; right:10px;",
-      "✕"
+      id = "tutorial_modal", class = "tutorial-modal",
+      tags$button(
+        id = "tutorial_close",
+        class = "fr-btn fr-btn--tertiary-no-outline", #bouton "?"
+        style = "position:absolute; top:10px; right:10px;",
+        "✕"
+      ),
+      tags$h3(id="tutorial_title", "Titre"),
+      tags$p(id="tutorial_text", "Texte de description"),
+      tags$div(style="text-align:right; margin-top:10px;",
+               tags$button(class="fr-btn", id="tutorial_prev", "Précédent"),
+               tags$button(class="fr-btn", id="tutorial_next", "Suivant")
+      )
     ),
-    tags$h3(id="tutorial_title", "Titre"),
-    tags$p(id="tutorial_text", "Texte de description"),
-    tags$div(style="text-align:right; margin-top:10px;",
-             tags$button(class="fr-btn", id="tutorial_prev", "Précédent"),
-             tags$button(class="fr-btn", id="tutorial_next", "Suivant")
-    )
-  ),
-  
-  #Script tutoriel
-  tags$script(HTML("
+    
+    #Script tutoriel
+    tags$script(HTML("
     document.addEventListener('DOMContentLoaded', function() {
 // Lorsque l'utilisateur clique sur 'Démarrer le tutoriel'
       document.getElementById('start_tutorial').addEventListener('click', function() {
@@ -926,7 +926,7 @@ tags$main(
       });
     };
   "))
-))  # fermeture UI
+  ))  # fermeture UI
 
 
 
@@ -934,15 +934,38 @@ tags$main(
 server <- function(input, output, session) {
   
   
-  ## début Silya##
-  
   #Permet de réafficher tous les PAT suite à un clic
   pat_actif <- reactiveVal(NULL)
   
   #pour afficher uniquement le PAT sur lequel on as cliqué 
   clic_sur_pat <- reactiveVal(FALSE)
   
-  #pour que les popup des PAT filtrer ne s'affiche plus au clic quand ils ne sont pas afficher
+  #Stock la bbox de la carte au départ#########################
+  bbox_init <- sf::st_bbox(commune_aura)
+  
+  #A l'issue du filtre revient sur la bbox de départ
+  observeEvent(
+    list(input$filtre_niveau, input$filtre_niveau_terri),
+    {
+      # 1) Reset logique "PAT cliqué / PAT actif"
+      pat_actif(NULL)
+      clic_sur_pat(FALSE)
+      
+      # 2) Reset vue carte + popups
+      leafletProxy("map") %>%
+        clearPopups() %>%
+        flyToBounds(
+          lng1 = unname(bbox_init["xmin"]),
+          lat1 = unname(bbox_init["ymin"]),
+          lng2 = unname(bbox_init["xmax"]),
+          lat2 = unname(bbox_init["ymax"])
+        )
+      
+    },
+    ignoreInit = TRUE
+  )
+  
+  #Fonction initialisation des filtres
   pat_filtre <- reactive({
     pat <- couche_pat_4326
     
@@ -963,17 +986,7 @@ server <- function(input, output, session) {
     return(pat)
   })
   
-  #Creation d'un fonction permettant de créer le Pop-up de la couche PAT (A AMELIORER) 
-  popup_pat <- function(pat){
-    paste0(
-      "<strong>",pat$nom_du_pat,"</strong><br/>",
-      "Niveau :", pat$niveau, "<br/>",
-      "Population :",pat$pop_hab, "<br/>",
-      "<hr>",
-      "<strong>Indicateurs :</strong><br/>",
-      "Indicateur 1 : ...<br/>"
-    )
-  }
+  
   
   zoom_pat <- function(pat){
     req(input$pat_layer)
@@ -991,19 +1004,11 @@ server <- function(input, output, session) {
         lat1 = unname(bb["ymin"]),
         lng2 = unname(bb["xmax"]),
         lat2 = unname(bb["ymax"])
-      ) %>% 
-      clearPopups() %>% 
-      addPopups(
-        lng = coords[1],
-        lat = coords[2],
-        popup = popup_pat(pat)
-      )
+      ) 
   }
   
   
-  ### fin silya ###
-  
-  ##modif paul ####
+# Paramètres de la liste suivant fil
   
   output$pat_sidemenu <- renderUI({
     pat <- pat_filtre()
@@ -1404,7 +1409,7 @@ server <- function(input, output, session) {
     
     sections <- list()
     
-# ===== PAT =====
+    # ===== PAT =====
     if (isTRUE(input$pat_layer)) {
       sections <- append(sections, list("
       <div class='leg-cat'>Projets Alimentaires Territoriaux</div>
@@ -1413,7 +1418,7 @@ server <- function(input, output, session) {
     "))
     }
     
-# ===== CLS =====
+    # ===== CLS =====
     if (isTRUE(input$cls_layer)) {
       sections <- append(sections, list("
       <div class='leg-cat'>Contrats Locaux de Santé</div>
@@ -1421,7 +1426,7 @@ server <- function(input, output, session) {
     "))
     }
     
-# ===== Départements =====
+    # ===== Départements =====
     if (isTRUE(input$dep_layer)) {
       sections <- append(sections, list("
       <div class='leg-cat'>Départements</div>
@@ -1429,7 +1434,7 @@ server <- function(input, output, session) {
     "))
     }
     
-# ===== Communes =====
+    # ===== Communes =====
     if (isTRUE(input$com_layer)) {
       
       sections <- append(sections, list("
@@ -1437,7 +1442,7 @@ server <- function(input, output, session) {
       <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limite communale</div>
     "))
       
-# ===== Indicateurs =====
+      # ===== Indicateurs =====
       if (!is.null(input$indicateur) && input$indicateur != "none") {
         
         if (input$indicateur == "pop") {
@@ -1468,7 +1473,7 @@ server <- function(input, output, session) {
       }
     }
     
-# ===== Assemblage final =====
+    # ===== Assemblage final =====
     if (length(sections) == 0) {
       content <- "<div style='font-size:12px;color:#888;font-style:italic;'>Aucune couche active.</div>"
     } else {
@@ -1670,7 +1675,14 @@ server <- function(input, output, session) {
     if(!is.null(pat_actif())){
       pat_actif(NULL)
       leafletProxy("map") %>%
-        clearPopups()
+        clearPopups() %>% 
+        flyToBounds(
+          lng1 = unname(bbox_init["xmin"]),
+          lat1 = unname(bbox_init["ymin"]),
+          lng2 = unname(bbox_init["xmax"]),
+          lat2 = unname(bbox_init["ymax"])
+        )
+      
     }
   })
 }
