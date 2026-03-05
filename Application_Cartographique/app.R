@@ -552,6 +552,96 @@ ui <- fluidPage(
       }
     }
   });
+  
+    // ===== Handler hachurage SVG pour PAT niveau 1 =====
+Shiny.addCustomMessageHandler('apply_hatch', function(data) {
+
+  // Stocke les données pour pouvoir réappliquer après zoom
+  window._lastHatchData = data;
+  var expectedCount = Object.keys(data).length;
+
+  function applyPatterns(dataToApply) {
+    var widget = HTMLWidgets.find('#map');
+    if (!widget || !widget.getMap()) return 0;
+    var leafletMap = widget.getMap();
+    var applied = 0;
+
+    leafletMap.eachLayer(function(layer) {
+      var lid = layer.options && layer.options.layerId;
+      if (!lid || !dataToApply[lid]) return;
+      var color = dataToApply[lid];
+      if (!layer._path) return;
+      var svgEl = layer._path.ownerSVGElement;
+      if (!svgEl) return;
+
+      var patId = 'hatch-' + lid.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Math.random().toString(36).substr(2, 6);
+
+      var defs = svgEl.querySelector('defs');
+      if (!defs) {
+        defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        svgEl.insertBefore(defs, svgEl.firstChild);
+      }
+
+      var pat = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+      pat.setAttribute('id', patId);
+      pat.setAttribute('patternUnits', 'userSpaceOnUse');
+      pat.setAttribute('width', '8');
+      pat.setAttribute('height', '8');
+      pat.setAttribute('patternTransform', 'rotate(45)');
+
+      var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', '0'); line.setAttribute('y1', '0');
+      line.setAttribute('x2', '0'); line.setAttribute('y2', '8');
+      line.setAttribute('stroke', color);
+      line.setAttribute('stroke-width', '8');
+      line.setAttribute('stroke-opacity', '0.5');
+      pat.appendChild(line);
+      defs.appendChild(pat);
+
+      layer._path.setAttribute('fill', 'url(#' + patId + ')');
+      layer._path.setAttribute('fill-opacity', '1');
+      applied++;
+    });
+
+    return applied;
+  }
+
+  // Boucle initiale
+  var attempts = 0;
+  var maxAttempts = 30;
+
+  function tryLoop() {
+    attempts++;
+    var n = applyPatterns(data);
+    if (n >= expectedCount) return;
+    if (attempts >= maxAttempts) return;
+    setTimeout(tryLoop, 200);
+  }
+
+  tryLoop();
+
+  // Réapplique après chaque fin de zoom (flyToBounds réinitialise les _path SVG)
+  var widget = HTMLWidgets.find('#map');
+  if (widget && widget.getMap()) {
+    var leafletMap = widget.getMap();
+
+    // Supprime l'ancien listener pour éviter les doublons
+    if (window._hatchZoomListener) {
+      leafletMap.off('zoomend', window._hatchZoomListener);
+    }
+
+    window._hatchZoomListener = function() {
+      // Courte attente pour que Leaflet finisse de re-rendre les paths SVG
+      setTimeout(function() {
+        if (window._lastHatchData) {
+          applyPatterns(window._lastHatchData);
+        }
+      }, 100);
+    };
+
+    leafletMap.on('zoomend', window._hatchZoomListener);
+  }
+});
 
 "))
   ), # FIN tags$head
@@ -1449,10 +1539,44 @@ server <- function(input, output, session) {
     # ===== PAT =====
     if (isTRUE(input$pat_layer)) {
       sections <- append(sections, list("
-      <div class='leg-cat'>Projets Alimentaires Territoriaux</div>
-      <div class='leg-item'><span class='swatch' style='background:#fbe769;'></span>Niveau 1</div>
-      <div class='leg-item'><span class='swatch' style='background:#E4794A;'></span>Niveau 2</div>
-    "))
+    <div class='leg-cat'>Projets Alimentaires Territoriaux</div>
+
+    <div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:6px;'>
+      Hachuré = Niveau 1 &nbsp;|&nbsp; Aplat = Niveau 2
+    </div>
+
+    <div class='leg-item' style='margin-top:4px;'>
+      <svg width='14' height='14' style='flex-shrink:0;'>
+        <defs><pattern id='lh1' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
+          <line x1='0' y1='0' x2='0' y2='4' stroke='#5576c0' stroke-width='1.5'/></pattern></defs>
+        <rect width='14' height='14' fill='url(#lh1)' stroke='#5576c0' stroke-width='1.5' rx='2'/>
+      </svg>&nbsp;PAiT — Niveau 1
+    </div>
+    <div class='leg-item'>
+      <svg width='14' height='14' style='flex-shrink:0;'>
+        <defs><pattern id='lh2' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
+          <line x1='0' y1='0' x2='0' y2='4' stroke='#ff732c' stroke-width='1.5'/></pattern></defs>
+        <rect width='14' height='14' fill='url(#lh2)' stroke='#ff732c' stroke-width='1.5' rx='2'/>
+      </svg>&nbsp;Intercommunal — Niveau 1
+    </div>
+    <div class='leg-item' style='margin-bottom:6px;'>
+      <svg width='14' height='14' style='flex-shrink:0;'>
+        <defs><pattern id='lh3' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
+          <line x1='0' y1='0' x2='0' y2='4' stroke='#1f8d49' stroke-width='1.5'/></pattern></defs>
+        <rect width='14' height='14' fill='url(#lh3)' stroke='#1f8d49' stroke-width='1.5' rx='2'/>
+      </svg>&nbsp;Départemental — Niveau 1
+    </div>
+
+    <div class='leg-item' style='margin-top:4px;'>
+      <span class='swatch' style='background:#5576c0;opacity:0.35;border:2px solid #5576c0;'></span>&nbsp;PAiT — Niveau 2
+    </div>
+    <div class='leg-item'>
+      <span class='swatch' style='background:#ff732c;opacity:0.35;border:2px solid #ff732c;'></span>&nbsp;Intercommunal — Niveau 2
+    </div>
+    <div class='leg-item'>
+      <span class='swatch' style='background:#1f8d49;opacity:0.35;border:2px solid #1f8d49;'></span>&nbsp;Départemental — Niveau 2
+    </div>
+  "))
     }
     
     # ===== CLS =====
@@ -1587,65 +1711,90 @@ server <- function(input, output, session) {
   
   # Paramétrages des filtres (combinés) 
   observe({
-    
     proxy <- leafletProxy("map")
-    
-    #on vide la couche 
     proxy %>% clearGroup("Projet Alimentaire Territoriaux")
+    proxy %>% clearPopups()
     
     pat_affiche <- pat_filtre()
     
-    #Si un PAT est cliqué on affiche uniquement celui la 
-    if(!is.null(pat_actif())){
-      pat_affiche <- pat_affiche[
-        pat_affiche$nom_du_pat == pat_actif(),
-      ]
+    if (!is.null(pat_actif())) {
+      pat_affiche <- pat_affiche[pat_affiche$nom_du_pat == pat_actif(), ]
     }
     
-    #Si aucun PAT après filtre on affiche rien 
-    if(nrow(pat_affiche)==0)return()
-
+    if (nrow(pat_affiche) == 0) return()
+    
     observeEvent(
       list(input$filtre_niveau, input$filtre_niveau_terri),
       {
         pat <- pat_filtre()
-        
         if (nrow(pat) == 0 &&
             input$filtre_niveau != "" &&
             input$filtre_niveau_terri != "") {
-          
           showNotification(
             "Aucun PAT correspondant aux filtres sélectionnés.",
-            type = "warning",
-            duration = 20,
-            id = "warning_pat"
+            type = "warning", duration = 20, id = "warning_pat"
           )
         }
       },
       ignoreInit = TRUE
     )
-    #Obligatoire de recréer la palette dans cet observe pour que elle soit effective 
+    
     pal_pat <- colorFactor(
       palette = c("#5576c0", "#ff732c", "#1f8d49"),
-      domain = couche_pat_4326$echelle
+      domain  = couche_pat_4326$echelle
     )
     
-    #evite l'affichage des popup quand la couche n'est pas coché
-    proxy %>% clearGroup("Projet Alimentaire Territoriaux")
-    proxy %>% clearPopups()
+    # ---- Niveau 2 : aplat 35% ----
+    pat_niv2 <- pat_affiche[!is.na(pat_affiche$niveau) & pat_affiche$niveau == "2", ]
+    if (nrow(pat_niv2) > 0) {
+      proxy %>% addPolygons(
+        data        = pat_niv2,
+        layerId     = ~nom_du_pat,
+        color       = ~pal_pat(echelle),
+        fillColor   = ~pal_pat(echelle),
+        weight      = 3,
+        fillOpacity = 0.35,
+        group       = "Projet Alimentaire Territoriaux"
+      )
+    }
     
-    #Réaffichage uniquement de la sélection
-    proxy %>% addPolygons(
-      data = pat_affiche,
-      layerId  = ~nom_du_pat,
-      color = ~pal_pat(echelle),
-      fillColor = ~pal_pat(echelle),
-      weight = 3,
-      fillOpacity = 0.35,
-      group = "Projet Alimentaire Territoriaux"
-    )
+    # ---- Niveau 1 : fond quasi transparent + hachurage SVG via JS ----
+    pat_niv1 <- pat_affiche[!is.na(pat_affiche$niveau) & pat_affiche$niveau == "1", ]
+    if (nrow(pat_niv1) > 0) {
+      proxy %>% addPolygons(
+        data        = pat_niv1,
+        layerId     = ~nom_du_pat,
+        color       = ~pal_pat(echelle),
+        fillColor   = ~pal_pat(echelle),
+        weight      = 3,
+        fillOpacity = 0.05,
+        group       = "Projet Alimentaire Territoriaux"
+      )
+      
+      couleurs_map <- setNames(
+        as.list(pal_pat(pat_niv1$echelle)),
+        pat_niv1$nom_du_pat
+      )
+      session$sendCustomMessage("apply_hatch", couleurs_map)
+    }
   })
-  
+  # Hachurage au démarrage : attend que la carte soit initialisée côté navigateur
+  observeEvent(input$map_initialized, {
+    pat_affiche <- pat_filtre()
+    pat_niv1 <- pat_affiche[!is.na(pat_affiche$niveau) & pat_affiche$niveau == "1", ]
+    if (nrow(pat_niv1) == 0) return()
+    
+    pal_pat <- colorFactor(
+      palette = c("#5576c0", "#ff732c", "#1f8d49"),
+      domain  = couche_pat_4326$echelle
+    )
+    
+    couleurs_map <- setNames(
+      as.list(pal_pat(pat_niv1$echelle)),
+      pat_niv1$nom_du_pat
+    )
+    session$sendCustomMessage("apply_hatch", couleurs_map)
+  })
   
   # Interception des clics sur la couche PAT pour l'affichage de pop-up 
   observeEvent(input$map_shape_click, {
