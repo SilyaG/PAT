@@ -56,7 +56,7 @@ ui <- fluidPage(
       rel = "stylesheet"
     ),
     
-    # CSS
+    ## CSS
     tags$link(
       rel="stylesheet",
       type="text/css",
@@ -75,13 +75,12 @@ ui <- fluidPage(
     tags$script(src = "liste_pat.js"),
     tags$script(src = "hachure_pat.js"),
     tags$script(src = "tutoriel.js"),
+    tags$script(src = "popup_pat.js"),
   ), # FIN tags$head
   
-  #Appel de la page introductive (1ère page du tutoriel)
-  includeHTML("www/intro_overlay.html"),
-  
-  #Appel de l'en-tête DSFR
-  includeHTML("www/header.html"),
+  ## HTML
+  includeHTML("www/intro_overlay.html"), #Appel de la page introductive (1ère page du tutoriel)
+  includeHTML("www/header.html"), #Appel de l'en-tête DSFR
   
   tags$main(
     class = "fr-container-fluid",
@@ -253,7 +252,11 @@ ui <- fluidPage(
       
       column(
         width = 8,
-        leafletOutput("map", height = "80vh")
+        div(
+          style = "position: relative;",   # ← conteneur relatif
+          leafletOutput("map", height = "80vh"),
+          includeHTML("www/popup_pat.html") #Appel du pop-up des PATs
+        )
       ),
       # Ajout Liste a droite 
       column(
@@ -321,6 +324,26 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
   
+  # Fonction helper : envoie les données du PAT au popup JS
+  show_popup_pat <- function(pat_row) {
+    # Adaptez les noms de colonnes à votre vrai jeu de données
+    contacts <- unlist(strsplit(
+      as.character(pat_row$contacts[1] %||% ""), 
+      ";"
+    ))
+    contacts <- trimws(contacts[contacts != ""])
+    
+    session$sendCustomMessage("show_pat_popup", list(
+      nom        = as.character(pat_row$nom_du_pat[1]),
+      niveau     = as.character(pat_row$niveau[1]),
+      annee      = as.character(pat_row$annee[1]     %||% ""),
+      population = as.character(pat_row$population[1] %||% ""),
+      sau        = as.character(pat_row$sau[1]        %||% ""),
+      bio        = as.character(pat_row$bio[1]        %||% ""),
+      contacts   = as.list(contacts)
+    ))
+  }
+  
   #Fonction initialisation des filtres
   pat_filtre <- reactive({
     pat <- couche_pat_4326
@@ -342,20 +365,34 @@ server <- function(input, output, session) {
     return(pat)
   })
   
-  #Fonction qui zoom sur le pat
-  zoom_pat <- function(pat){
-    req(input$pat_layer)
-    req(nrow(pat) > 0)
-    pat_actif(pat$nom_du_pat)
-    bb <- st_bbox(pat)
-    
-    leafletProxy("map") %>% 
+  select_pat <- function(pat_row, depuis_clic_carte = FALSE) {
+    req(nrow(pat_row) > 0)
+    pat_actif(pat_row$nom_du_pat[1])
+    clic_sur_pat(depuis_clic_carte)   # TRUE seulement si clic direct sur la carte
+    bb <- st_bbox(pat_row)
+    leafletProxy("map") %>%
+      clearPopups() %>%
       flyToBounds(
         lng1 = unname(bb["xmin"]),
         lat1 = unname(bb["ymin"]),
         lng2 = unname(bb["xmax"]),
         lat2 = unname(bb["ymax"])
-      ) 
+      )
+    show_popup_pat(pat_row)
+  }
+  
+  deselect_pat <- function() {
+    pat_actif(NULL)
+    clic_sur_pat(FALSE)
+    session$sendCustomMessage("hide_pat_popup", list())
+    leafletProxy("map") %>%
+      clearPopups() %>%
+      flyToBounds(
+        lng1 = unname(bbox_init["xmin"]),
+        lat1 = unname(bbox_init["ymin"]),
+        lng2 = unname(bbox_init["xmax"]),
+        lat2 = unname(bbox_init["ymax"])
+      )
   }
   
   #Cohérence PAT LISTE 
@@ -418,6 +455,7 @@ server <- function(input, output, session) {
           tags$p(
             class = "fr-sidemenu__title",
             id = "sidemenu-title",
+            style = "color:#000091; font-weight:bold; font-size:18px;",
             paste0("PAT visibles : ", length(pats))
           ),
           
@@ -853,36 +891,23 @@ server <- function(input, output, session) {
   # l'autocomplétion déclenche le bouton via btn.click()
   observeEvent(input$search_button, {
     req(input$nom_du_pat)
-    
-    #Normalise la recherche (évite la sensibilité à la casse notamment) 
     recherche <- tolower(trimws(input$nom_du_pat))
     
-    #Recherche exacte du nom du PAT 
+    # Recherche PAT
     selection_pat <- couche_pat_4326[
-      tolower(trimws(couche_pat_4326$nom_du_pat)) == recherche,
-    ]
+      tolower(trimws(couche_pat_4326$nom_du_pat)) == recherche, ]
     
     if (nrow(selection_pat) > 0) {
-      #Zoom animé sur l'emprise du PAT trouvé
-      bb <- st_bbox(selection_pat)
-      leafletProxy("map") %>%
-        flyToBounds(
-          lng1 = unname(bb["xmin"]),
-          lat1 = unname(bb["ymin"]),
-          lng2 = unname(bb["xmax"]),
-          lat2 = unname(bb["ymax"])
-        )
+      select_pat(selection_pat[1, ])
       return()
     }
     
-    #Recherche exacte du nom de la commune 
+    # Recherche commune : zoom uniquement, pas de sélection PAT
     selection_com <- commune_aura[
-      tolower(trimws(commune_aura$nom_officiel)) == recherche,
-    ]
+      tolower(trimws(commune_aura$nom_officiel)) == recherche, ]
+    if (nrow(selection_com) == 0) return()
     
-    #prend en compte les limites du polygones pour le zoom (centroide impossible car multipolygones)
     bb <- st_bbox(selection_com)
-    
     leafletProxy("map") %>%
       flyToBounds(
         lng1 = unname(bb["xmin"]),
@@ -891,7 +916,6 @@ server <- function(input, output, session) {
         lat2 = unname(bb["ymax"])
       )
   })
-  
   
   # Paramétrages des filtres (combinés) 
   observe({
@@ -942,18 +966,11 @@ server <- function(input, output, session) {
   })
   
   #Création du warning lorsque la combinaison de filtres amène à aucun résultat
+  # APRÈS
   observeEvent(
     list(input$filtre_niveau, input$filtre_niveau_terri),
     {
-      pat <- pat_filtre()
-      if (nrow(pat) == 0 &&
-          !is.null(input$filtre_niveau)    && input$filtre_niveau    != "" &&
-          !is.null(input$filtre_niveau_terri) && input$filtre_niveau_terri != "") {
-        showNotification(
-          "Aucun PAT correspondant aux filtres sélectionnés.",
-          type = "warning", duration = 5, id = "warning_pat"
-        )
-      }
+      deselect_pat()
     },
     ignoreInit = TRUE
   )
@@ -973,35 +990,33 @@ server <- function(input, output, session) {
   
   # Interception des clics sur la couche PAT pour l'affichage de pop-up 
   observeEvent(input$map_shape_click, {
-    
-    if(!input$pat_layer) return()
-    
-    clic_sur_pat(TRUE)
+    if (!input$pat_layer) return()
     
     click <- input$map_shape_click
     req(click)
     
-    #point cliqué 
-    point <- st_sfc(
-      st_point(c(click$lng, click$lat)),
-      crs = 4326
-    )
-    
-    #Recherche des PAT qui s'intersectent 
+    point <- st_sfc(st_point(c(click$lng, click$lat)), crs = 4326)
     pat_sf <- pat_filtre()
     intersect <- st_intersects(pat_sf, point, sparse = FALSE)
-    pat_click <- pat_sf[unlist(intersect),]
+    pat_click <- pat_sf[unlist(intersect), ]
     
-    #Cas 1 : aucun PAT présent à l'endroit du clic 
-    if (nrow(pat_click)== 0) return()
+    if (nrow(pat_click) == 0) return()
     
-    #Cas 2 : un seul PAT present à l'endroit du clic
-    if (nrow(pat_click)==1){
-      zoom_pat(pat_click[1,])
+    # Cas 1 : un seul PAT
+    if (nrow(pat_click) == 1) {
+      select_pat(pat_click[1, ], depuis_clic_carte = TRUE)
       return()
     }
     
-    #Cas 3 : Plusieurs PAT à l'endroit du clic 
+    # Cas 2 : plusieurs PAT superposés
+    # Si un PAT est déjà sélectionné, on ne réaffiche pas le popup de choix
+    if (!is.null(pat_actif())) {
+      select_pat(pat_click[1, ], depuis_clic_carte = TRUE)
+      return()
+    }
+    
+    # Cas 2 en état initial : popup de choix
+    clic_sur_pat(TRUE)
     liens <- paste0(
       "<li><a href='#' onclick=\"Shiny.setInputValue('pat_selectionne','",
       pat_click$nom_du_pat,
@@ -1010,57 +1025,31 @@ server <- function(input, output, session) {
       "</a></li>",
       collapse = ""
     )
-    contenu <- paste0(
-      "<strong>Plusieurs PAT à cet endroit :</strong><br/>",
-      "<ul>", liens, "</ul>"
-    )
-    
     leafletProxy("map") %>%
       clearPopups() %>%
       addPopups(
-        lng = click$lng,
-        lat = click$lat,
-        popup = contenu
+        lng   = click$lng,
+        lat   = click$lat,
+        popup = paste0("<strong>Plusieurs PAT à cet endroit :</strong><br/><ul>", liens, "</ul>")
       )
   })
   
   #Gerer le clic sur un PAT de la liste 
   observeEvent(input$pat_selectionne, {
-    
-    clic_sur_pat(TRUE)
-    
     req(input$pat_selectionne)
-    
-    pat_select <- pat_filtre()[
-      pat_filtre()$nom_du_pat == input$pat_selectionne,
-    ]
-    
-    if (nrow(pat_select)== 0) return()
-    
-    zoom_pat(pat_select)
+    pat_row <- pat_filtre()[pat_filtre()$nom_du_pat == input$pat_selectionne, ]
+    if (nrow(pat_row) == 0) return()
+    select_pat(pat_row)
   })
   
   #Reset si on clic ailleurs sur la carte (tous les PAT se réaffiche) 
   observeEvent(input$map_click, {
-    
-    #si on clique sur le polygone d'un PAT on ignore le reset 
-    if (clic_sur_pat()){
+    if (clic_sur_pat()) {
       clic_sur_pat(FALSE)
       return()
     }
-    
-    #sinon on reset 
-    if(!is.null(pat_actif())){
-      pat_actif(NULL)
-      leafletProxy("map") %>%
-        clearPopups() %>% 
-        flyToBounds(
-          lng1 = unname(bbox_init["xmin"]),
-          lat1 = unname(bbox_init["ymin"]),
-          lng2 = unname(bbox_init["xmax"]),
-          lat2 = unname(bbox_init["ymax"])
-        )
-      
+    if (!is.null(pat_actif())) {
+      deselect_pat()
     }
   })
 }

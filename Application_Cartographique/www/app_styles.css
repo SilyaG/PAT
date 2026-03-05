@@ -395,3 +395,92 @@
       box-shadow: none !important;
       padding: 0 !important;
     }
+
+
+
+    /* Pop-up des PAT */
+    .pat-popup {
+      position: absolute;
+      bottom: 30px;
+      right: 10px;
+      width: 320px;
+      z-index: 9999;
+      background: white;
+      border: 2px solid #e5e5e5;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      font-family: "Marianne", Arial, sans-serif;
+    }
+    
+    .pat-popup__inner {
+      padding: 20px;
+      position: relative;
+    }
+    
+    .pat-popup__close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #000091;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    
+    .pat-popup__close:hover {
+      text-decoration: underline;
+    }
+    
+    .pat-popup__header {
+      font-weight: bold;
+      color: #000091;
+      font-size: 16px;
+      margin-bottom: 4px;
+      padding-right: 60px;
+    }
+    
+    .pat-popup__niveau {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 2px;
+    }
+    
+    .pat-popup__annee {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .pat-popup__sep {
+      border: none;
+      border-top: 1px solid #e5e5e5;
+      margin: 12px 0;
+    }
+    
+    .pat-popup__row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .pat-popup__icon {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    
+    .pat-popup__contacts {
+      font-size: 12px;
+      color: #000091;
+    }
+    
+    .pat-popup__contacts a {
+      display: block;
+      color: #000091;
+      text-decoration: underline;
+    }
