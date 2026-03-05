@@ -1527,7 +1527,6 @@ server <- function(input, output, session) {
     
     html <- paste0(
       "<div id='map_legend'>",
-      "<h4>Légende</h4>",
       content,
       "</div>"
     )
