@@ -24,6 +24,9 @@ couche_cls_4326 <- st_read("./data/cls_aura.gpkg") %>%
 dep_aura_4326 <- st_read("./data/departement_aura.gpkg") %>% 
   st_transform(4326)
 
+reg_aura_4326 <- st_read("./data/region.gpkg") %>% 
+  st_transform(4326)
+
 pat_com <- read_csv("./data/pat_com.csv")
 
 #Autocomplétion : listes séparées (Communes vs PAT)
@@ -736,7 +739,8 @@ ui <- fluidPage(
               choices = c(
                 "Plan IGN" = "ign",
                 "Registre Parcellaire Graphique" = "rpg",
-                "OpenStreetMap" = "osm"
+                "OpenStreetMap" = "osm",
+                "Limites administratives" = "fond_admin"
               ),
               selected = "ign"
             ),
@@ -1269,6 +1273,28 @@ server <- function(input, output, session) {
         group = "Departement"
       ) %>%
       
+      #Régions + département
+      addPolygons(
+        data = reg_aura_4326,
+        color = "black",
+        weight = 2.5,
+        fillColor = NA,
+        fillOpacity = 0,
+        popup = ~paste(nom_officiel, sep = "<br/>"),
+        group = "Limites administratives"
+      ) %>%
+      addPolygons(
+        data = dep_aura_4326,
+        color = "#7b7b7b",
+        weight = 2,
+        fillColor = NA,
+        fillOpacity = 0,
+        popup = ~paste(nom_officiel, sep = "<br/>"),
+        group = "Limites administratives"
+      ) %>%
+      
+      
+      
       #Communes AURA
       addPolygons(
         data = commune_aura,
@@ -1348,6 +1374,8 @@ server <- function(input, output, session) {
     proxy %>% hideGroup("Plan IGN")
     proxy %>% hideGroup("Registre Parcellaire Graphique")
     proxy %>% hideGroup("OSM")
+    proxy %>% hideGroup("Limites administratives") 
+    
     
     #Pour ensuite afficher la couche choisi par utilisateur 
     if (input$fond == "ign"){
@@ -1358,6 +1386,9 @@ server <- function(input, output, session) {
     }
     if (input$fond == "osm"){
       proxy %>% showGroup("OSM")
+    }
+    if (input$fond == "fond_admin"){
+      proxy %>% showGroup("Limites administratives")
     }
   })
   
@@ -1431,10 +1462,10 @@ server <- function(input, output, session) {
     }
     
     # ===== Départements =====
-    if (isTRUE(input$dep_layer)) {
+    if (isTRUE(input$dep_layer) && input$fond != "fond_admin") {
       sections <- append(sections, list("
-      <div class='leg-cat'>Départements</div>
-      <div class='leg-item'><span class='swatch-line' style='background:#7b7b7b;'></span>Limite départementale</div>
+    <div class='leg-cat'>Départements</div>
+    <div class='leg-item'><span class='swatch-line' style='background:#7b7b7b;'></span>Limites départementales</div>
     "))
     }
     
@@ -1443,7 +1474,7 @@ server <- function(input, output, session) {
       
       sections <- append(sections, list("
       <div class='leg-cat'>Communes</div>
-      <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limite communale</div>
+      <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limites communales</div>
     "))
       
       # ===== Indicateurs =====
@@ -1477,6 +1508,14 @@ server <- function(input, output, session) {
       }
     }
     
+    # ===== Limites administratives =====
+    if (!is.null(input$fond) && input$fond == "fond_admin") {
+      sections <- append(sections, list("
+    <div class='leg-cat'>Limites administratives</div>
+    <div class='leg-item'><span class='swatch-line' style='background:black; height:2px;'></span>Limites régionales</div>
+    <div class='leg-item'><span class='swatch-line' style='background:#7b7b7b; height:2px;'></span>Limites départementales</div>
+  "))
+    }
     # ===== Assemblage final =====
     if (length(sections) == 0) {
       content <- "<div style='font-size:12px;color:#888;font-style:italic;'>Aucune couche active.</div>"
