@@ -1586,8 +1586,8 @@ server <- function(input, output, session) {
     )
     #Obligatoire de recréer la palette dans cet observe pour que elle soit effective 
     pal_pat <- colorFactor(
-      palette = c("#fbe769", "#E4794A"),
-      domain = couche_pat_4326$niveau
+      palette = c("#5576c0", "#ff732c", "#1f8d49"),
+      domain = couche_pat_4326$echelle
     )
     
     #evite l'affichage des popup quand la couche n'est pas coché
@@ -1598,8 +1598,8 @@ server <- function(input, output, session) {
     proxy %>% addPolygons(
       data = pat_affiche,
       layerId  = ~nom_du_pat,
-      color = ~pal_pat(niveau),
-      fillColor = ~pal_pat(niveau),
+      color = ~pal_pat(echelle),
+      fillColor = ~pal_pat(echelle),
       weight = 3,
       fillOpacity = 0.35,
       group = "Projet Alimentaire Territoriaux"
