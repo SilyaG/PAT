@@ -51,599 +51,26 @@ ui <- fluidPage(
       href = "https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css",
       rel = "stylesheet"
     ),
-    #Création des divers styles nécessaires à la mise en page 
-    tags$style(HTML("
-    .menu-couches {
-      background-color:#f6f6f6;
-      padding: 10px;
-      border-radius: 8px;
-      height: 90hv;
-      overflow-y:auto;
-    }
-    .menu-couches h4 {
-      font-weight: 600;
-      margin-top: 15px;
-    }
-    .leaflet-control-scale-line {
-      text-align: center;  /* Centre le texte horizontalement */
-      font-size: 14px;     /* Ajuste la taille du texte */
-    }
-    .tutorial-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 9998;
-      display: none;
-    }
-    .tutorial-highlight {
-      position: absolute;
-      background-color: transparent;
-      border: 2px solid #000091;
-      border-radius: 6px;
-      box-shadow: 0 0 2px #6a6af4;
-      z-index: 9999;
-      pointer-events: none;
-      display: none;
-      transition: all 0.3s ease;
-    }
-    .tutorial-modal {
-      position: fixed;
-      z-index: 10000;
-      background: white;
-      border: 2px solid #e5e5e5;
-      padding: 20px;
-      border-radius: 8px;
-      width: 300px;
-      display: none;
-      transform: none !important;
-    }
-    .tutorial-modal p {
-      font-size: 14px; /* Augmente la taille des paragraphes */
-    }
-    #tutorial_close {
-      position: absolute;
-      top: 0;
-      right: 0;
-      font-size: 10px;
-      cursor: pointer;
-      transform: translate(10px, -10px);
-    }
-    .intro-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background-color: rgba(0, 0, 0, 0.7); /* Assure que l'overlay est bien visible */
-      z-index: 9998;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 18px;
-      border: 2px solid #e5e5e5;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    #intro_overlay .fr-card {
-      padding: 20px 20px !important;
-      border-radius: 15px !important;
-      max-width: 900px !important;
-      min-height: 500px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.25) !important;
-      transition: all 0.3s ease;
-    }
-    .intro-overlay p {
-      color: #333;  /* Couleur du texte pour s'assurer qu'il soit lisible */
-      font-size: 14px;  /* Taille de texte pour une meilleure lisibilité */
-      line-height: 1.5; /* Espacement entre les lignes */
-      margin-bottom: 20px;  /* Ajout d'une marge pour espacer les paragraphes */
-      text-align: center; /* Alignement des paragraphes au centre */
-    }
-    .intro-overlay h2 {
-      color: #333;
-      font-size: 24px;
-      margin-bottom: 20px;  /* Ajout d'un espacement pour aérer */
-      text-align: center; /* Assurez-vous que le titre est centré */
-    }
-    .intro-overlay button {
-      padding: 12px 24px;  /* Plus d'espace autour du texte */
-      font-size: 12px;  /* Taille de police plus grande */
-    }
-    /* Autocomplete panel : place le menu sous la barre de recherche */
-    .fr-search-bar { position: relative; }
-
-    /* design du menu déroulant barre de recherche */
-    .autocomplete-panel{
-      display:none;
-      position:absolute;
-      left:0;
-      right:0;
-      top: calc(100% + 4px);
-      z-index: 9999;
-    }
-
-    /* style visuel du panneau déroulant */
-    .autocomplete-card{
-      background:#fff;
-      border:1px solid #e5e5e5;
-      border-radius:8px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-      padding:8px;
-    }
-
-    /* Design du titre */
-    .autocomplete-title{
-      font-size:12px;
-      font-weight:600;
-      margin:2px 0 6px 0;
-      color:#000091;;
-    }
-    /*ligne de séparation */
-    .autocomplete-sep{
-      height:1px;
-      background:#eee;
-      margin:8px 0;
-    }
-    .autocomplete-list{
-      list-style:none;
-      padding:0;
-      margin:0;
-      max-height:140px;
-      overflow:auto;
-    }
-    .autocomplete-list li{
-      font-size:12px;
-      padding:6px 8px;
-      border-radius:6px;
-      cursor:pointer;
-      line-height:1.2;
-      color:#161616;
-      user-select:none;
-    }
-    .autocomplete-list li:hover{
-      background:#f6f6f6;
-    }
-    .autocomplete-empty{
-      cursor:default;
-      opacity:0.7;
-    }
-    select.fr-select,
-    .fr-select {
-      border-bottom: 2px solid #000091 !important;
-      box-shadow: none !important;
-    }
-/* Style liste et placement*/
-        .right-panel{
-      background-color:#f6f6f6;
-      padding:10px;
-      border-radius:8px;
-      height: calc(80vh - 20px);
-      overflow-y:auto;
-    }
-    .right-panel .fr-sidemenu__link{
-      font-size: 12px;
-      line-height: 1.2;
-      padding: 6px 8px;
-    }
-    .hidden-sidebar{
-      transform: translateX(100%);
-      opacity: 0;
-      transition: all 0.4s ease-in-out;
-      pointer-events: none;
-    }
-    .visible-sidebar{
-      transform: translateX(0%);
-      opacity: 1;
-      pointer-events: auto;
-    }
-      
-/*Style des boutons zoom/dezoom/plein écran*/
-    .leaflet-control-zoom.leaflet-bar {
-      border: none !important;
-      box-shadow: none !important;
-      background: none !important;
-    }
     
-    .leaflet-control-zoom a {
-      background-color: #ffffff !important; /* Couleur de fond souhaitée */
-      border: 1px solid #e5e5e5 !important; /* Bordure légère type DSFR */
-      color: #000091 !important; /* Bleu France */
-      background-image: none !important; 
-      text-indent: 0 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      height: 36px !important;
-      width: 36px !important;
-      font-size: 24px !important; /* Taille du + et - */
-      font-weight: normal !important;
-      text-decoration: none !important;
-    }
-
-    .leaflet-control-fullscreen a {
-      border-radius: 4px !important;
-      border: 1px solid #e5e5e5 !important;
-      box-shadow: none !important;
-      height: 36px !important;
-      width: 36px !important;
-      justify-content: center !important;
-      display: flex !important;
-      align-items: center !important;
-      padding: 0 !important; 
-      line-height: 1 !important; 
-      background-size: 30px 58px !important;
-      background-repeat: no-repeat !important;
-    }
+    # CSS
+    tags$link(
+      rel="stylesheet",
+      type="text/css",
+      href="app_styles.css"
+    ),
     
-    .leaflet-control-fullscreen a:hover,
-    .leaflet-control-zoom a:hover{
-      background-color: #eeeeee !important;
-      color: #000091 !important;
-    }
-/*Style de la légende */
-    .map-legend {
-      display: none;
-      background: #ffffff;
-      padding: 14px 16px;
-      border-radius: 6px;
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      min-width: 240px;
-      font-size: 13px;
-      line-height: 1.5;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-    
-    .map-legend h4 {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #000091;
-    }
-    
-    .leg-cat {
-      font-weight: 600;
-      font-size: 12.5px;
-      margin: 10px 0 6px 0;
-      color: #161616;
-    }
-    
-    .leg-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 4px 0;
-      font-size: 12px;
-    }
-    
-    .leg-sep {
-      height: 1px;
-      background: #e5e5e5;
-      margin: 10px 0;
-    }
-    
-    .swatch {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-      flex-shrink: 0;
-    }
-    
-    .swatch-line {
-      width: 18px;
-      height: 3px;
-      flex-shrink: 0;
-    }
-    
-    .swatch-circle {
-      border-radius: 50%;
-    }
-    
-    .swatch-grad {
-      width: 40px;
-      height: 10px;
-      background: linear-gradient(to right, #bcd9a3, #306600);
-      border-radius: 3px;
-    }
-    
-    .map-legend h4 {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #000091;
-    }
-    .leaflet-bar {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-    #legend_toggle {
-      width: 26px;
-      height: 26px;
-      line-height: 26px;
-      text-align: center;
-      padding: 0;
-    }
-    
-    #legend_toggle i {
-      font-size: 14px;
-    }
-    /* Supprime le padding par défaut du conteneur addControl() */
-    #legend_toggle.leaflet-control {
-      margin: 0 !important;
-    }
-    /* Réduit le bouton légende à la même taille que zoom/fullscreen */
-    #legend_toggle {
-      width: 36px !important;
-      height: 36px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      background: #fff !important;
-      border: 1px solid #e5e5e5 !important;
-      border-radius: 4px !important;
-      color: #000091 !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      text-decoration: none !important;
-    }
-    
-    #legend_toggle i {
-      font-size: 18px !important;
-      line-height: 1 !important;
-      display: block !important;
-    }
-    .leaflet-control:has(#legend_toggle) {
-      background: transparent !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-    }
-    ")), 
-    
-    ##Fin du bloc de style     
-    #Script autocomplétion : panneau (Communes/PAT) + clic => lance la recherche
-    tags$script(HTML(sprintf("
-      document.addEventListener('DOMContentLoaded', function () {
-
-        var input  = document.getElementById('nom_du_pat'); // (2e) Entrer de recherche
-        var panel  = document.getElementById('autocomplete_panel'); // (2e) Recupere les éléments du panneau déroulant
-        var ulCom  = document.getElementById('suggest_communes'); // (2e) Liste des communes issues du champs communes 
-        var ulPat  = document.getElementById('suggest_pats'); // (2e) Liste des pat issus du champ nom_du_pat
-        var btn    = document.getElementById('search_button'); // (2e) Bouton rechercher
-
-        if (!input || !panel || !ulCom || !ulPat || !btn) return;
-
-        var COMMUNES = %s;  // (2e) Variable table communes 
-        var PATS     = %s;  // (2e) Variable table PAT
-
-        // Fonction de normalisation 
-        function norm(s) {
-          return (s || '')
-            .trim() // supprime les espaces
-            .toLowerCase() //Ne prend pas en compte les Majuscules et minuscule
-            .normalize('NFD')  // Sépare lettre et accents 
-            .replace(/[\\u0300-\\u036f]/g, '')   //supprime accents
-            .replace(/[’']/g, '')               // supprime apostrophes
-            .replace(/[-‐-‒–—―]/g, '')           //supprime tous les tirets
-            .replace(/\\s+/g, '');              // supprime tous les espaces
-        }
-
-        function clearList(ul) { ul.innerHTML = ''; }
-
-        function addItem(ul, label, clickable) {
-          var li = document.createElement('li');
-          li.textContent = label;
-
-          if (clickable) {
-            li.addEventListener('click', function () {
-
-              input.value = label;
-
-              // informe Shiny que la valeur a changé
-              if (window.Shiny && Shiny.setInputValue) {
-                Shiny.setInputValue('nom_du_pat', label, { priority: 'event' });
-              }
-
-              panel.style.display = 'none';
-
-              // Lance la recherche après que Shiny ait bien reçu la valeur
-              setTimeout(function () {
-                btn.click();
-              }, 50);
-
-            });
-          } else {
-            li.classList.add('autocomplete-empty');
-          }
-
-          ul.appendChild(li);
-        }
-
-// fonction de mise a jour suivant entrée 
-        function updatePanel() {
-          var q = norm(input.value);  // Récupere la saisie de l'utilisateur
-
-          if (q.length === 0) {
-            panel.style.display = 'none';
-            clearList(ulCom);
-            clearList(ulPat);
-            return;
-          }
-
-// Filtrage saisie commune commence par X
-          var comMatches = COMMUNES.filter(function(x){ return norm(x).startsWith(q); }).slice(0, 20);
-
-// Filtrage saisie PAT contient x
-          var patMatches = PATS.filter(function(x){ return norm(x).includes(q); }).slice(0, 20);
-
-// Affichage des nouvelles listes
-          clearList(ulCom);
-          clearList(ulPat);
-
-          if (comMatches.length === 0) addItem(ulCom, 'Aucun résultat', false);
-          for (var i = 0; i < comMatches.length; i++) addItem(ulCom, comMatches[i], true);
-
-          if (patMatches.length === 0) addItem(ulPat, 'Aucun résultat', false);
-          for (var j = 0; j < patMatches.length; j++) addItem(ulPat, patMatches[j], true);
-
-          panel.style.display = 'block';
-        }
-
-        input.addEventListener('input', updatePanel);
-
-// Entrée = recherche 
-        input.addEventListener('keydown', function(e){
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            btn.click();
-            panel.style.display = 'none';
-          }
-          if (e.key === 'Escape') {
-            panel.style.display = 'none';
-          }
-        });
-// clic ailleurs => masque 
-        document.addEventListener('click', function(e){
-          if (e.target === input || panel.contains(e.target)) return;
-          panel.style.display = 'none';
-        });
-
-      });
-    ",
-                             jsonlite::toJSON(autocomplete_communes, auto_unbox = TRUE),
-                             jsonlite::toJSON(autocomplete_pats, auto_unbox = TRUE)
+    ## JS
+    tags$script(HTML(sprintf(
+      "window.AUTOCOMPLETE_COMMUNES = %s;\nwindow.AUTOCOMPLETE_PATS = %s;",
+      jsonlite::toJSON(autocomplete_communes, auto_unbox = TRUE),
+      jsonlite::toJSON(autocomplete_pats,     auto_unbox = TRUE)
     ))),
     
-    tags$script(HTML("
-
-  // ===== TOGGLE LÉGENDE =====
-// ===== TOGGLE LÉGENDE =====
-    document.addEventListener('click', function(e){
-      var btn = e.target.closest('#legend_toggle');
-      if(!btn) return;
-      e.preventDefault();
-    
-      var legend = document.getElementById('map_legend');
-      if(!legend) return;
-    
-      // getComputedStyle capte le display réel (même défini en CSS)
-      var displayed = window.getComputedStyle(legend).display;
-      
-      if(displayed === 'none'){
-        legend.style.display = 'block';
-      } else {
-        legend.style.display = 'none';
-      }
-    });
-
-  // ===== Mise à jour dynamique de la légende =====
-  Shiny.addCustomMessageHandler('update_legende', function(html) {
-    var legend = document.getElementById('map_legend');
-    if(legend) legend.innerHTML = html;
-  });
-
-  // ===== Clic sur PAT dans la sidebar =====
-  document.addEventListener('click', function(e){
-    if(e.target && e.target.classList.contains('pat-link')){
-      e.preventDefault();
-      var pat = e.target.getAttribute('data-pat');
-      if(window.Shiny){
-        Shiny.setInputValue('pat_selectionne', pat, {priority: 'event'});
-      }
-    }
-  });
-  
-    // ===== Handler hachurage SVG pour PAT niveau 1 =====
-Shiny.addCustomMessageHandler('apply_hatch', function(data) {
-
-  // Stocke les données pour pouvoir réappliquer après zoom
-  window._lastHatchData = data;
-  var expectedCount = Object.keys(data).length;
-
-  function applyPatterns(dataToApply) {
-    var widget = HTMLWidgets.find('#map');
-    if (!widget || !widget.getMap()) return 0;
-    var leafletMap = widget.getMap();
-    var applied = 0;
-
-    leafletMap.eachLayer(function(layer) {
-      var lid = layer.options && layer.options.layerId;
-      if (!lid || !dataToApply[lid]) return;
-      var color = dataToApply[lid];
-      if (!layer._path) return;
-      var svgEl = layer._path.ownerSVGElement;
-      if (!svgEl) return;
-
-      var patId = 'hatch-' + lid.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Math.random().toString(36).substr(2, 6);
-
-      var defs = svgEl.querySelector('defs');
-      if (!defs) {
-        defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        svgEl.insertBefore(defs, svgEl.firstChild);
-      }
-
-      var pat = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
-      pat.setAttribute('id', patId);
-      pat.setAttribute('patternUnits', 'userSpaceOnUse');
-      pat.setAttribute('width', '8');
-      pat.setAttribute('height', '8');
-      pat.setAttribute('patternTransform', 'rotate(45)');
-
-      var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', '0'); line.setAttribute('y1', '0');
-      line.setAttribute('x2', '0'); line.setAttribute('y2', '8');
-      line.setAttribute('stroke', color);
-      line.setAttribute('stroke-width', '8');
-      line.setAttribute('stroke-opacity', '0.5');
-      pat.appendChild(line);
-      defs.appendChild(pat);
-
-      layer._path.setAttribute('fill', 'url(#' + patId + ')');
-      layer._path.setAttribute('fill-opacity', '1');
-      applied++;
-    });
-
-    return applied;
-  }
-
-  // Boucle initiale
-  var attempts = 0;
-  var maxAttempts = 30;
-
-  function tryLoop() {
-    attempts++;
-    var n = applyPatterns(data);
-    if (n >= expectedCount) return;
-    if (attempts >= maxAttempts) return;
-    setTimeout(tryLoop, 200);
-  }
-
-  tryLoop();
-
-  // Réapplique après chaque fin de zoom (flyToBounds réinitialise les _path SVG)
-  var widget = HTMLWidgets.find('#map');
-  if (widget && widget.getMap()) {
-    var leafletMap = widget.getMap();
-
-    // Supprime l'ancien listener pour éviter les doublons
-    if (window._hatchZoomListener) {
-      leafletMap.off('zoomend', window._hatchZoomListener);
-    }
-
-    window._hatchZoomListener = function() {
-      // Courte attente pour que Leaflet finisse de re-rendre les paths SVG
-      setTimeout(function() {
-        if (window._lastHatchData) {
-          applyPatterns(window._lastHatchData);
-        }
-      }, 100);
-    };
-
-    leafletMap.on('zoomend', window._hatchZoomListener);
-  }
-});
-
-"))
+    tags$script(src = "autocomplete.js"),
+    tags$script(src = "legende.js"),
+    tags$script(src = "liste_pat.js"),
+    tags$script(src = "hachure_pat.js"),
+    tags$script(src = "tutoriel.js"),
   ), # FIN tags$head
   
   ############################################################################################################### 
@@ -670,7 +97,6 @@ Shiny.addCustomMessageHandler('apply_hatch', function(data) {
       )
     )
   ),
-  
   
   #En-tête DSFR
   tags$header(
@@ -911,127 +337,7 @@ Shiny.addCustomMessageHandler('apply_hatch', function(data) {
                tags$button(class="fr-btn", id="tutorial_next", "Suivant")
       )
     ),
-    
-    #Script tutoriel
-    tags$script(HTML("
-    document.addEventListener('DOMContentLoaded', function() {
-// Lorsque l'utilisateur clique sur 'Démarrer le tutoriel'
-      document.getElementById('start_tutorial').addEventListener('click', function() {
-// Masquer l'overlay d'introduction
-        document.getElementById('intro_overlay').style.display = 'none';
-// Lancer le tutoriel
-        startTutorial();
-      });
-
-// Lorsque l'utilisateur clique sur 'Passer'
-      document.getElementById('skip_tutorial').addEventListener('click', function() {
-// Masquer l'overlay d'introduction sans lancer le tutoriel
-        document.getElementById('intro_overlay').style.display = 'none';
-      });
-    });
-
-// Fonction pour démarrer le tutoriel
-    function startTutorial() {
-      var tutorialSteps = [
-        {el:'.menu-couches', title:'Menu des couches', text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.', position:{ top: 520, left: 10 }},
-        {el:'#filtre_niveau', title:'Filtre des niveaux de labellisation', text:'Utilisez ce filtre pour sélectionner le niveau de labellisation des PAT.', position:{ top: 135, left: 10 }},
-        {el:'#filtre_niveau_terri', title:'Filtre des échelles territoriales', text:'Vous pouvez aussi utiliser ce filtre pour sélectionner l’échelle territoriale des PAT.', position:{ top: 135, left: 280 }},
-        {el:'#map', title:'Carte', text:'La carte centrale affiche les couches et le fond de carte souhaités.', position:{ top: 788, left: 10 }},
-        {el:'#legend_toggle', title:'Afficher/Masquer la légende', text:'Cliquez sur ce bouton pour afficher ou masquer la légende des couches visibles sur la carte.', position:{ top: 200, left: 337 }},
-        {el:'#map_legend', title:'Légende', text:'La légende s’actualise en fonction des couches présentes sur la carte.', position:{ top: 320, left: 343 }},
-        {el:'#nom_du_pat', title:'Barre de recherche', text:'Vous piuvez recherchez un PAT ou une commune ici.', position:{ top: 140, left: 1570 }},
-        {el:'#right_sidebar', title:'Liste des PAT visibles', text:'Cette liste affiche uniquement les PAT visibles dans la vue actuelle de la carte. Cliquez sur un PAT pour zoomer dessus.', position:{ top: 140, left: 1300 }},
-        {el:'#info_tutorial', title:'Relancer le tutoriel', text:'Vous pouvez relancer le tutoriel à tout moment en cliquant sur cette icône.', position:{ top: 130, left: 1570 }}
-      ];
-
-      var currentStep = 0;
-
-      function showStep(step){
-        var s = tutorialSteps[step];
-        var el = document.querySelector(s.el);
-        if(!el) return;
-
-        var rect = el.getBoundingClientRect();
-
-        var overlay = document.getElementById('tutorial_overlay');
-        overlay.style.display='block';
-
-        var hl = document.getElementById('tutorial_highlight');
-        hl.style.display='block';
-        hl.style.top = (rect.top - 5) + 'px';
-        hl.style.left = (rect.left - 5) + 'px';
-        hl.style.width = (rect.width + 10) + 'px';
-        hl.style.height = (rect.height + 10) + 'px';
-
-        var modal = document.getElementById('tutorial_modal');
-        modal.style.display='block';
-        
-
-        if(s.position){
-          modal.style.top = s.position.top + 'px';
-          modal.style.left = s.position.left + 'px';
-        } else {
-          modal.style.top = (rect.bottom + 10) + 'px';
-          modal.style.left = rect.left + 'px';
-        }
-
-        document.getElementById('tutorial_title').innerText = s.title;
-        document.getElementById('tutorial_text').innerText = s.text;
-
-        var prevBtn = document.getElementById('tutorial_prev');
-        var nextBtn = document.getElementById('tutorial_next');
-
-        if(step === 0){
-          prevBtn.style.display = 'none';
-        } else {
-          prevBtn.style.display = 'inline-block';
-        }
-
-        if(step === tutorialSteps.length - 1){
-          nextBtn.innerText = 'Fin';
-        } else {
-          nextBtn.innerText = 'Suivant';
-        }
-      }
-
-      document.getElementById('tutorial_next').addEventListener('click', function(){
-        if(currentStep < tutorialSteps.length-1){currentStep++; showStep(currentStep);}
-        else {
-          document.getElementById('tutorial_overlay').style.display='none';
-          document.getElementById('tutorial_highlight').style.display='none';
-          document.getElementById('tutorial_modal').style.display='none';
-        }
-      });
-
-      document.getElementById('tutorial_prev').addEventListener('click', function(){
-        if(currentStep > 0){currentStep--; showStep(currentStep);}
-      });
-
-// Affiche le premier step
-      showStep(currentStep);
-    }
-
-    function closeTutorial(){
-      document.getElementById('tutorial_overlay').style.display='none';
-      document.getElementById('tutorial_highlight').style.display='none';
-      document.getElementById('tutorial_modal').style.display='none';
-    }
-
-    document.getElementById('tutorial_close').addEventListener('click', function(){
-      closeTutorial();
-    })
-
-    var infoBtn = document.getElementById('info_tutorial');
-    if (infoBtn) {
-      infoBtn.addEventListener('click', function () {
-        startTutorial();
-      });
-    };
-  "))
   ))  # fermeture UI
-
-
-
 ###########################################Partie SERVER###########################################################
 server <- function(input, output, session) {
   
@@ -1042,8 +348,25 @@ server <- function(input, output, session) {
   #pour afficher uniquement le PAT sur lequel on as cliqué 
   clic_sur_pat <- reactiveVal(FALSE)
   
-  #Stock la bbox de la carte au départ#########################
+  #Stock la bbox de la carte au départ avec tampon #########################
   bbox_init <- sf::st_bbox(commune_aura)
+  
+  expand_bbox <- function(bbox, factor = 1.25) { 
+    xmid <- (bbox["xmin"] + bbox["xmax"]) / 2
+    ymid <- (bbox["ymin"] + bbox["ymax"]) / 2
+    dx <- (bbox["xmax"] - bbox["xmin"]) * factor / 2
+    dy <- (bbox["ymax"] - bbox["ymin"]) * factor / 2
+    
+    bbox2 <- bbox
+    bbox2["xmin"] <- xmid - dx
+    bbox2["xmax"] <- xmid + dx
+    bbox2["ymin"] <- ymid - dy
+    bbox2["ymax"] <- ymid + dy
+    bbox2
+  }
+  
+  bbox_init <- sf::st_bbox(commune_aura)
+  bbox_init <- expand_bbox(bbox_init, factor = 1.1)  #Regle la taille de la bbox de départ
   
   #A l'issue du filtre revient sur la bbox de départ
   observeEvent(
@@ -1246,17 +569,14 @@ server <- function(input, output, session) {
     )
   })
   ####Fin modifs paul####
-  
-  
-  
+
   #L'affichage de la carte en elle-même paramétrages de la BBOX 
   output$map <- renderLeaflet({
-    bbox <- st_bbox(commune_aura)
     
-    xmin <- unname(bbox["xmin"])
-    ymin <- unname(bbox["ymin"])
-    xmax <- unname(bbox["xmax"])
-    ymax <- unname(bbox["ymax"])
+    xmin <- unname(bbox_init["xmin"])
+    ymin <- unname(bbox_init["ymin"])
+    xmax <- unname(bbox_init["xmax"])
+    ymax <- unname(bbox_init["ymax"])
     
     #Préparation des indicateurs (SAU, SAU BIO, Population) 
     #Recherche du centroïdes des communes
@@ -1889,7 +1209,6 @@ server <- function(input, output, session) {
     }
   })
 }
-
 
 #################################LANCEMENT DE L'APPLICATION#########################################################
 shinyApp(ui, server)
