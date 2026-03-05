@@ -8,6 +8,7 @@ library(readr)
 library(stringi)
 library(jsonlite)  
 library(scales)   
+library(stringr)
 #remotes::install_github("trafficonese/leaflet.extras")
 
 # Chargement des couches et reprojection en 4326
@@ -28,6 +29,10 @@ reg_aura_4326 <- st_read("./data/region.gpkg") %>%
   st_transform(4326)
 
 pat_com <- read_csv("./data/pat_com.csv")
+
+# Normalisation robuste des codes INSEE (gère les zéros à gauche)
+commune_aura$code_insee_chr <- str_pad(as.character(commune_aura$code_insee), width = 5, side = "left", pad = "0")
+pat_com$code_insee_chr      <- str_pad(as.character(pat_com$code_insee),      width = 5, side = "left", pad = "0")
 
 #Autocomplétion : listes séparées (Communes vs PAT)
 autocomplete_communes <- sort(unique(na.omit(commune_aura$nom_officiel))) #liste nom_officiel
@@ -278,6 +283,9 @@ server <- function(input, output, session) {
   #Permet de réafficher tous les PAT suite à un clic
   pat_actif <- reactiveVal(NULL)
   
+  #Découc
+  updateCheckboxInput(session, "com_layer", value = FALSE)
+  
   #pour afficher uniquement le PAT sur lequel on as cliqué 
   clic_sur_pat <- reactiveVal(FALSE)
   
@@ -346,17 +354,42 @@ server <- function(input, output, session) {
   zoom_pat <- function(pat){
     req(input$pat_layer)
     req(nrow(pat) > 0)
+    
+    # PAT actif (nom)
     pat_actif(pat$nom_du_pat)
+    
+    # >>> FORCER l'affichage des communes
+    updateCheckboxInput(session, "com_layer", value = TRUE)
+    
     bb <- st_bbox(pat)
     
-    leafletProxy("map") %>% 
+    leafletProxy("map") %>%
+      clearPopups() %>%
       flyToBounds(
         lng1 = unname(bb["xmin"]),
         lat1 = unname(bb["ymin"]),
         lng2 = unname(bb["xmax"]),
         lat2 = unname(bb["ymax"])
-      ) 
+      )
   }
+  
+  # ================================
+  # COMMUNES DANS LE PAT ACTIF (par code INSEE)
+  # ================================
+  communes_dans_pat_actif <- reactive({
+    req(pat_actif())  # ici pat_actif stocke le nom_du_pat
+    
+    # 1) retrouver le(s) code_pat correspondant(s) au PAT actif
+    codes_pat <- unique(na.omit(couche_pat_4326$code_pat[couche_pat_4326$nom_du_pat == pat_actif()]))
+    if (length(codes_pat) == 0) return(NULL)
+    
+    # 2) récupérer les codes INSEE des communes dans ce(s) PAT
+    insee <- unique(na.omit(pat_com$code_insee_chr[pat_com$code_pat %in% codes_pat]))
+    if (length(insee) == 0) return(NULL)
+    
+    # 3) retourner les communes correspondantes (avec INSEE normalisé)
+    commune_aura[commune_aura$code_insee_chr %in% insee, ]
+  })
   
   #Cohérence PAT LISTE 
   pat_visibles_dans_vue <- reactive({
@@ -418,6 +451,7 @@ server <- function(input, output, session) {
           tags$p(
             class = "fr-sidemenu__title",
             id = "sidemenu-title",
+            style = "color:#000091; font-weight:bold; font-size:18px;",
             paste0("PAT visibles : ", length(pats))
           ),
           
@@ -448,39 +482,7 @@ server <- function(input, output, session) {
     xmax <- unname(bbox_init["xmax"])
     ymax <- unname(bbox_init["ymax"])
     
-    #Préparation des indicateurs (SAU, SAU BIO, Population) 
-    #Recherche du centroïdes des communes
-    communes_centroid <- st_centroid(commune_aura)
     
-    #Calcul de la part en % de la SAU bio par communes 
-    part_bio <- communes_centroid$part_bio
-    
-    #Sécurisation (évite la division par 0 et les valeurs NA) 
-    part_bio[is.na(part_bio) | is.infinite(part_bio)] <- 0
-    
-    #Création des valeurs permettant la création des cercles proportionnels 
-    #Création des cercles proportionnels du nombre d'habitants par communes 
-    pop_com <- communes_centroid$population
-    rayon_brut_pop <- sqrt(pop_com)
-    rayon_pop <- scales::rescale(rayon_brut_pop, to = c(1, 50))
-    
-    #Création des cercles proportionnels du nombre d'hectares de SAU par communes
-    sau_com <- communes_centroid$rpg_ha_sum
-    rayon_brut_sau <- sqrt(sau_com)
-    rayon_sau <- scales::rescale(rayon_brut_sau, to = c(1, 30))
-    
-    #Création des cercles proportionnels du nombre d'hectares de SAU BIO par communes 
-    saubio_com <- communes_centroid$bio_ha_sum
-    rayon_brut_saubio <- sqrt(saubio_com)
-    rayon_saubio <- scales::rescale(rayon_brut_saubio, to = c(1, 30))
-    
-##Palettes de couleur des couches
-#Palette % SAU bio (la couleur des cercles proportionnels) 
-    pal_bio <- colorNumeric(
-      palette = c("#bcd9a3","#306600"),
-      domain = part_bio,
-      na.color = "transparent"
-    )
     
     #Limitation du dézoom maximal de la carte 
     leaflet(
@@ -573,16 +575,14 @@ server <- function(input, output, session) {
         group = "Limites administratives"
       ) %>%
       
-      #Communes AURA
+      # Communes (placeholder) : on ne met rien ici, la couche est gérée dynamiquement
       addPolygons(
-        data = commune_aura,
+        data = commune_aura[0, ],
         color = "#929292",
         weight = 1,
         fillColor = NA,
         fillOpacity = 0,
-        popup = ~paste(nom_officiel, sep = "<br/>"),
-        group = "Communes",
-        label="nom_officiel"
+        group = "Communes"
       ) %>%
       
       #CLS 
@@ -593,54 +593,116 @@ server <- function(input, output, session) {
         fillOpacity = 0.5,
         popup = ~paste(Nom_CLS, sep= "<br/>"),
         group = "Contrats locaux de santé"
-      ) %>%
-      
-      #Cercle population
-      addCircleMarkers(
-        data = communes_centroid,
-        radius = rayon_pop,
-        fillColor = "#CE614A",
-        color = "#ffffff",
-        weight = 1,
-        fillOpacity = 0.7,
-        popup = ~paste(
-          "<strong>", nom_officiel, "</strong><br/>",
-          "Population :", population
-        ),
-        group = "Population communale"
-      ) %>%
-      
-      #Cercle SAU
-      addCircleMarkers(
-        data = communes_centroid,
-        radius = rayon_sau,
-        fillColor = "#CE614A",
-        color = "#ffffff",
-        weight = 1,
-        fillOpacity = 0.7,
-        popup = ~paste(
-          "<strong>", nom_officiel, "</strong><br/>",
-          "SAU (ha) :", rpg_ha_sum
-        ),
-        group = "SAU"
-      ) %>%
-      
-      #Cercle SAU BIO 
-      addCircleMarkers(
-        data = communes_centroid,
-        radius = rayon_saubio,
-        fillColor = ~pal_bio(part_bio),
-        color = "#ffffff",
-        weight = 1,
-        fillOpacity = 1,
-        popup = ~paste(
-          "<strong>", nom_officiel, "</strong><br/>",
-          "SAU Bio (ha) :", bio_ha_sum/2,"<br/>",
-          "Part de la SAU Bio (%) :", part_bio
-        ),
-        group = "SAU bio"
       )
+   })
+  
+  # ================================
+  # AFFICHAGE DES COMMUNES : uniquement dans le PAT actif
+  # ================================
+  observe({
+    proxy <- leafletProxy("map")
+    
+    # on reconstruit toujours la couche
+    proxy %>% clearGroup("Communes")
+    
+    # si l'utilisateur ne veut pas la couche communes
+    if (isFALSE(input$com_layer)) return()
+    
+    # si aucun PAT actif, on n'affiche rien (ou tu peux choisir d'afficher toute la région)
+    if (is.null(pat_actif())) return()
+    
+    communes_pat <- communes_dans_pat_actif()
+    if (is.null(communes_pat) || nrow(communes_pat) == 0) return()
+    
+    proxy %>% addPolygons(
+      data = communes_pat,
+      color = "#929292",
+      weight = 1,
+      fillColor = NA,
+      fillOpacity = 0,
+      popup = ~paste(nom_officiel, sep = "<br/>"),
+      group = "Communes",
+      label = ~nom_officiel
+    )
   })
+  
+  # ================================
+# INDICATEURS : uniquement communes du PAT actif (match par INSEE)
+# ================================
+communes_centroid <- st_centroid(commune_aura)
+communes_centroid$rayon_pop <- scales::rescale(sqrt(communes_centroid$population), to = c(1,50))
+communes_centroid$rayon_sau <- scales::rescale(sqrt(communes_centroid$rpg_ha_sum), to = c(1,30))
+communes_centroid$rayon_bio <- scales::rescale(sqrt(communes_centroid$bio_ha_sum), to = c(1,30))
+communes_centroid$part_bio[is.na(communes_centroid$part_bio) | is.infinite(communes_centroid$part_bio)] <- 0
+
+pal_bio <- colorNumeric(
+  palette = c("#bcd9a3","#306600"),
+  domain = communes_centroid$part_bio,
+  na.color = "transparent"
+)
+
+observe({
+  proxy <- leafletProxy("map")
+
+  # Toujours nettoyer les cercles
+  proxy %>%
+    clearGroup("Population communale") %>%
+    clearGroup("SAU") %>%
+    clearGroup("SAU bio")
+
+  # conditions
+  if (!isTRUE(input$com_layer)) return()
+  if (is.null(input$indicateur) || input$indicateur == "none") return()
+  if (is.null(pat_actif())) return()
+
+  communes_pat <- communes_dans_pat_actif()
+  if (is.null(communes_pat) || nrow(communes_pat) == 0) return()
+
+  # FIX : filtrer par code INSEE (pas par nom)
+  centroid_pat <- communes_centroid[communes_centroid$code_insee_chr %in% communes_pat$code_insee_chr, ]
+  if (nrow(centroid_pat) == 0) return()
+
+  if (input$indicateur == "pop") {
+    proxy %>% addCircleMarkers(
+      data = centroid_pat,
+      radius = ~rayon_pop,
+      fillColor = "#CE614A",
+      color = "#ffffff",
+      weight = 1,
+      fillOpacity = 0.7,
+      popup = ~paste("<strong>", nom_officiel, "</strong><br/>", "Population :", population),
+      group = "Population communale"
+    )
+  }
+
+  if (input$indicateur == "sau") {
+    proxy %>% addCircleMarkers(
+      data = centroid_pat,
+      radius = ~rayon_sau,
+      fillColor = "#CE614A",
+      color = "#ffffff",
+      weight = 1,
+      fillOpacity = 0.7,
+      popup = ~paste("<strong>", nom_officiel, "</strong><br/>", "SAU (ha) :", rpg_ha_sum),
+      group = "SAU"
+    )
+  }
+
+  if (input$indicateur == "bio") {
+    proxy %>% addCircleMarkers(
+      data = centroid_pat,
+      radius = ~rayon_bio,
+      fillColor = ~pal_bio(part_bio),
+      color = "#ffffff",
+      weight = 1,
+      fillOpacity = 1,
+      popup = ~paste("<strong>", nom_officiel, "</strong><br/>",
+                     "SAU Bio (ha) :", bio_ha_sum/2,"<br/>",
+                     "Part de la SAU Bio (%) :", part_bio),
+      group = "SAU bio"
+    )
+  }
+})
   
   # Paramétrages du sélecteur de couches
   #Fonds de plans 
@@ -698,24 +760,7 @@ server <- function(input, output, session) {
     }
   })
   
-  #Indicateurs 
-  observe({
-    proxy <- leafletProxy("map")
-    
-    proxy %>% hideGroup("Population communale")
-    proxy %>% hideGroup("SAU")
-    proxy %>% hideGroup("SAU bio")
-    
-    if (input$indicateur == "pop"){
-      proxy %>% showGroup("Population communale")
-    }
-    if (input$indicateur == "sau"){
-      proxy %>% showGroup("SAU")
-    }
-    if (input$indicateur == "bio"){
-      proxy %>% showGroup("SAU bio")
-    }
-  })
+
   
   ##Légende
   observe({
