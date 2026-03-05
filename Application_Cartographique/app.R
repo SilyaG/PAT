@@ -1402,9 +1402,9 @@ server <- function(input, output, session) {
       #CLS 
       addPolygons(
         data = couche_cls_4326,
-        color = "#869ECE",
+        color = "#6a6af4",
         weight = 2,
-        fillOpacity = 0.7,
+        fillOpacity = 0.5,
         popup = ~paste(Nom_CLS, sep= "<br/>"),
         group = "Contrats locaux de santé"
       ) %>%
