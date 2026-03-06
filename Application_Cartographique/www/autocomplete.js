@@ -20,13 +20,13 @@ document.addEventListener('DOMContentLoaded', function () {
       // Fonction de normalisation du texte, serte à comparer le texte sans être sensible à la casse
       function norm(s) {
         return (s || '')
-          .trim() // supprime les espaces
-          .toLowerCase() //Ne prend pas en compte les Majuscules et minuscule
-          .normalize('NFD')  // Sépare lettre et accents 
-          .replace(/[\\u0300-\\u036f]/g, '')   //supprime accents
-          .replace(/[’']/g, '')               // supprime apostrophes
-          .replace(/[-‐-‒–—―]/g, '')           //supprime tous les tirets
-          .replace(/\\s+/g, '');              // supprime tous les espaces
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')   // accents
+          .replace(/[’']/g, '')              // apostrophes
+          .replace(/[-‐-‒–—―]/g, '')         // tirets
+          .replace(/\s+/g, '');              // espaces
       }
   
   // vide le contenu d'une liste HTML
