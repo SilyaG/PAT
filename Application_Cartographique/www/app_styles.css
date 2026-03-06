@@ -302,6 +302,11 @@
       background: #e5e5e5;
       margin: 10px 0;
     }
+
+    .leg-sep-inner {
+      border-top: 1px dashed #ddd;
+      margin: 6px 0;
+    }
     
   /* symbole de légende */
   /* carré de couleur */

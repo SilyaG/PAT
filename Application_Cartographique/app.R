@@ -217,25 +217,8 @@ ui <- fluidPage(
           checkboxInput("pat_layer", "Projet Alimentaire Territoriaux", TRUE),
           checkboxInput("cls_layer", "Contrat Locaux de Santé", FALSE),
           checkboxInput("dep_layer", "Départements", FALSE),
-          checkboxInput("com_layer", "Communes", FALSE),
-          
-          hr(),
-          
-          conditionalPanel(
-            condition = "input.com_layer == true",
-            h4("Indicateurs communaux"),
-            radioButtons(
-              "indicateur",
-              label = NULL,
-              choices = c(
-                "Aucun" = "none",
-                "Population" = "pop",
-                "surface agricole utile (ha)" = "sau",
-                "surface agricole utile bio" = "bio"
-              ),
-              selected = "none"
-            )
-          )
+          uiOutput("com_layer_ui"),     
+
         )
       ),
       
@@ -379,9 +362,7 @@ server <- function(input, output, session) {
     pat_actif(pat_row$nom_du_pat[1])
     clic_sur_pat(depuis_clic_carte)
     
-    # option utile du code 2 : afficher automatiquement les communes du PAT actif
-    updateCheckboxInput(session, "com_layer", value = TRUE)
-    
+
     bb <- st_bbox(pat_row)
     
     leafletProxy("map") %>%
@@ -465,7 +446,7 @@ server <- function(input, output, session) {
             class = "fr-sidemenu__title",
             id = "sidemenu-title",
             style = "color:#000091; font-weight:bold; font-size:18px;",
-            paste0("PAT visibles : ", length(pats))
+            paste0("PAT visible(s) : ", length(pats))
           ),
           
           tags$ul(
@@ -698,18 +679,17 @@ server <- function(input, output, session) {
     
     if (nrow(centroid_pat) == 0) return()
     
+    # Rescale LOCAL au PAT actif
+    centroid_pat$rayon_pop_local <- scales::rescale(sqrt(centroid_pat$population),  to = c(3, 30))
+    centroid_pat$rayon_sau_local <- scales::rescale(sqrt(centroid_pat$rpg_ha_sum),  to = c(3, 30))
+    centroid_pat$rayon_bio_local <- scales::rescale(sqrt(centroid_pat$bio_ha_sum),  to = c(3, 30))
+    
     if (input$indicateur == "pop") {
       proxy %>% addCircleMarkers(
         data = centroid_pat,
-        radius = ~rayon_pop,
-        fillColor = "#CE614A",
-        color = "#ffffff",
-        weight = 1,
-        fillOpacity = 0.7,
-        popup = ~paste(
-          "<strong>", nom_officiel, "</strong><br/>",
-          "Population :", population
-        ),
+        radius = ~rayon_pop_local,
+        fillColor = "#CE614A", color = "#ffffff", weight = 1, fillOpacity = 0.7,
+        popup = ~paste("<strong>", nom_officiel, "</strong><br/>Population :", population),
         group = "Population communale"
       )
     }
@@ -717,15 +697,9 @@ server <- function(input, output, session) {
     if (input$indicateur == "sau") {
       proxy %>% addCircleMarkers(
         data = centroid_pat,
-        radius = ~rayon_sau,
-        fillColor = "#CE614A",
-        color = "#ffffff",
-        weight = 1,
-        fillOpacity = 0.7,
-        popup = ~paste(
-          "<strong>", nom_officiel, "</strong><br/>",
-          "SAU (ha) :", rpg_ha_sum
-        ),
+        radius = ~rayon_sau_local,
+        fillColor = "#CE614A", color = "#ffffff", weight = 1, fillOpacity = 0.7,
+        popup = ~paste("<strong>", nom_officiel, "</strong><br/>SAU (ha) :", rpg_ha_sum),
         group = "SAU"
       )
     }
@@ -733,16 +707,10 @@ server <- function(input, output, session) {
     if (input$indicateur == "bio") {
       proxy %>% addCircleMarkers(
         data = centroid_pat,
-        radius = ~rayon_bio,
-        fillColor = ~pal_bio(part_bio),
-        color = "#ffffff",
-        weight = 1,
-        fillOpacity = 1,
-        popup = ~paste(
-          "<strong>", nom_officiel, "</strong><br/>",
-          "SAU Bio (ha) :", bio_ha_sum / 2, "<br/>",
-          "Part de la SAU Bio (%) :", part_bio
-        ),
+        radius = ~rayon_bio_local,
+        fillColor = ~pal_bio(part_bio), color = "#ffffff", weight = 1, fillOpacity = 1,
+        popup = ~paste("<strong>", nom_officiel, "</strong><br/>SAU Bio (ha) :", bio_ha_sum / 2,
+                       "<br/>Part de la SAU Bio (%) :", part_bio),
         group = "SAU bio"
       )
     }
@@ -753,45 +721,92 @@ server <- function(input, output, session) {
     sections <- list()
     
     if (isTRUE(input$pat_layer)) {
-      sections <- append(sections, list("
-        <div class='leg-cat'>Projets Alimentaires Territoriaux</div>
-
-        <div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:6px;'>
-          Hachuré = Niveau 1 &nbsp;|&nbsp; Aplat = Niveau 2
-        </div>
-
-        <div class='leg-item' style='margin-top:4px;'>
-          <svg width='14' height='14' style='flex-shrink:0;'>
-            <defs><pattern id='lh1' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
-              <line x1='0' y1='0' x2='0' y2='4' stroke='#5576c0' stroke-width='1.5'/></pattern></defs>
-            <rect width='14' height='14' fill='url(#lh1)' stroke='#5576c0' stroke-width='1.5' rx='2'/>
-          </svg>&nbsp;PAiT — Niveau 1
-        </div>
-        <div class='leg-item'>
-          <svg width='14' height='14' style='flex-shrink:0;'>
-            <defs><pattern id='lh2' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
-              <line x1='0' y1='0' x2='0' y2='4' stroke='#ff732c' stroke-width='1.5'/></pattern></defs>
-            <rect width='14' height='14' fill='url(#lh2)' stroke='#ff732c' stroke-width='1.5' rx='2'/>
-          </svg>&nbsp;Intercommunal — Niveau 1
-        </div>
-        <div class='leg-item' style='margin-bottom:6px;'>
-          <svg width='14' height='14' style='flex-shrink:0;'>
-            <defs><pattern id='lh3' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
-              <line x1='0' y1='0' x2='0' y2='4' stroke='#1f8d49' stroke-width='1.5'/></pattern></defs>
-            <rect width='14' height='14' fill='url(#lh3)' stroke='#1f8d49' stroke-width='1.5' rx='2'/>
-          </svg>&nbsp;Départemental — Niveau 1
-        </div>
-
-        <div class='leg-item' style='margin-top:4px;'>
-          <span class='swatch' style='background:#5576c0;opacity:0.35;border:2px solid #5576c0;'></span>&nbsp;PAiT — Niveau 2
-        </div>
-        <div class='leg-item'>
-          <span class='swatch' style='background:#ff732c;opacity:0.35;border:2px solid #ff732c;'></span>&nbsp;Intercommunal — Niveau 2
-        </div>
-        <div class='leg-item'>
-          <span class='swatch' style='background:#1f8d49;opacity:0.35;border:2px solid #1f8d49;'></span>&nbsp;Départemental — Niveau 2
-        </div>
-      "))
+      
+      # Déterminer les PAT effectivement affichés
+      pat_legende <- pat_filtre()
+      if (!is.null(pat_actif())) {
+        pat_legende <- pat_legende[pat_legende$nom_du_pat == pat_actif(), ]
+      }
+      
+      niveaux_affiches  <- unique(pat_legende$niveau)
+      echelles_affichees <- unique(pat_legende$echelle)
+      
+      show_niv1 <- "1" %in% niveaux_affiches
+      show_niv2 <- "2" %in% niveaux_affiches
+      
+      show_pait  <- "PAT interterritorial (PAiT)"    %in% echelles_affichees
+      show_inter <- "PAT d'échelle intercommunale"   %in% echelles_affichees
+      show_dep   <- "PAT d'échelle départementale"   %in% echelles_affichees
+      
+      # Sous-titre hachuré/aplat uniquement si les deux niveaux sont présents
+      sous_titre <- if (show_niv1 && show_niv2) "
+    <div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:6px;'>
+      Hachuré = Niveau 1 &nbsp;|&nbsp; Aplat = Niveau 2
+    </div>" else ""
+      
+      # Entrées niveau 1 (hachurées)
+      niv1_html <- ""
+      if (show_niv1) {
+        if (show_inter) niv1_html <- paste0(niv1_html, "
+  <div class='leg-item' style='margin-top:4px;'>
+    <svg width='14' height='14' style='flex-shrink:0;'>
+      <defs>
+        <pattern id='lh1' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
+          <line x1='0' y1='0' x2='0' y2='4' style='stroke:#ff732c; stroke-width:1.5;'/>
+        </pattern>
+      </defs>
+      <rect width='14' height='14' fill='url(#lh1)' stroke='#ff732c' stroke-width='1.5' rx='2'/>
+    </svg>&nbsp;Intercommunal — Niveau 1
+  </div>")
+        
+        if (show_pait) niv1_html <- paste0(niv1_html, "
+  <div class='leg-item'>
+    <svg width='14' height='14' style='flex-shrink:0;'>
+      <defs>
+        <pattern id='lh2' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
+          <line x1='0' y1='0' x2='0' y2='4' style='stroke:#1f8d49; stroke-width:1.5;'/>
+        </pattern>
+      </defs>
+      <rect width='14' height='14' fill='url(#lh2)' stroke='#1f8d49' stroke-width='1.5' rx='2'/>
+    </svg>&nbsp;PAiT — Niveau 1
+  </div>")
+        
+        if (show_dep) niv1_html <- paste0(niv1_html, "
+  <div class='leg-item' style='margin-bottom:6px;'>
+    <svg width='14' height='14' style='flex-shrink:0;'>
+      <defs>
+        <pattern id='lh3' patternUnits='userSpaceOnUse' width='4' height='4' patternTransform='rotate(45)'>
+          <line x1='0' y1='0' x2='0' y2='4' style='stroke:#5576c0; stroke-width:1.5;'/>
+        </pattern>
+      </defs>
+      <rect width='14' height='14' fill='url(#lh3)' stroke='#5576c0' stroke-width='1.5' rx='2'/>
+    </svg>&nbsp;Départemental — Niveau 1
+  </div>")
+      }
+      
+      # Entrées niveau 2 (aplat)
+      niv2_html <- ""
+      if (show_niv2) {
+        if (show_inter) niv2_html <- paste0(niv2_html, "
+    <div class='leg-item' style='margin-top:4px;'>
+      <span class='swatch' style='background:#ff732c;opacity:0.35;border:2px solid #ff732c;'></span>&nbsp;Intercommunal — Niveau 2
+    </div>")
+        if (show_pait) niv2_html <- paste0(niv2_html, "
+    <div class='leg-item'>
+      <span class='swatch' style='background:#1f8d49;opacity:0.35;border:2px solid #1f8d49;'></span>&nbsp;PAiT — Niveau 2
+    </div>")
+        if (show_dep) niv2_html <- paste0(niv2_html, "
+    <div class='leg-item'>
+      <span class='swatch' style='background:#5576c0;opacity:0.35;border:2px solid #5576c0;'></span>&nbsp;Départemental — Niveau 2
+    </div>")
+      }
+      
+      sections <- append(sections, list(paste0(
+        "<div class='leg-cat'>Projets Alimentaires Territoriaux</div>",
+        sous_titre,
+        niv1_html,
+        niv2_html
+      )))
     }
     
     if (isTRUE(input$cls_layer)) {
@@ -808,39 +823,80 @@ server <- function(input, output, session) {
       "))
     }
     
-    if (isTRUE(input$com_layer)) {
-      sections <- append(sections, list("
-        <div class='leg-cat'>Communes</div>
-        <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limites communales</div>
-      "))
+    if (isTRUE(input$com_layer) && !is.null(pat_actif())) {
+      
+      indicateur_html <- ""
       
       if (!is.null(input$indicateur) && input$indicateur != "none") {
-        if (input$indicateur == "pop") {
-          sections <- append(sections, list("
-            <div class='leg-cat'>Population communale</div>
-            <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:8px;height:8px;'></span>Faible</div>
-            <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:14px;height:14px;'></span>Moyenne</div>
-            <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:20px;height:20px;'></span>Forte</div>
-          "))
+        
+        # Calcul des valeurs réelles du PAT actif pour la légende
+        communes_pat <- communes_dans_pat_actif()
+        centroid_pat_leg <- communes_centroid[
+          communes_centroid$code_insee_chr %in% communes_pat$code_insee_chr, ]
+        
+        if (input$indicateur == "pop" && nrow(centroid_pat_leg) > 0) {
+          vals <- sort(unique(na.omit(centroid_pat_leg$population)))
+          v_min <- format(round(min(vals)),    big.mark = " ")
+          v_med <- format(round(median(vals)), big.mark = " ")
+          v_max <- format(round(max(vals)),    big.mark = " ")
+          indicateur_html <- paste0("
+    <div class='leg-sep-inner'></div>
+    <div class='leg-cat'>Indicateurs</div>
+    <div class='leg-item'>Population communale</div>
+    <div style='display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding-left:2px; margin-top:4px;'>
+    <div style='display:flex; align-items:center; gap:8px;'>
+      <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+        <span class='swatch swatch-circle' style='background:#CE614A; width:6px; height:6px; display:block;'></span>
+      </div>
+      <span style='font-size:12px;'>", v_min, " hab.</span>
+    </div>
+    <div style='display:flex; align-items:center; gap:8px;'>
+      <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+        <span class='swatch swatch-circle' style='background:#CE614A; width:14px; height:14px; display:block;'></span>
+      </div>
+      <span style='font-size:12px;'>", v_med, " hab.</span>
+    </div>
+    <div style='display:flex; align-items:center; gap:8px;'>
+      <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+        <span class='swatch swatch-circle' style='background:#CE614A; width:20px; height:20px; display:block;'></span>
+      </div>
+      <span style='font-size:12px;'>", v_max, " hab.</span>
+    </div>
+    </div>
+  ")
         }
         
-        if (input$indicateur == "sau") {
-          sections <- append(sections, list("
-            <div class='leg-cat'>Surface Agricole Utile (ha)</div>
-            <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:8px;height:8px;'></span>&lt; 500 ha</div>
-            <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:14px;height:14px;'></span>500–2000 ha</div>
-            <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:20px;height:20px;'></span>&gt; 2000 ha</div>
-          "))
+        if (input$indicateur == "sau" && nrow(centroid_pat_leg) > 0) {
+          vals <- sort(unique(na.omit(centroid_pat_leg$rpg_ha_sum)))
+          v_min <- format(round(min(vals)),    big.mark = " ")
+          v_med <- format(round(median(vals)), big.mark = " ")
+          v_max <- format(round(max(vals)),    big.mark = " ")
+          indicateur_html <- paste0("
+        <div class='leg-sep-inner'></div>
+        <div class='leg-cat'>Indicateurs</div>
+        <div class='leg-item'>Surface Agricole Utile (ha)</div>
+        <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:6px;height:6px;'></span>", v_min, " ha</div>
+        <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:14px;height:14px;'></span>", v_med, " ha</div>
+        <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:20px;height:20px;'></span>", v_max, " ha</div>
+      ")
         }
         
         if (input$indicateur == "bio") {
-          sections <- append(sections, list("
-            <div class='leg-cat'>Part de SAU Bio (%)</div>
-            <div class='leg-item'><span class='swatch-grad'></span>
-            <span style='font-size:11px;color:#666;'>0% → 100%</span></div>
-          "))
+          indicateur_html <- "
+        <div class='leg-sep-inner'></div>
+        <div class='leg-cat'>Indicateurs</div>
+        <div class='leg-item'>Part de SAU Bio (%)</div>
+        <div class='leg-item'><span class='swatch-grad'></span>
+        <span style='font-size:11px;color:#666;'>0% → 100%</span></div>
+      "
         }
       }
+      
+      sections <- append(sections, list(paste0("
+    <div class='leg-cat'>Communes</div>
+    <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limites communales</div>",
+                                               indicateur_html
+      )))
     }
     
     if (!is.null(input$fond) && input$fond == "fond_admin") {
@@ -866,6 +922,30 @@ server <- function(input, output, session) {
         position = "topleft",
         layerId = "legend_control"
       )
+  })
+  
+  output$com_layer_ui <- renderUI({
+    if (is.null(pat_actif())) return(NULL)
+    
+    tagList(
+      checkboxInput("com_layer", "Communes", TRUE),
+      hr(),
+      conditionalPanel(
+        condition = "input.com_layer == true",
+        h4("Indicateurs communaux"),
+        radioButtons(
+          "indicateur",
+          label = NULL,
+          choices = c(
+            "Aucun"                       = "none",
+            "Population"                  = "pop",
+            "surface agricole utile (ha)" = "sau",
+            "surface agricole utile bio"  = "bio"
+          ),
+          selected = "none"
+        )
+      )
+    )
   })
   
   # Recherche PAT / commune
