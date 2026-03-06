@@ -225,7 +225,7 @@ ui <- fluidPage(
       column(
         width = 8,
         div(
-          style = "position: relative;",
+          style = "position: relative; overflow: hidden; height: 80vh;",
           leafletOutput("map", height = "80vh"),
           includeHTML("www/popup_pat.html")
         )
@@ -309,18 +309,22 @@ server <- function(input, output, session) {
   
   # Popup PAT custom
   show_popup_pat <- function(pat_row) {
-    contacts <- unlist(strsplit(as.character(pat_row$contacts[1] %||% ""), ";"))
+    contacts <- unlist(strsplit(as.character(pat_row$mail_coord[1] %||% ""), ";"))
     contacts <- trimws(contacts[contacts != ""])
     
     session$sendCustomMessage("show_pat_popup", list(
-      nom        = as.character(pat_row$nom_du_pat[1]),
-      niveau     = as.character(pat_row$niveau[1]),
-      annee      = as.character(pat_row$annee[1]     %||% ""),
-      population = as.character(pat_row$pop_hab[1] %||% ""),
-      sau        = as.character(pat_row$rpg_ha_sum_sum[1]        %||% ""),
-      bio        = as.character(pat_row$bio_ha_sum_sum[1]        %||% ""),
-      partbio    = as.character(pat_row$part_bio[1]        %||% ""),
-      contacts   = as.list(contacts)
+      nom            = as.character(pat_row$nom_du_pat[1]),
+      niveau         = as.character(pat_row$niveau[1]),
+      annee          = as.character(pat_row$annee[1]     %||% ""),
+      population     = as.character(pat_row$pop_hab[1] %||% ""),
+      pct_population = as.character(pat_row$part_pop[1]   %||% ""),
+      sau            = as.character(pat_row$rpg_ha_sum_sum[1]        %||% ""),
+      pct_sau        = as.character(pat_row$part_sau_pat[1]   %||% ""),
+      bio            = as.character(pat_row$bio_ha_sum_sum[1]        %||% ""),
+      pct_sau_bio    = as.character(pat_row$part_bio_pat[1]   %||% ""),
+      partbio        = as.character(pat_row$part_bio[1]        %||% ""),
+      bio_aura       = as.character(pat_row$bio_aura[1]   %||% ""),
+      contacts       = as.list(contacts)
     ))
   }
   
