@@ -309,18 +309,22 @@ server <- function(input, output, session) {
   
   # Popup PAT custom
   show_popup_pat <- function(pat_row) {
-    contacts <- unlist(strsplit(as.character(pat_row$contacts[1] %||% ""), ";"))
+    contacts <- unlist(strsplit(as.character(pat_row$mail_coord[1] %||% ""), ";"))
     contacts <- trimws(contacts[contacts != ""])
     
     session$sendCustomMessage("show_pat_popup", list(
-      nom        = as.character(pat_row$nom_du_pat[1]),
-      niveau     = as.character(pat_row$niveau[1]),
-      annee      = as.character(pat_row$annee[1]     %||% ""),
-      population = as.character(pat_row$pop_hab[1] %||% ""),
-      sau        = as.character(pat_row$rpg_ha_sum_sum[1]        %||% ""),
-      bio        = as.character(pat_row$bio_ha_sum_sum[1]        %||% ""),
-      partbio    = as.character(pat_row$part_bio[1]        %||% ""),
-      contacts   = as.list(contacts)
+      nom            = as.character(pat_row$nom_du_pat[1]),
+      niveau         = as.character(pat_row$niveau[1]),
+      annee          = as.character(pat_row$annee[1]     %||% ""),
+      population     = as.character(pat_row$pop_hab[1] %||% ""),
+      pct_population = as.character(pat_row$part_pop[1]   %||% ""),
+      sau            = as.character(pat_row$rpg_ha_sum_sum[1]        %||% ""),
+      pct_sau        = as.character(pat_row$part_sau_pat[1]   %||% ""),
+      bio            = as.character(pat_row$bio_ha_sum_sum[1]        %||% ""),
+      pct_sau_bio    = as.character(pat_row$part_bio_pat[1]   %||% ""),
+      partbio        = as.character(pat_row$part_bio[1]        %||% ""),
+      bio_aura       = as.character(pat_row$bio_aura[1]   %||% ""),
+      contacts       = as.list(contacts)
     ))
   }
   
@@ -1135,14 +1139,24 @@ server <- function(input, output, session) {
     clic_sur_pat(TRUE)
     
     liens <- paste0(
-      "<li><a href='#' onclick=\"Shiny.setInputValue('pat_selectionne','",
-      pat_click$nom_du_pat,
-      "', {priority:'event'})\">",
-      pat_click$nom_du_pat,
-      "</a></li>",
+      vapply(
+        seq_len(nrow(pat_click)),
+        function(i) {
+          code_json <- jsonlite::toJSON(as.character(pat_click$code_pat[i]), auto_unbox = TRUE)
+          libelle   <- htmltools::htmlEscape(as.character(pat_click$nom_du_pat[i]))
+          
+          paste0(
+            "<li><a href='#' onclick='Shiny.setInputValue(\"pat_selectionne_code\", ",
+            code_json,
+            ", {priority:\"event\"}); return false;'>",
+            libelle,
+            "</a></li>"
+          )
+        },
+        character(1)
+      ),
       collapse = ""
     )
-    
     leafletProxy("map") %>%
       clearPopups() %>%
       addPopups(
@@ -1156,7 +1170,20 @@ server <- function(input, output, session) {
   observeEvent(input$pat_selectionne, {
     req(input$pat_selectionne)
     
-    pat_row <- pat_filtre()[pat_filtre()$nom_du_pat == input$pat_selectionne, ]
+    pat <- pat_filtre()
+    pat_row <- pat[pat$nom_du_pat == input$pat_selectionne, ]
+    if (nrow(pat_row) == 0) return()
+    
+    select_pat(pat_row, depuis_clic_carte = FALSE)
+  })
+  
+  # Clic sur Pop-up choix du pat pour le zoom
+  
+  observeEvent(input$pat_selectionne_code, {
+    req(input$pat_selectionne_code)
+    
+    pat <- pat_filtre()
+    pat_row <- pat[as.character(pat$code_pat) == as.character(input$pat_selectionne_code), ]
     if (nrow(pat_row) == 0) return()
     
     select_pat(pat_row, depuis_clic_carte = FALSE)
