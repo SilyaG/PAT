@@ -1,10 +1,11 @@
 Shiny.addCustomMessageHandler('show_pat_popup', function(data) {
   document.getElementById('pat_popup_nom').innerText        = data.nom        || '';
-  document.getElementById('pat_popup_niveau').innerText     = 'Niveau ' + (data.niveau  || '');
-  document.getElementById('pat_popup_annee').innerText      = data.annee      || '';
-  document.getElementById('pat_popup_population').innerText = data.population || '';
-  document.getElementById('pat_popup_sau').innerText        = data.sau        || '';
-  document.getElementById('pat_popup_bio').innerText        = data.bio        || '';
+  document.getElementById('pat_popup_niveau').innerText     = 'Niveau de labellisation : ' + (data.niveau || '');
+  document.getElementById('pat_popup_annee').innerText      = 'Année de labellisation : ' + (data.annee || '');
+  document.getElementById('pat_popup_population').innerText = (data.population || '') + ' habitants';
+  document.getElementById('pat_popup_sau').innerText        = (data.sau        || '') + ' ha';
+  document.getElementById('pat_popup_bio').innerText        = (data.bio    || '') + ' ha';
+  document.getElementById('pat_popup_partbio').innerText        = (data.partbio    || '') + ' %';
 
   var contactsEl = document.getElementById('pat_popup_contacts');
   contactsEl.innerHTML = '';

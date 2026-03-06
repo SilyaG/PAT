@@ -330,12 +330,13 @@ server <- function(input, output, session) {
     contacts <- trimws(contacts[contacts != ""])
     
     session$sendCustomMessage("show_pat_popup", list(
-      nom        = as.character(pat_row$nom_du_pat[1] %||% ""),
-      niveau     = as.character(pat_row$niveau[1] %||% ""),
-      annee      = as.character(pat_row$annee[1] %||% ""),
-      population = as.character(pat_row$population[1] %||% ""),
-      sau        = as.character(pat_row$sau[1] %||% ""),
-      bio        = as.character(pat_row$bio[1] %||% ""),
+      nom        = as.character(pat_row$nom_du_pat[1]),
+      niveau     = as.character(pat_row$niveau[1]),
+      annee      = as.character(pat_row$annee[1]     %||% ""),
+      population = as.character(pat_row$pop_hab[1] %||% ""),
+      sau        = as.character(pat_row$rpg_ha_sum_sum[1]        %||% ""),
+      bio        = as.character(pat_row$bio_ha_sum_sum[1]        %||% ""),
+      partbio    = as.character(pat_row$part_bio[1]        %||% ""),
       contacts   = as.list(contacts)
     ))
   }
@@ -500,6 +501,14 @@ server <- function(input, output, session) {
       )
     ) %>%
       addProviderTiles("OpenStreetMap", group = "OSM") %>%
+      
+      # Fond neutre toujours visible (base pour les limites admin)
+      addProviderTiles(
+        "CartoDB.PositronNoLabels",
+        group = "fond_neutre_fixe",
+        options = providerTileOptions(opacity = 1)
+      ) %>%
+      
       fitBounds(xmin, ymin, xmax, ymax) %>%
       setMaxBounds(xmin, ymin, xmax, ymax) %>%
       
@@ -546,28 +555,29 @@ server <- function(input, output, session) {
         weight = 2,
         fillColor = NA,
         fillOpacity = 0,
-        popup = ~paste(nom_officiel, sep = "<br/>"),
         group = "Departement"
       ) %>%
       
       # Limites administratives
       addPolygons(
-        data = reg_aura_4326,
-        color = "black",
-        weight = 2.5,
-        fillColor = NA,
+        data        = reg_aura_4326,
+        color       = "#161616",
+        weight      = 3,
+        fillColor   = NA,
         fillOpacity = 0,
-        popup = ~paste(nom_officiel, sep = "<br/>"),
-        group = "Limites administratives"
+        options     = pathOptions(interactive = FALSE),  # ← clics désactivés
+        group       = "Limites administratives"
       ) %>%
+      
+      # Départements
       addPolygons(
-        data = dep_aura_4326,
-        color = "#7b7b7b",
-        weight = 2,
-        fillColor = NA,
+        data        = dep_aura_4326,
+        color       = "#7b7b7b",
+        weight      = 1.5,
+        fillColor   = NA,
         fillOpacity = 0,
-        popup = ~paste(nom_officiel, sep = "<br/>"),
-        group = "Limites administratives"
+        options     = pathOptions(interactive = FALSE),  # ← clics désactivés
+        group       = "Limites administratives"
       ) %>%
       
       # Communes placeholder : gérées dynamiquement ensuite
@@ -599,8 +609,9 @@ server <- function(input, output, session) {
     proxy %>% hideGroup("Registre Parcellaire Graphique")
     proxy %>% hideGroup("OSM")
     proxy %>% hideGroup("Limites administratives")
+    proxy %>% hideGroup("fond_neutre_fixe")  # ← ajout
     
-    if (input$fond == "ign") {
+    if (input$fond == "ign"){
       proxy %>% showGroup("Plan IGN")
     }
     if (input$fond == "rpg") {
@@ -609,8 +620,9 @@ server <- function(input, output, session) {
     if (input$fond == "osm") {
       proxy %>% showGroup("OSM")
     }
-    if (input$fond == "fond_admin") {
-      proxy %>% showGroup("Limites administratives")
+    if (input$fond == "fond_admin"){
+      proxy %>% showGroup("fond_neutre_fixe")   # ← fond de base
+      proxy %>% showGroup("Limites administratives")  # ← WMS par-dessus
     }
   })
   
@@ -660,9 +672,7 @@ server <- function(input, output, session) {
       weight = 1,
       fillColor = NA,
       fillOpacity = 0,
-      popup = ~paste(nom_officiel, sep = "<br/>"),
       group = "Communes",
-      label = ~nom_officiel
     )
   })
   
