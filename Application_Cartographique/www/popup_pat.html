@@ -1,42 +1,42 @@
 <div id="pat_popup" class="pat-popup" style="display:none;">
-  <div class="pat-popup__inner">
-
+  
+  <!-- HEADER FIXE (titre + bouton fermer) -->
+  <div class="pat-popup__sticky-header" id="pat_popup_header" style="cursor:grab;">
     <button id="pat_popup_close" class="pat-popup__close">Fermer ×</button>
-
-    <!-- Poignée de drag : le header devient draggable -->
-    <div id="pat_popup_header" class="pat-popup__header" style="cursor:grab;">
-      <i class="ri-map-pin-2-fill" style="margin-right:6px;"></i>
+    <div class="pat-popup__header">
       <span id="pat_popup_nom"></span>
     </div>
-
     <div class="pat-popup__niveau" id="pat_popup_niveau"></div>
     <div class="pat-popup__annee"  id="pat_popup_annee"></div>
+  </div>
 
+  <!-- CONTENU SCROLLABLE -->
+  <div class="pat-popup__scrollable">
     <hr class="pat-popup__sep">
-
     <div class="pat-popup__row">
       <img src="18-7-famille.png" class="pat-popup__icon">
       <span id="pat_popup_population"></span>
+      <span class="pat-popup__secondary" id="pat_popup_pct_population"></span>
     </div>
-
     <div class="pat-popup__row">
       <img src="1-1-Agriculture.png" class="pat-popup__icon">
       <span id="pat_popup_sau"></span>
+      <span class="pat-popup__secondary" id="pat_popup_pct_sau"></span>
     </div>
-
     <div class="pat-popup__row">
       <img src="AB.png" class="pat-popup__icon">
       <span id="pat_popup_bio"></span>
+      <span class="pat-popup__secondary" id="pat_popup_pct_sau_bio"></span>
     </div>
-
     <div class="pat-popup__row">
-      <img src="AB.png" class="pat-popup__icon">
+      <img src="leaf.png" class="pat-popup__icon">
       <span id="pat_popup_partbio"></span>
+      <span class="pat-popup__secondary" id="pat_popup_pct_bio_aura"></span>
     </div>
-
     <hr class="pat-popup__sep">
-
     <div class="pat-popup__contacts" id="pat_popup_contacts"></div>
-
+    
+    <!-- Futurs éléments ici -->
+    
   </div>
 </div>

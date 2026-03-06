@@ -2,485 +2,487 @@
 
 /* style du menu des couches */
 .menu-couches {
-      background-color:#f6f6f6;
-      padding: 10px;
-      border-radius: 8px;
-      overflow-y:auto;
-    }
+  background-color:#f6f6f6;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-y:auto;
+}
 
 /* titre du menu des couches */
 .menu-couches h4 {
-      font-weight: 600;
-      margin-top: 15px;
-    }
+  font-weight: 600;
+  margin-top: 15px;
+}
 
 /* Barre d'échelle */
 .leaflet-control-scale-line {
-      text-align: center;  /* Centre le texte horizontalement */
-      font-size: 14px;     /* Ajuste la taille du texte */
-    }
+  text-align: center;
+  font-size: 14px;
+}
 
 /* Fenêtre de tutoriel se déplace en fonction de l'objet présentés */
 .tutorial-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 9998;
-      display: none;
-    }
-    /* Met en surbrillance les contour des objets présentés */
-    .tutorial-highlight {
-      position: absolute;
-      background-color: transparent;
-      border: 2px solid #000091;
-      border-radius: 6px;
-      box-shadow: 0 0 2px #6a6af4;
-      z-index: 9999;
-      pointer-events: none;
-      display: none;
-      transition: all 0.3s ease;
-    }
-    .tutorial-modal {
-      position: fixed;
-      z-index: 10000;
-      background: white;
-      border: 2px solid #e5e5e5;
-      padding: 20px;
-      border-radius: 8px;
-      width: 300px;
-      display: none;
-      transform: none !important;
-    }
-    .tutorial-modal p {
-      font-size: 14px; /* Augmente la taille des paragraphes */
-    }
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 9998;
+  display: none;
+}
 
-    /* bouton croix pour fermer le tutoriel */
-    #tutorial_close {
-      position: absolute;
-      top: 0;
-      right: 0;
-      font-size: 10px;
-      cursor: pointer;
-      transform: translate(10px, -10px);
-    }
+/* Met en surbrillance les contour des objets présentés */
+.tutorial-highlight {
+  position: absolute;
+  background-color: transparent;
+  border: 2px solid #000091;
+  border-radius: 6px;
+  box-shadow: 0 0 2px #6a6af4;
+  z-index: 9999;
+  pointer-events: none;
+  display: none;
+  transition: all 0.3s ease;
+}
+.tutorial-modal {
+  position: fixed;
+  z-index: 10000;
+  background: white;
+  border: 2px solid #e5e5e5;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  display: none;
+  transform: none !important;
+}
+.tutorial-modal p {
+  font-size: 14px;
+}
 
-    /* fenêtre d'introduction du tutoriel */
-    .intro-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background-color: rgba(0, 0, 0, 0.7); /* Assure que l'overlay est bien visible */
-      z-index: 9998;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 18px;
-      border: 2px solid #e5e5e5;
-      padding: 20px;
-      border-radius: 8px;
-    }
-    #intro_overlay .fr-card {
-      padding: 20px 20px !important;
-      border-radius: 15px !important;
-      max-width: 900px !important;
-      min-height: 500px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.25) !important;
-      transition: all 0.3s ease;
-    }
-    .intro-overlay p {
-      color: #333;  /* Couleur du texte pour s'assurer qu'il soit lisible */
-      font-size: 14px;  /* Taille de texte pour une meilleure lisibilité */
-      line-height: 1.5; /* Espacement entre les lignes */
-      margin-bottom: 20px;  /* Ajout d'une marge pour espacer les paragraphes */
-      text-align: center; /* Alignement des paragraphes au centre */
-    }
-    .intro-overlay h2 {
-      color: #333;
-      font-size: 24px;
-      margin-bottom: 20px;  /* Ajout d'un espacement pour aérer */
-      text-align: center; /* Assurez-vous que le titre est centré */
-    }
-    .intro-overlay button {
-      padding: 12px 24px;  /* Plus d'espace autour du texte */
-      font-size: 12px;  /* Taille de police plus grande */
-    }
+/* bouton croix pour fermer le tutoriel */
+#tutorial_close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 10px;
+  cursor: pointer;
+  transform: translate(10px, -10px);
+}
+
+/* fenêtre d'introduction du tutoriel */
+.intro-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9998;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 18px;
+  border: 2px solid #e5e5e5;
+  padding: 20px;
+  border-radius: 8px;
+}
+#intro_overlay .fr-card {
+  padding: 20px 20px !important;
+  border-radius: 15px !important;
+  max-width: 900px !important;
+  min-height: 500px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.25) !important;
+  transition: all 0.3s ease;
+}
+.intro-overlay p {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.intro-overlay h2 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.intro-overlay button {
+  padding: 12px 24px;
+  font-size: 12px;
+}
 
 
-    /* Positionnement du menu d'autocompletion sous la barre de recherche */
-    .fr-search-bar { position: relative; }
+/* Positionnement du menu d'autocompletion sous la barre de recherche */
+.fr-search-bar { position: relative; }
 
-    /* Conteneur du menu deroulant d'autocompletion */
-    .autocomplete-panel{
-      display:none; /* le paneau est caché par defaut, il sera affiché lors d'une recherche via le JS */
-      position:absolute;
-      left:0;
-      right:0;
-      top: calc(100% + 4px);
-      z-index: 9999; /* garantit que le menu passe au dessus des autres élément de la page */
-    }
+/* Conteneur du menu deroulant d'autocompletion */
+.autocomplete-panel{
+  display:none;
+  position:absolute;
+  left:0;
+  right:0;
+  top: calc(100% + 4px);
+  z-index: 9999;
+}
 
-    /* style visuel du panneau déroulant */
-    .autocomplete-card{
-      background:#fff;
-      border:1px solid #e5e5e5;
-      border-radius:8px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-      padding:8px;
-    }
+/* style visuel du panneau déroulant */
+.autocomplete-card{
+  background:#fff;
+  border:1px solid #e5e5e5;
+  border-radius:8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  padding:8px;
+}
 
-    /* Style du titre de section (PAT ou Communes) */
-    .autocomplete-title{
-      font-size:12px;
-      font-weight:600;
-      margin:2px 0 6px 0;
-      color:#000091;;
-    }
-    /*ligne de séparation entre les sections*/
-    .autocomplete-sep{
-      height:1px;
-      background:#eee;
-      margin:8px 0;
-    }
+/* Style du titre de section (PAT ou Communes) */
+.autocomplete-title{
+  font-size:12px;
+  font-weight:600;
+  margin:2px 0 6px 0;
+  color:#000091;;
+}
 
-    /* Liste de résultat de l'autocompletion */
-    .autocomplete-list{
-      list-style:none;
-      padding:0;
-      margin:0;
-      max-height:140px;
-      overflow:auto;
-    }
+/* ligne de séparation entre les sections */
+.autocomplete-sep{
+  height:1px;
+  background:#eee;
+  margin:8px 0;
+}
 
-    /* style de chacun des éléments de résultat */
-    .autocomplete-list li{
-      font-size:12px;
-      padding:6px 8px;
-      border-radius:6px;
-      cursor:pointer;
-      line-height:1.2;
-      color:#161616;
-      user-select:none;
-    }
+/* Liste de résultat de l'autocompletion */
+.autocomplete-list{
+  list-style:none;
+  padding:0;
+  margin:0;
+  max-height:140px;
+  overflow:auto;
+}
 
-    /* style au survol d'un résultat */
-    .autocomplete-list li:hover{
-      background:#f6f6f6;
-    }
-    .autocomplete-empty{
-      cursor:default;
-      opacity:0.7;
-    }
+/* style de chacun des éléments de résultat */
+.autocomplete-list li{
+  font-size:12px;
+  padding:6px 8px;
+  border-radius:6px;
+  cursor:pointer;
+  line-height:1.2;
+  color:#161616;
+  user-select:none;
+}
 
-    /* Personalisation du champ select du DSFR */
-    select.fr-select,
-    .fr-select {
-      border-bottom: 2px solid #000091 !important;
-      box-shadow: none !important;
-    }
+/* style au survol d'un résultat */
+.autocomplete-list li:hover{
+  background:#f6f6f6;
+}
+.autocomplete-empty{
+  cursor:default;
+  opacity:0.7;
+}
+
+/* Personalisation du champ select du DSFR */
+select.fr-select,
+.fr-select {
+  border-bottom: 2px solid #000091 !important;
+  box-shadow: none !important;
+}
 
 /* Style du panneau latéral droit (liste des PAT) */
-/* Conteneur principal du panneau latéral*/
-    .right-panel{
-      background-color:#f6f6f6;
-      padding:10px;
-      border-radius:8px;
-      height: 80vh;
-      overflow-y:auto;
-    }
+.right-panel{
+  background-color:#f6f6f6;
+  padding:10px;
+  border-radius:8px;
+  height: 80vh;
+  overflow-y:auto;
+}
 
 /* Style des liens dans le menu latéral */
-    .right-panel .fr-sidemenu__link{
-      font-size: 12px;
-      line-height: 1.2;
-      padding: 6px 8px;
-    }
-    .hidden-sidebar{
-      transform: translateX(100%);
-      opacity: 0;
-      transition: all 0.4s ease-in-out;
-      pointer-events: none;
-    }
-    .visible-sidebar{
-      transform: translateX(0%);
-      opacity: 1;
-      pointer-events: auto;
-    }
-      
-/*Style des boutons leaflet zoom/dezoom/plein écran*/
-/* Suppression du style par defaut du conteneur leaflet */
-    .leaflet-control-zoom.leaflet-bar {
-      border: none !important;
-      box-shadow: none !important;
-      background: none !important;
-    }
-    
-  /* Style des boutons + et - */
-    .leaflet-control-zoom a {
-      background-color: #ffffff !important; /* Couleur de fond souhaitée */
-      border: 1px solid #e5e5e5 !important; /* Bordure légère type DSFR */
-      color: #000091 !important; /* Bleu France */
-      background-image: none !important; 
-      text-indent: 0 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      height: 36px !important;
-      width: 36px !important;
-      font-size: 24px !important; /* Taille du + et - */
-      font-weight: normal !important;
-      text-decoration: none !important;
-    }
+.right-panel .fr-sidemenu__link{
+  font-size: 12px;
+  line-height: 1.2;
+  padding: 6px 8px;
+}
+.hidden-sidebar{
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.4s ease-in-out;
+  pointer-events: none;
+}
+.visible-sidebar{
+  transform: translateX(0%);
+  opacity: 1;
+  pointer-events: auto;
+}
 
-  /* style du bouton de plein écran */
-    .leaflet-control-fullscreen a {
-      border-radius: 4px !important;
-      border: 1px solid #e5e5e5 !important;
-      box-shadow: none !important;
-      height: 36px !important;
-      width: 36px !important;
-      justify-content: center !important;
-      display: flex !important;
-      align-items: center !important;
-      padding: 0 !important; 
-      line-height: 1 !important; 
-      background-size: 30px 58px !important;
-      background-repeat: no-repeat !important;
-    }
-    
-  /* effet au survol des boutons */
-    .leaflet-control-fullscreen a:hover,
-    .leaflet-control-zoom a:hover{
-      background-color: #eeeeee !important;
-      color: #000091 !important;
-    }
+/* Style des boutons leaflet zoom/dezoom/plein écran */
+.leaflet-control-zoom.leaflet-bar {
+  border: none !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e5e5 !important;
+  color: #000091 !important;
+  background-image: none !important;
+  text-indent: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  width: 36px !important;
+  font-size: 24px !important;
+  font-weight: normal !important;
+  text-decoration: none !important;
+}
+
+.leaflet-control-fullscreen a {
+  border-radius: 4px !important;
+  border: 1px solid #e5e5e5 !important;
+  box-shadow: none !important;
+  height: 36px !important;
+  width: 36px !important;
+  justify-content: center !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  background-size: 30px 58px !important;
+  background-repeat: no-repeat !important;
+}
+
+.leaflet-control-fullscreen a:hover,
+.leaflet-control-zoom a:hover{
+  background-color: #eeeeee !important;
+  color: #000091 !important;
+}
 
 
-/*Style de la légende de la carte*/
-    .map-legend {
-      display: none; /*caché par défaut */
-      background: #ffffff;
-      padding: 14px 16px;
-      border-radius: 6px;
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      min-width: 240px;
-      font-size: 13px;
-      line-height: 1.5;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-    
-    /* titre principale de la légende */
-    .map-legend h4 {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #000091;
-    }
-    
-    /* catégorie de la légende */
-    .leg-cat {
-      font-weight: 600;
-      font-size: 12.5px;
-      margin: 10px 0 6px 0;
-      color: #161616;
-    }
-    
-    .leg-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 4px 0;
-      font-size: 12px;
-    }
-    
-    /* séparateur dans la légende */
-    .leg-sep {
-      height: 1px;
-      background: #e5e5e5;
-      margin: 10px 0;
-    }
-    
-  /* symbole de légende */
-  /* carré de couleur */
-    .swatch {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-      flex-shrink: 0;
-    }
-    
-    /* symbole de ligne pour les limites administratives */
-    .swatch-line {
-      width: 18px;
-      height: 3px;
-      flex-shrink: 0;
-    }
-    
-    /* symbole circulaire pour les cercles proportionel */
-    .swatch-circle {
-      border-radius: 50%;
-    }
-    
-    /* dégragé de couleurs pour les variable quantitative d'intensité */
-    .swatch-grad {
-      width: 40px;
-      height: 10px;
-      background: linear-gradient(to right, #bcd9a3, #306600);
-      border-radius: 3px;
-    }
-    
-    /* ajoute la légende à la carte */
-    .map-legend h4 {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #000091;
-    }
+/* Style de la légende de la carte */
+.map-legend {
+  display: none;
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  min-width: 240px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.map-legend h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000091;
+}
+
+.leg-cat {
+  font-weight: 600;
+  font-size: 12.5px;
+  margin: 10px 0 6px 0;
+  color: #161616;
+}
+
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.leg-sep {
+  height: 1px;
+  background: #e5e5e5;
+  margin: 10px 0;
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.swatch-line {
+  width: 18px;
+  height: 3px;
+  flex-shrink: 0;
+}
+
+.swatch-circle {
+  border-radius: 50%;
+}
+
+.swatch-grad {
+  width: 40px;
+  height: 10px;
+  background: linear-gradient(to right, #bcd9a3, #306600);
+  border-radius: 3px;
+}
+
 
 /* Personalisation des controles leaflet */
-/* supprime le fond et la bordure des groupes de boutons */
-    .leaflet-bar {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
+.leaflet-bar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
 
 /* Bouton d'affichage de la légende */
-/* taille initiale du bouton */
-    #legend_toggle {
-      width: 26px;
-      height: 26px;
-      line-height: 26px;
-      text-align: center;
-      padding: 0;
-    }
-    
-/* icone de légende à l'intérieur du bouton */
-    #legend_toggle i {
-      font-size: 14px;
-    }
-    /* Supprime le padding par défaut du conteneur addControl() */
-    #legend_toggle.leaflet-control {
-      margin: 0 !important;
-    }
-    /* Réduit le bouton légende à la même taille que zoom/fullscreen */
-    #legend_toggle {
-      width: 36px !important;
-      height: 36px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      background: #fff !important;
-      border: 1px solid #e5e5e5 !important;
-      border-radius: 4px !important;
-      color: #000091 !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      text-decoration: none !important;
-    }
-    
-    /* taille de l'icone */
-    #legend_toggle i {
-      font-size: 18px !important;
-      line-height: 1 !important;
-      display: block !important;
-    }
+#legend_toggle {
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #fff !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 4px !important;
+  color: #000091 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+}
 
-    /* supprime le fond autour du bouton dans Leaflet */
-    .leaflet-control:has(#legend_toggle) {
-      background: transparent !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-    }
+#legend_toggle i {
+  font-size: 18px !important;
+  line-height: 1 !important;
+  display: block !important;
+}
+
+.leaflet-control:has(#legend_toggle) {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
 
 
+/* ============================================
+Pop-up des PAT
+============================================ */
 
-    /* Pop-up des PAT */
-    .pat-popup {
-      position: absolute;
-      bottom: 30px;
-      right: 10px;
-      width: 320px;
-      z-index: 9999;
-      background: white;
-      border: 2px solid #e5e5e5;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-      font-family: "Marianne", Arial, sans-serif;
-    }
-    
-    .pat-popup__inner {
-      padding: 20px;
-      position: relative;
-    }
-    
-    .pat-popup__close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      color: #000091;
-      font-size: 13px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    
-    .pat-popup__close:hover {
-      text-decoration: underline;
-    }
-    
-    .pat-popup__header {
-      font-weight: bold;
-      color: #000091;
-      font-size: 16px;
-      margin-bottom: 4px;
-      padding-right: 60px;
-    }
-    
-    .pat-popup__niveau {
-      font-size: 14px;
-      color: #333;
-      margin-bottom: 2px;
-    }
-    
-    .pat-popup__annee {
-      font-size: 14px;
-      color: #333;
-      margin-bottom: 8px;
-    }
-    
-    .pat-popup__sep {
-      border: none;
-      border-top: 1px solid #e5e5e5;
-      margin: 12px 0;
-    }
-    
-    .pat-popup__row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: #333;
-    }
-    
-    .pat-popup__icon {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
-      flex-shrink: 0;
-    }
-    
-    .pat-popup__contacts {
-      font-size: 12px;
-      color: #000091;
-    }
-    
-    .pat-popup__contacts a {
-      display: block;
-      color: #000091;
-      text-decoration: underline;
-    }
+/* Conteneur principal — dimensions fixes */
+.pat-popup {
+  position: absolute;
+  bottom: 30px;
+  right: 10px;
+  width: 320px;
+  height: 420px;
+  max-height: 420px;
+  z-index: 9999;
+  background: white;
+  border: 2px solid #e5e5e5;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  font-family: "Marianne", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pat-popup__sticky-header {
+  flex-shrink: 0;
+  padding: 16px 20px 10px 20px;
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  position: relative;
+  min-height: 0;
+}
+
+.pat-popup__scrollable {
+  flex: 1 1 0;
+  min-height: 0;
+  height: 280px;
+  overflow-y: scroll !important;   /* ← !important pour forcer contre tout héritage */
+  padding: 0 20px 16px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: #000091 #f0f0f0;
+}
+
+.pat-popup__scrollable::-webkit-scrollbar {
+  width: 6px;
+  display: block !important;       /* ← force l'affichage webkit */
+}
+.pat-popup__scrollable::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+.pat-popup__scrollable::-webkit-scrollbar-thumb {
+  background-color: #000091;
+  border-radius: 3px;
+}
+
+/* Bouton fermer */
+.pat-popup__close {
+position: absolute;
+top: 10px;
+right: 10px;
+background: none;
+border: none;
+color: #000091;
+font-size: 13px;
+cursor: pointer;
+font-family: inherit;
+}
+
+.pat-popup__close:hover {
+text-decoration: underline;
+}
+
+/* Titre du PAT */
+.pat-popup__header {
+font-weight: bold;
+color: #000091;
+font-size: 16px;
+margin-bottom: 4px;
+padding-right: 60px; /* évite chevauchement avec bouton fermer */
+}
+
+.pat-popup__niveau {
+font-size: 14px;
+color: #333;
+margin-bottom: 2px;
+}
+
+.pat-popup__annee {
+font-size: 14px;
+color: #333;
+}
+
+.pat-popup__sep {
+border: none;
+border-top: 1px solid #e5e5e5;
+margin: 12px 0;
+}
+
+.pat-popup__row {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 8px;
+font-size: 14px;
+color: #333;
+}
+
+.pat-popup__icon {
+width: 36px;
+height: 36px;
+object-fit: contain;
+flex-shrink: 0;
+}
+
+.pat-popup__contacts {
+font-size: 12px;
+color: #000091;
+}
+
+.pat-popup__contacts a {
+  display: inline-block;
+  color: #000091;
+  text-decoration: underline;
+}
+
+.pat-popup__secondary {
+  font-size: 12px;
+  color: #666;
+  margin-left: 4px;
+}
