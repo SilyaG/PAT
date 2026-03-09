@@ -83,7 +83,8 @@ ui <- fluidPage(
     tags$script(src = "hachure_pat.js"),
     tags$script(src = "tutoriel.js"),
     tags$script(src = "popup_pat.js"),
-    tags$script(src = "reset.js")
+    tags$script(src = "reset.js"),
+    tags$script(src = "indicateurs_highlight.js")
   ),
   
   includeHTML("www/intro_overlay.html"),
@@ -398,7 +399,7 @@ server <- function(input, output, session) {
     pat_actif(pat_row$nom_du_pat[1])
     clic_sur_pat(depuis_clic_carte)
     
-    
+    session$sendCustomMessage("show_toast_indicateurs", list())
     bb <- st_bbox(pat_row)
     
     leafletProxy("map") %>%
@@ -1199,31 +1200,49 @@ server <- function(input, output, session) {
     # Cas 2 : plusieurs PAT superposés (seulement quand aucun PAT n'est actif)
     clic_sur_pat(TRUE)
     
-    liens <- paste0(
-      vapply(
-        seq_len(nrow(pat_click)),
-        function(i) {
-          code_json <- jsonlite::toJSON(as.character(pat_click$code_pat[i]), auto_unbox = TRUE)
-          libelle   <- htmltools::htmlEscape(as.character(pat_click$nom_du_pat[i]))
-          
-          paste0(
-            "<li><a href='#' onclick='Shiny.setInputValue(\"pat_selectionne_code\", ",
-            code_json,
-            ", {priority:\"event\"}); return false;'>",
-            libelle,
-            "</a></li>"
-          )
-        },
-        character(1)
-      ),
-      collapse = ""
-    )
+liens <- paste0(
+  vapply(
+    seq_len(nrow(pat_click)),
+    function(i) {
+      code_json <- jsonlite::toJSON(as.character(pat_click$code_pat[i]), auto_unbox = TRUE)
+      libelle   <- htmltools::htmlEscape(as.character(pat_click$nom_du_pat[i]))
+      echelle   <- htmltools::htmlEscape(as.character(pat_click$echelle[i]))
+
+      paste0(
+        "<li style='margin-bottom:6px; list-style:none;'>",
+        "<a href='#'",
+        " style='display:block; padding:6px 10px; background:#f5f5fe;",
+        " border-left:3px solid #000091; color:#000091 !important;",
+        " text-decoration:none !important; font-size:12px;",
+        " font-family:Marianne,Arial,sans-serif;'",
+        " onmouseover=\"this.style.background='#e3e3fd'\"",
+        " onmouseout=\"this.style.background='#f5f5fe'\"",
+        " onclick='Shiny.setInputValue(\"pat_selectionne_code\", ",
+        code_json,
+        ", {priority:\"event\"}); return false;'>",
+        "<span style='font-weight:600;'>", libelle, "</span>",
+        "<br/><span style='font-size:11px; color:#666;'>", echelle, "</span>",
+        "</a></li>"
+      )
+    },
+    character(1)
+  ),
+  collapse = ""
+)
     leafletProxy("map") %>%
       clearPopups() %>%
       addPopups(
         lng = click$lng,
         lat = click$lat,
-        popup = paste0("<strong>Plusieurs PAT à cet endroit :</strong><br/><ul>", liens, "</ul>")
+        popup = paste0("
+  <div style='font-family:Marianne,Arial,sans-serif; font-size:13px; min-width:200px;'>
+    <div style='font-weight:700; color:#000091; font-size:13px;
+      margin-bottom:8px; padding-bottom:6px; border-bottom:2px solid #000091;'>
+      Quel PAT souhaitez-vous consulter ? 
+    </div>
+    <ul style='margin:0; padding:0;'>", liens, "</ul>
+  </div>
+")
       )
   })
   
