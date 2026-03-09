@@ -324,6 +324,7 @@ server <- function(input, output, session) {
       pct_sau_bio    = as.character(pat_row$part_bio_pat[1]   %||% ""),
       partbio        = as.character(pat_row$part_bio[1]        %||% ""),
       bio_aura       = as.character(pat_row$bio_aura[1]   %||% ""),
+      restau         = as.character(pat_row$nb_cantines_sum[1]   %||% ""),
       contacts       = as.list(contacts)
     ))
   }
@@ -1039,6 +1040,17 @@ server <- function(input, output, session) {
     
     if (nrow(pat_affiche) == 0) return()
     
+    # Ordre d'affichage : départemental d'abord (fond), puis interterritorial, puis intercommunal (dessus)
+    ordre_echelle <- c(
+      "PAT d'échelle intercommunale",
+      "PAT interterritorial (PAiT)",
+      "PAT d'échelle départementale"
+    )
+    
+    pat_affiche$echelle <- factor(pat_affiche$echelle, levels = ordre_echelle)
+    pat_affiche <- pat_affiche[order(pat_affiche$echelle, na.last = TRUE), ]
+    
+    # --- Niveau 2 (aplat) ---
     pat_niv2 <- pat_affiche[!is.na(pat_affiche$niveau) & pat_affiche$niveau == "2", ]
     if (nrow(pat_niv2) > 0) {
       proxy %>% addPolygons(
@@ -1052,6 +1064,7 @@ server <- function(input, output, session) {
       )
     }
     
+    # --- Niveau 1 (hachuré) ---
     pat_niv1 <- pat_affiche[!is.na(pat_affiche$niveau) & pat_affiche$niveau == "1", ]
     if (nrow(pat_niv1) > 0) {
       proxy %>% addPolygons(
