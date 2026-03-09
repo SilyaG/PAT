@@ -606,7 +606,11 @@ server <- function(input, output, session) {
         color = "#6a6af4",
         weight = 2,
         fillOpacity = 0.5,
-        popup = ~paste(Nom_CLS, sep = "<br/>"),
+        popup = ~paste0(
+          "<div style='font-family:Marianne,Arial,sans-serif; font-size:11px; padding:4px;'>",
+          "<div style='font-weight:bold; color:#000091; font-size:12px; margin-bottom:4px;'>",
+          Nom_CLS
+        ),
         group = "Contrats locaux de santé"
       )
   })
