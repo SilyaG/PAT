@@ -82,7 +82,8 @@ ui <- fluidPage(
     tags$script(src = "liste_pat.js"),
     tags$script(src = "hachure_pat.js"),
     tags$script(src = "tutoriel.js"),
-    tags$script(src = "popup_pat.js")
+    tags$script(src = "popup_pat.js"),
+    tags$script(src = "reset.js")
   ),
   
   includeHTML("www/intro_overlay.html"),
@@ -133,6 +134,13 @@ ui <- fluidPage(
             tags$option(value = "PAT d'échelle intercommunale", "Intercommunale"),
             tags$option(value = "PAT d'échelle départementale", "Départementale")
           )
+        ),
+        tags$button(
+          id = "reset_button",
+          class = "fr-btn fr-btn--secondary",
+          type = "button",
+          tags$i(class = "ri-restart-line", style = "margin-right:6px;"),
+          "Réinitialiser"
         )
       ),
       
@@ -307,6 +315,43 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
   
+  # Filtres PAT
+  pat_filtre <- reactive({
+    pat <- couche_pat_4326
+    
+    if (!is.null(input$filtre_niveau) &&
+        input$filtre_niveau != "Tous" &&
+        input$filtre_niveau != "") {
+      pat <- pat[pat$niveau == input$filtre_niveau, ]
+    }
+    
+    if (!is.null(input$filtre_niveau_terri) &&
+        input$filtre_niveau_terri != "Tous" &&
+        input$filtre_niveau_terri != "") {
+      pat <- pat[pat$echelle == input$filtre_niveau_terri, ]
+    }
+    
+    pat
+  })
+  
+  #Bouton reset 
+  observeEvent(input$reset_button, {
+    session$sendCustomMessage("reset_filtres", list())
+    
+    pat_actif(NULL)
+    clic_sur_pat(FALSE)
+    session$sendCustomMessage("hide_pat_popup", list())
+    
+    leafletProxy("map") %>%
+      clearPopups() %>%
+      flyToBounds(
+        lng1 = unname(bbox_init["xmin"]),
+        lat1 = unname(bbox_init["ymin"]),
+        lng2 = unname(bbox_init["xmax"]),
+        lat2 = unname(bbox_init["ymax"])
+      )
+  })
+  
   # Popup PAT custom
   show_popup_pat <- function(pat_row) {
     contacts <- unlist(strsplit(as.character(pat_row$mail_coord[1] %||% ""), ";"))
@@ -327,26 +372,6 @@ server <- function(input, output, session) {
       contacts       = as.list(contacts)
     ))
   }
-  
-  # Filtres PAT
-  pat_filtre <- reactive({
-    pat <- couche_pat_4326
-    
-    if (!is.null(input$filtre_niveau) &&
-        input$filtre_niveau != "Tous" &&
-        input$filtre_niveau != "") {
-      pat <- pat[pat$niveau == input$filtre_niveau, ]
-    }
-    
-    if (!is.null(input$filtre_niveau_terri) &&
-        input$filtre_niveau_terri != "Tous" &&
-        input$filtre_niveau_terri != "") {
-      pat <- pat[pat$echelle == input$filtre_niveau_terri, ]
-    }
-    
-    pat
-  })
-  
   # Communes du PAT actif via code_pat -> code_insee
   communes_dans_pat_actif <- reactive({
     req(pat_actif())
@@ -683,10 +708,16 @@ server <- function(input, output, session) {
     
     if (nrow(centroid_pat) == 0) return()
     
-    # Rescale LOCAL au PAT actif
     centroid_pat$rayon_pop_local <- scales::rescale(sqrt(centroid_pat$population),  to = c(3, 30))
     centroid_pat$rayon_sau_local <- scales::rescale(sqrt(centroid_pat$rpg_ha_sum),  to = c(3, 30))
     centroid_pat$rayon_bio_local <- scales::rescale(sqrt(centroid_pat$bio_ha_sum),  to = c(3, 30))
+    
+    # ← PALETTE BIO RECALCULÉE LOCALEMENT SUR LE PAT ACTIF
+    pal_bio_local <- colorNumeric(
+      palette  = c("#bcd9a3", "#306600"),
+      domain   = centroid_pat$part_bio,
+      na.color = "transparent"
+    )
     
     if (input$indicateur == "pop") {
       proxy %>% addCircleMarkers(
@@ -712,7 +743,8 @@ server <- function(input, output, session) {
       proxy %>% addCircleMarkers(
         data = centroid_pat,
         radius = ~rayon_bio_local,
-        fillColor = ~pal_bio(part_bio), color = "#ffffff", weight = 1, fillOpacity = 1,
+        fillColor = ~pal_bio_local(part_bio),  # ← palette locale
+        color = "#ffffff", weight = 1, fillOpacity = 1,
         popup = ~paste("<strong>", nom_officiel, "</strong><br/>SAU Bio (ha) :", bio_ha_sum / 2,
                        "<br/>Part de la SAU Bio (%) :", part_bio),
         group = "SAU bio"
@@ -903,7 +935,7 @@ server <- function(input, output, session) {
       Surface agricole bio (ha)
     </div>
     <div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:4px;'>
-      Taille du cercle proportionnelle
+      Taille du cercle proportionnel
     </div>
     <div style='display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding-left:2px; margin-top:4px;'>
       <div style='display:flex; align-items:center; gap:8px;'>

@@ -108,7 +108,13 @@
   font-size: 12px;
 }
 
-
+/* Angles droits sur les filtres et la barre de recherche */
+#filtre_niveau,
+#filtre_niveau_terri,
+.fr-search-bar .fr-input,
+.fr-search-bar .fr-btn {
+  border-radius: 0 !important;
+}
 /* Positionnement du menu d'autocompletion sous la barre de recherche */
 .fr-search-bar { position: relative; }
 
@@ -126,7 +132,7 @@
 .autocomplete-card{
   background:#fff;
   border:1px solid #e5e5e5;
-  border-radius:8px;
+  border-radius: 8px;  
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
   padding:8px;
 }
@@ -236,7 +242,6 @@ select.fr-select,
 
   /* style du bouton de plein écran */
     .leaflet-control-fullscreen a {
-      border-radius: 4px !important;
       border: 1px solid #e5e5e5 !important;
       box-shadow: none !important;
       height: 36px !important;
