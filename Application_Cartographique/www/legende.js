@@ -42,3 +42,5 @@ Shiny.addCustomMessageHandler('update_legende', function(html) {
   // Si l'élement existe alors on remplace le contenu
   if(legend) legend.innerHTML = html;
 });
+
+
