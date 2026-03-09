@@ -137,7 +137,12 @@ ui <- fluidPage(
       ),
       
       tags$div(
-        style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
+        style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;"),
+        
+      uiOutput("warning_pat_ui"),
+
+  tags$div(
+    style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
         
         tags$button(
           id = "info_tutorial",
@@ -254,6 +259,9 @@ server <- function(input, output, session) {
   
   # Pour éviter le reset juste après un clic PAT
   clic_sur_pat <- reactiveVal(FALSE)
+  
+  # Pour delai message d'erreur pas de Pat visible suivant les filtres
+  warning_visible <- reactiveVal(FALSE)
   
   expand_bbox <- function(bbox, factor = 1.25) {
     xmid <- (bbox["xmin"] + bbox["xmax"]) / 2
@@ -1073,21 +1081,27 @@ server <- function(input, output, session) {
   })
   
   # Warning si filtres sans résultat
-  observeEvent(
-    list(input$filtre_niveau, input$filtre_niveau_terri),
-    {
-      pat <- pat_filtre()
-      if (nrow(pat) == 0 &&
-          !is.null(input$filtre_niveau) && input$filtre_niveau != "" &&
-          !is.null(input$filtre_niveau_terri) && input$filtre_niveau_terri != "") {
-        showNotification(
-          "Aucun PAT correspondant aux filtres sélectionnés.",
-          type = "warning", duration = 5, id = "warning_pat"
+  warning_visible <- reactiveVal(FALSE)
+  
+  # Warning si filtres sans résultat
+  output$warning_pat_ui <- renderUI({
+    pat <- pat_filtre()
+    
+    if (nrow(pat) == 0 &&
+        !is.null(input$filtre_niveau) && input$filtre_niveau != "" &&
+        !is.null(input$filtre_niveau_terri) && input$filtre_niveau_terri != "") {
+      
+      tags$div(
+        class = "fr-alert fr-alert--warning alert-inline-warning",
+        tags$p(
+          class = "fr-alert__title",
+          "Aucun PAT correspondant aux filtres sélectionnés."
         )
-      }
-    },
-    ignoreInit = TRUE
-  )
+      )
+    } else {
+      NULL
+    }
+  })
   
   # Hachures au démarrage
   observeEvent(input$map_initialized, {

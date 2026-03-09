@@ -510,3 +510,41 @@ color: #000091;
   color: #666;
   margin-left: 4px;
 }
+
+.shiny-notification {
+  background: white !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  opacity: 1 !important;
+}
+
+.shiny-notification .fr-alert {
+  margin: 0 !important;
+}
+
+.alert-inline-warning {
+  width: 250px;
+  min-height: 28px !important;
+  padding: 4px 10px 4px 28px !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  position: relative !important;
+}
+
+.alert-inline-warning .fr-alert__title {
+  margin: 0 !important;
+  font-size: 0.85rem !important;
+  line-height: 1.15 !important;
+}
+
+.alert-inline-warning::before {
+  position: absolute !important;
+  left: 5px !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+}
