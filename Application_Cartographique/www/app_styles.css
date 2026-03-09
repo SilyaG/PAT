@@ -516,6 +516,34 @@ color: #000091;
   margin-left: 4px;
 }
 
+/* Style du popup des CLS */
+.leaflet-popup-content-wrapper {
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+  border: 1px solid #e5e5e5 !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px !important;
+  font-family: Marianne, Arial, sans-serif !important;
+  font-size: 11px !important;  /* ← réduit */
+}
+
+.leaflet-popup-tip-container {
+  display: none !important;
+}
+
+.leaflet-popup-close-button {
+  color: #000091 !important;
+  font-size: 13px !important;
+  font-family: Marianne, Arial, sans-serif !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #000091 !important;
+  text-decoration: underline !important;
+}
 .shiny-notification {
   background: white !important;
   border: none !important;
