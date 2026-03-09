@@ -143,11 +143,9 @@ ui <- fluidPage(
           "Réinitialiser"
         )
       ),
-      
+      uiOutput("warning_pat_ui"),
       tags$div(
         style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;"),
-        
-      uiOutput("warning_pat_ui"),
 
   tags$div(
     style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
