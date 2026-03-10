@@ -748,7 +748,7 @@ server <- function(input, output, session) {
       proxy %>% addCircleMarkers(
         data = centroid_pat,
         radius = ~rayon_pop_local,
-        fillColor = "#CE614A", color = "#ffffff", weight = 1, fillOpacity = 0.7,
+        fillColor = "#CE614A", color = "#ffffff", weight = 1, fillOpacity = 1,
         popup = ~paste0(
           "<div style='font-family:Marianne,Arial,sans-serif; min-width:180px;'>",
           "<div style='font-weight:700; color:#000091; font-size:13px; padding-bottom:6px;",
@@ -758,7 +758,9 @@ server <- function(input, output, session) {
           "<div><div style='font-weight:600;'>", formatC(population, format="d", big.mark=" "), " habitants</div>",
           "<div style='font-size:11px; color:#666;'>Population communale</div></div>",
           "</div></div>"
-        ),        group = "Population communale"
+        ),
+        popupOptions = popupOptions(autoPan = TRUE, keepInView = TRUE),
+        group = "Population communale"
       )
     }
     
@@ -798,6 +800,7 @@ server <- function(input, output, session) {
           round(part_sau, 1), " %</div>",
           "</div></div>"
         ),
+        popupOptions = popupOptions(autoPan = TRUE, keepInView = TRUE),
         group = "SAU"
       )
     }
@@ -828,6 +831,7 @@ server <- function(input, output, session) {
           round(part_bio, 1), " %</div>",
           "</div></div>"
         ),
+        popupOptions = popupOptions(autoPan = TRUE, keepInView = TRUE),
         group = "SAU bio"
       )
     }

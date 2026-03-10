@@ -549,8 +549,11 @@ color: #000091;
 .leaflet-popup-content {
   margin: 12px 16px !important;
   font-family: Marianne, Arial, sans-serif !important;
-  font-size: 11px !important;  /* ← réduit */
+  font-size: 11px !important; 
+  max-width: 250px !important;
+  word-wrap: break-word !important;
 }
+
 
 .leaflet-popup-tip-container {
   display: none !important;
