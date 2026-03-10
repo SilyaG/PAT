@@ -2,6 +2,8 @@
 // Ici il s'agit du fichier concernant le tutoriel d'explication de l'application
 
 // ================ Tutoriel de lancement ==============
+
+
 document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('start_tutorial').addEventListener('click', function() {
@@ -38,7 +40,7 @@ function startTutorial() {
     {el:'#filtre_niveau',       title:'Filtre des niveaux de labellisation',  text:'Utilisez ce filtre pour sélectionner le niveau de labellisation des PAT.'},
     {el:'#filtre_niveau_terri', title:'Filtre des échelles territoriales',    text:'Vous pouvez aussi utiliser ce filtre pour sélectionner l\'échelle territoriale des PAT.'},
     {el:'#reset_button',        title:'Réinitialiser la carte',               text:'Ce bouton remet la carte dans son état initial : les filtres sont effacés, le zoom revient sur la région entière et tout PAT sélectionné est désélectionné.'},
-    {el:'#map',                 title:'Carte',                               text:'La carte centrale affiche les couches et le fond de carte souhaités. Cliquer sur un PAT pour le sélectionner et en dehors de ce dernier pour revenir à la carte initiale.', position:{ top: 700, left: 10 }},
+    {el:'#map',                 title:'Carte',                               text:'La carte centrale affiche les couches et le fond de carte souhaités. Cliquer sur un PAT pour le sélectionner et en dehors de ce dernier pour revenir à la carte initiale.'},
     {el:'#legend_toggle',       title:'Afficher/Masquer la légende',         text:'Cliquez sur ce bouton pour afficher ou masquer la légende des couches visibles sur la carte.'},
     {el:'#map_legend',          title:'Légende',                             text:'La légende s\'actualise en fonction des couches présentes sur la carte.'},
     {el:'#nom_du_pat',          title:'Barre de recherche',                  text:'Vous pouvez rechercher un PAT ou une commune ici.'},
@@ -83,44 +85,28 @@ function startTutorial() {
       var modal = document.getElementById('tutorial_modal');
       modal.style.display = 'block';
 
-      // Réinitialise les positions avant calcul
-      modal.style.top    = 'auto';
-      modal.style.left   = 'auto';
-      modal.style.right  = 'auto';
-      modal.style.bottom = 'auto';
-
+      var isMobile = window.innerWidth <= 768;
+      var margin = 12;
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
       var modalW = modal.offsetWidth;
       var modalH = modal.offsetHeight;
-      var margin = 15;
-      var top, left;
 
-      if (s.position) {
-        top  = s.position.top;
-        left = s.position.left;
+      if (isMobile) {
+        // Sur mobile : le CSS gère le placement en bas, on réinitialise
+        modal.style.top  = '';
+        modal.style.left = '';
       } else {
-        // Placement préféré : en dessous
+        var top, left;
         top  = rect.bottom + margin;
         left = rect.left;
-
-        // Dépasse à droite → recaler
-        if (left + modalW > window.innerWidth - margin)
-          left = window.innerWidth - modalW - margin;
-
-        // Dépasse en bas → passer au dessus
-        if (top + modalH > window.innerHeight - margin)
-          top = rect.top - modalH - margin;
-
-        // Sécurité : ne jamais sortir à gauche ou en haut
-        if (left < margin) left = margin;
-        if (top  < margin) top  = margin;
-
-        // Dernier recours : centrer verticalement si toujours hors écran
-        if (top + modalH > window.innerHeight - margin)
-          top = Math.max(margin, (window.innerHeight - modalH) / 2);
+        if (left + modalW > vw - margin) left = vw - modalW - margin;
+        if (top + modalH > vh - margin)  top  = rect.top - modalH - margin;
+        if (top < margin)                top  = Math.max(margin, (vh - modalH) / 2);
+        if (left < margin)               left = margin;
+        modal.style.top  = top  + 'px';
+        modal.style.left = left + 'px';
       }
-
-      modal.style.top  = top  + 'px';
-      modal.style.left = left + 'px';
 
       document.getElementById('tutorial_title').innerText = s.title;
       document.getElementById('tutorial_text').innerText  = s.text;

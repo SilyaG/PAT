@@ -739,8 +739,16 @@ server <- function(input, output, session) {
         data = centroid_pat,
         radius = ~rayon_pop_local,
         fillColor = "#CE614A", color = "#ffffff", weight = 1, fillOpacity = 0.7,
-        popup = ~paste("<strong>", nom_officiel, "</strong><br/>Population :", population),
-        group = "Population communale"
+        popup = ~paste0(
+          "<div style='font-family:Marianne,Arial,sans-serif; min-width:180px;'>",
+          "<div style='font-weight:700; color:#000091; font-size:13px; padding-bottom:6px;",
+          " margin-bottom:8px; border-bottom:2px solid #000091;'>", nom_officiel, "</div>",
+          "<div style='display:flex; align-items:center; gap:8px; font-size:13px; color:#333;'>",
+          "<span style='font-size:18px;'>&#128101;</span>",
+          "<div><div style='font-weight:600;'>", formatC(population, format="d", big.mark=" "), " habitants</div>",
+          "<div style='font-size:11px; color:#666;'>Population communale</div></div>",
+          "</div></div>"
+        ),        group = "Population communale"
       )
     }
     
@@ -760,8 +768,26 @@ server <- function(input, output, session) {
         radius = ~rayon_bio_local,
         fillColor = ~pal_bio_local(part_bio),  # ← palette locale
         color = "#ffffff", weight = 1, fillOpacity = 1,
-        popup = ~paste("<strong>", nom_officiel, "</strong><br/>SAU Bio (ha) :", bio_ha_sum / 2,
-                       "<br/>Part de la SAU Bio (%) :", part_bio),
+        popup = ~paste0(
+          "<div style='font-family:Marianne,Arial,sans-serif; min-width:200px;'>",
+          "<div style='font-weight:700; color:#000091; font-size:13px; padding-bottom:6px;",
+          " margin-bottom:8px; border-bottom:2px solid #000091;'>", nom_officiel, "</div>",
+          "<div style='display:flex; align-items:center; gap:8px; font-size:13px;",
+          " color:#333; margin-bottom:8px;'>",
+          "<span style='font-size:18px;'>&#127807;</span>",
+          "<div><div style='font-weight:600;'>", formatC(round(bio_ha_sum / 2), format="d", big.mark=" "), " hectares</div>",
+          "<div style='font-size:11px; color:#666;'>Surface Agricole Utile Bio</div></div>",
+          "</div>",
+          "<div style='background:#f6f6f6; border-radius:4px; padding:6px 10px;'>",
+          "<div style='font-size:11px; color:#555; margin-bottom:4px;'>Part de SAU bio</div>",
+          "<div style='background:#e5e5e5; border-radius:3px; height:10px; width:100%;'>",
+          "<div style='width:", pmin(round(part_bio), 100), "%; background:#1f8d49;",
+          " height:100%; border-radius:3px; min-width:2px;'></div>",
+          "</div>",
+          "<div style='font-size:12px; font-weight:600; color:#1f8d49; margin-top:4px;'>",
+          round(part_bio, 1), " %</div>",
+          "</div></div>"
+        ),
         group = "SAU bio"
       )
     }
