@@ -753,7 +753,7 @@ server <- function(input, output, session) {
         popup = ~paste0(
           "<div style='font-family:Marianne,Arial,sans-serif; min-width:180px;'>",
           "<div style='font-weight:700; color:#000091; font-size:13px; padding-bottom:6px;",
-          " margin-bottom:8px; border-bottom:2px solid #000091;'>", nom_officiel, "</div>",
+          " margin-bottom:8px; border-bottom:1px solid #000091;'>", nom_officiel, "</div>",
           "<div style='display:flex; align-items:center; gap:8px; font-size:13px; color:#333;'>",
           "<span style='font-size:18px;'>&#128101;</span>",
           "<div><div style='font-weight:600;'>", formatC(population, format="d", big.mark=" "), " habitants</div>",
@@ -784,7 +784,7 @@ server <- function(input, output, session) {
         popup = ~paste0(
           "<div style='font-family:Marianne,Arial,sans-serif; min-width:200px;'>",
           "<div style='font-weight:700; color:#000091; font-size:13px; padding-bottom:6px;",
-          " margin-bottom:8px; border-bottom:2px solid #000091;'>", nom_officiel, "</div>",
+          " margin-bottom:8px; border-bottom:1px solid #000091;'>", nom_officiel, "</div>",
           "<div style='display:flex; align-items:center; gap:8px; font-size:13px;",
           " color:#333; margin-bottom:8px;'>",
           "<span style='font-size:18px;'>&#127807;</span>",
@@ -815,7 +815,7 @@ server <- function(input, output, session) {
         popup = ~paste0(
           "<div style='font-family:Marianne,Arial,sans-serif; min-width:200px;'>",
           "<div style='font-weight:700; color:#000091; font-size:13px; padding-bottom:6px;",
-          " margin-bottom:8px; border-bottom:2px solid #000091;'>", nom_officiel, "</div>",
+          " margin-bottom:8px; border-bottom:1px solid #000091;'>", nom_officiel, "</div>",
           "<div style='display:flex; align-items:center; gap:8px; font-size:13px;",
           " color:#333; margin-bottom:8px;'>",
           "<span style='font-size:18px;'>&#127807;</span>",
