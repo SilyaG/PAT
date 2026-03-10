@@ -223,7 +223,12 @@ select.fr-select,
       box-shadow: none !important;
       background: none !important;
     }
-    
+    .leaflet-control-fullscreen-button {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000091' stroke-width='1.5'%3E%3Cpath d='M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3'/%3E%3C/svg%3E") !important;
+      background-size: 16px !important;
+      background-repeat: no-repeat !important;
+      background-position: center !important;
+    }
   /* Style des boutons + et - */
     .leaflet-control-zoom a {
       background-color: #ffffff !important; /* Couleur de fond souhaitée */
@@ -265,7 +270,7 @@ select.fr-select,
 
 
 /*Style de la légende de la carte*/
-    .map-legend {
+    #map-legend {
       display: none; /*caché par défaut */
       background: #ffffff;
       padding: 14px 16px;
@@ -277,10 +282,11 @@ select.fr-select,
       line-height: 1.5;
       max-height: 60vh;
       overflow-y: auto;
+      margin-top: 65px;
     }
     
     /* titre principale de la légende */
-    .map-legend h4 {
+    #map-legend h4 {
       margin: 0 0 12px 0;
       font-size: 14px;
       font-weight: 600;
@@ -358,6 +364,14 @@ select.fr-select,
   border: none !important;
   box-shadow: none !important;
 }
+.leaflet-control:has(#map_legend) {
+  margin-top: 50px !important;
+  pointer-events: none;
+}
+
+.leaflet-control:has(#map_legend) * {
+  pointer-events: auto;
+}
 
 /* Bouton d'affichage de la légende */
 #legend_toggle {
@@ -371,8 +385,6 @@ select.fr-select,
   border-radius: 4px !important;
   color: #000091 !important;
   box-shadow: none !important;
-  padding: 0 !important;
-  text-decoration: none !important;
 }
 
 #legend_toggle i {
@@ -481,14 +493,14 @@ color: #333;
 .pat-popup__sep {
 border: none;
 border-top: 1px solid #e5e5e5;
-margin: 12px 0;
+margin: 6px 0;
 }
 
 .pat-popup__row {
 display: flex;
 align-items: center;
 gap: 10px;
-margin-bottom: 8px;
+margin-bottom: 16px;
 font-size: 14px;
 color: #333;
 }
@@ -517,6 +529,15 @@ color: #000091;
   margin-left: 4px;
 }
 
+.pat-popup__scrollable h4 {
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.pat-popup__scrollable h4:first-child {
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
 /* Style du popup des CLS */
 .leaflet-popup-content-wrapper {
   border-radius: 4px !important;
