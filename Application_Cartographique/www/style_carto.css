@@ -538,6 +538,11 @@ color: #000091;
   margin-top: 12px;
   margin-bottom: 8px;
 }
+
+
+.leaflet-interactive {
+  cursor: pointer !important;
+}
 /* Style du popup des CLS */
 .leaflet-popup-content-wrapper {
   border-radius: 4px !important;
@@ -554,11 +559,12 @@ color: #000091;
   word-wrap: break-word !important;
 }
 
-
-.leaflet-popup-tip-container {
-  display: none !important;
+.leaflet-popup-tip {
+  background: #000091 !important;
+  box-shadow: none !important;
+  width: 15px !important;
+  height: 15px !important;
 }
-
 .leaflet-popup-close-button {
   color: #000091 !important;
   font-size: 13px !important;

@@ -83,6 +83,7 @@ ui <- fluidPage(
     tags$script(src = "symbologie_hachure_pat.js"),
     tags$script(src = "tutoriel_demarrage.js"),
     tags$script(src = "popup_pat.js"),
+    tags$script(src = "popup_communes.js"),
     tags$script(src = "bouton_reset.js"),
     tags$script(src = "warning_indicateurs_communaux.js")
   ),
@@ -759,7 +760,7 @@ server <- function(input, output, session) {
           "<div style='font-size:11px; color:#666;'>Population communale</div></div>",
           "</div></div>"
         ),
-        popupOptions = popupOptions(autoPan = TRUE, keepInView = TRUE),
+        popupOptions = popupOptions(autoPan = TRUE,   autoPanPadding = c(20, 20)),
         group = "Population communale"
       )
     }
@@ -800,7 +801,7 @@ server <- function(input, output, session) {
           round(part_sau, 1), " %</div>",
           "</div></div>"
         ),
-        popupOptions = popupOptions(autoPan = TRUE, keepInView = TRUE),
+        popupOptions = popupOptions(autoPan = TRUE,   autoPanPadding = c(20, 20)),
         group = "SAU"
       )
     }
@@ -831,7 +832,7 @@ server <- function(input, output, session) {
           round(part_bio, 1), " %</div>",
           "</div></div>"
         ),
-        popupOptions = popupOptions(autoPan = TRUE, keepInView = TRUE),
+        popupOptions = popupOptions(autoPan = TRUE,   autoPanPadding = c(20, 20)),
         group = "SAU bio"
       )
     }
