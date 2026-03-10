@@ -22,25 +22,22 @@
 
 /* Fenêtre de tutoriel se déplace en fonction de l'objet présentés */
 .tutorial-overlay {
-  position: fixed;
+  position: fixed;       
   top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  z-index: 9998;
-  display: none;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9990;
 }
-
 /* Met en surbrillance les contour des objets présentés */
 .tutorial-highlight {
-  position: absolute;
-  background-color: transparent;
-  border: 2px solid #000091;
-  border-radius: 6px;
-  box-shadow: 0 0 2px #6a6af4;
-  z-index: 9999;
+  position: absolute;   
+  z-index: 9995;
   pointer-events: none;
-  display: none;
-  transition: all 0.3s ease;
+  border: 3px solid #000091;
+  border-radius: 6px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
 }
+
 .tutorial-modal {
   position: fixed;
   z-index: 9999;
@@ -69,29 +66,31 @@
 }
 
 /* fenêtre d'introduction du tutoriel */
-.intro-overlay {
+/* fenêtre d'introduction du tutoriel */
+#intro_overlay {
   position: fixed;
   top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.7);
-  z-index: 9998;
+  z-index: 10000;          /* ← au-dessus de tout */
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
-  font-size: 18px;
-  border: 2px solid #e5e5e5;
-  padding: 20px;
-  border-radius: 8px;
 }
+
 #intro_overlay .fr-card {
-  padding: 20px 20px !important;
-  border-radius: 15px !important;
-  max-width: 900px !important;
-  min-height: 500px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.25) !important;
-  transition: all 0.3s ease;
+  max-width: 750px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  box-sizing: border-box;
 }
+
+
 .intro-overlay p {
   color: #333;
   font-size: 14px;
@@ -592,4 +591,37 @@ color: #000091;
 input[type="checkbox"],
 input[type="radio"] {
   accent-color: #000091;
+}
+
+/* ── Tutoriel responsive mobile */
+@media (max-width: 768px) {
+  .tutorial-modal {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;  /* ← centrage parfait */
+    bottom: auto !important;
+    position: fixed !important;
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+    font-size: 13px;
+  } 
+  .tutorial-modal h3 {
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tutorial-modal p {
+    font-size: 12px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Boutons Précédent/Suivant plus grands pour le tactile */
+  #tutorial_prev,
+  #tutorial_next {
+    min-height: 44px !important;   /* taille minimale recommandée pour le tactile */
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+  }
 }
