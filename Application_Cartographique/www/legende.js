@@ -12,6 +12,7 @@ document.addEventListener('click', function(e){
   // si le clic ne concerne pas le bouton on sort de la boucle
   if(!btn) return;
   e.preventDefault();
+  e.stopPropagation(); 
 
   // recupère l'élement HTML contenant la légende 
   var legend = document.getElementById('map_legend');
