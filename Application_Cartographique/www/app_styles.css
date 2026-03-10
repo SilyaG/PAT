@@ -43,14 +43,16 @@
 }
 .tutorial-modal {
   position: fixed;
-  z-index: 10000;
+  z-index: 9999;
   background: white;
-  border: 2px solid #e5e5e5;
   padding: 20px;
   border-radius: 8px;
-  width: 300px;
-  display: none;
-  transform: none !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  width: 320px;
+  max-width: calc(100vw - 30px);   
+  max-height: calc(100vh - 30px); 
+  overflow-y: auto;                
+  box-sizing: border-box;
 }
 .tutorial-modal p {
   font-size: 14px;

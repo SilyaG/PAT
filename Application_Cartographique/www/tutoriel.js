@@ -2,8 +2,6 @@
 // Ici il s'agit du fichier concernant le tutoriel d'explication de l'application
 
 // ================ Tutoriel de lancement ==============
-
-
 document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('start_tutorial').addEventListener('click', function() {
@@ -85,18 +83,40 @@ function startTutorial() {
       var modal = document.getElementById('tutorial_modal');
       modal.style.display = 'block';
 
+      // Réinitialise les positions avant calcul
+      modal.style.top    = 'auto';
+      modal.style.left   = 'auto';
+      modal.style.right  = 'auto';
+      modal.style.bottom = 'auto';
+
+      var modalW = modal.offsetWidth;
+      var modalH = modal.offsetHeight;
+      var margin = 15;
       var top, left;
 
       if (s.position) {
         top  = s.position.top;
         left = s.position.left;
       } else {
-        top  = rect.bottom + 15;
+        // Placement préféré : en dessous
+        top  = rect.bottom + margin;
         left = rect.left;
-        if (left + modal.offsetWidth  > window.innerWidth)  left = window.innerWidth  - modal.offsetWidth  - 20;
-        if (top  + modal.offsetHeight > window.innerHeight) top  = rect.top - modal.offsetHeight - 15;
-        if (left < 10) left = 10;
-        if (top  < 10) top  = 10;
+
+        // Dépasse à droite → recaler
+        if (left + modalW > window.innerWidth - margin)
+          left = window.innerWidth - modalW - margin;
+
+        // Dépasse en bas → passer au dessus
+        if (top + modalH > window.innerHeight - margin)
+          top = rect.top - modalH - margin;
+
+        // Sécurité : ne jamais sortir à gauche ou en haut
+        if (left < margin) left = margin;
+        if (top  < margin) top  = margin;
+
+        // Dernier recours : centrer verticalement si toujours hors écran
+        if (top + modalH > window.innerHeight - margin)
+          top = Math.max(margin, (window.innerHeight - modalH) / 2);
       }
 
       modal.style.top  = top  + 'px';
