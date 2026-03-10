@@ -278,14 +278,8 @@ server <- function(input, output, session) {
   
   communes_centroid$part_bio[is.na(communes_centroid$part_bio) | is.infinite(communes_centroid$part_bio)] <- 0
   communes_centroid$rayon_pop <- scales::rescale(sqrt(communes_centroid$population), to = c(1, 50))
-  communes_centroid$rayon_sau <- scales::rescale(sqrt(communes_centroid$rpg_ha_sum), to = c(1, 30))
-  communes_centroid$rayon_bio <- scales::rescale(sqrt(communes_centroid$bio_ha_sum), to = c(1, 30))
-  
-  pal_bio <- colorNumeric(
-    palette = c("#bcd9a3", "#306600"),
-    domain = communes_centroid$part_bio,
-    na.color = "transparent"
-  )
+  communes_centroid$rayon_sau <- scales::rescale(sqrt(communes_centroid$rpg_ha), to = c(1, 30))
+  communes_centroid$rayon_bio <- scales::rescale(sqrt(communes_centroid$bio_ha), to = c(1, 30))
   
   # Reset carte si changement de filtres
   observeEvent(
@@ -318,13 +312,13 @@ server <- function(input, output, session) {
       annee          = as.character(pat_row$annee[1]     %||% ""),
       population     = as.character(pat_row$pop_hab[1] %||% ""),
       pct_population = as.character(pat_row$part_pop[1]   %||% ""),
-      sau            = as.character(pat_row$rpg_ha_sum_sum[1]        %||% ""),
+      sau            = as.character(pat_row$rpg_ha[1]        %||% ""),
       pct_sau        = as.character(pat_row$part_sau_pat[1]   %||% ""),
-      bio            = as.character(pat_row$bio_ha_sum_sum[1]        %||% ""),
+      bio            = as.character(pat_row$bio_ha[1]        %||% ""),
       pct_sau_bio    = as.character(pat_row$part_bio_pat[1]   %||% ""),
       partbio        = as.character(pat_row$part_bio[1]        %||% ""),
       bio_aura       = as.character(pat_row$bio_aura[1]   %||% ""),
-      restau         = as.character(pat_row$nb_cantines_sum[1]   %||% ""),
+      restau         = as.character(pat_row$nb_cantines[1]   %||% ""),
       contacts       = as.list(contacts)
     ))
   }
@@ -686,8 +680,8 @@ server <- function(input, output, session) {
     
     # Rescale LOCAL au PAT actif
     centroid_pat$rayon_pop_local <- scales::rescale(sqrt(centroid_pat$population),  to = c(3, 30))
-    centroid_pat$rayon_sau_local <- scales::rescale(sqrt(centroid_pat$rpg_ha_sum),  to = c(3, 30))
-    centroid_pat$rayon_bio_local <- scales::rescale(sqrt(centroid_pat$bio_ha_sum),  to = c(3, 30))
+    centroid_pat$rayon_sau_local <- scales::rescale(sqrt(centroid_pat$rpg_ha),  to = c(3, 30))
+    centroid_pat$rayon_bio_local <- scales::rescale(sqrt(centroid_pat$bio_ha),  to = c(3, 30))
     
     if (input$indicateur == "pop") {
       proxy %>% addCircleMarkers(
@@ -700,21 +694,47 @@ server <- function(input, output, session) {
     }
     
     if (input$indicateur == "sau") {
-      proxy %>% addCircleMarkers(
-        data = centroid_pat,
-        radius = ~rayon_sau_local,
-        fillColor = "#CE614A", color = "#ffffff", weight = 1, fillOpacity = 0.7,
-        popup = ~paste("<strong>", nom_officiel, "</strong><br/>SAU (ha) :", rpg_ha_sum),
+      
+      # Jointure des valeurs SAU sur les polygones communes
+      communes_sau <- commune_aura[
+        commune_aura$code_insee_chr %in% communes_pat$code_insee_chr, ]
+      
+      # Palette locale sur les communes du PAT uniquement
+      pal_sau_local <- colorNumeric(
+        palette  = c("#fef6e3", "#efcb3a"),
+        domain   = communes_sau$part_sau,
+        na.color = "transparent"
+      )
+      
+      proxy %>% addPolygons(
+        data        = communes_sau,
+        fillColor   = ~pal_sau_local(part_sau),
+        fillOpacity = 0.8,
+        color       = "#929292",
+        weight      = 1,
+        popup       = ~paste0(
+          "<strong>", nom_officiel, "</strong><br/>",
+          "SAU : ", round(part_sau, 1), " %"
+        ),
         group = "SAU"
       )
     }
     
     if (input$indicateur == "bio") {
+      
+      # Palette BIO recalculée localement sur les communes du PAT actif
+      pal_bio_local <- colorNumeric(
+        palette  = c("#bcd9a3", "#306600"),
+        domain   = centroid_pat$part_bio,
+        na.color = "transparent"
+      )
+      
       proxy %>% addCircleMarkers(
         data = centroid_pat,
         radius = ~rayon_bio_local,
-        fillColor = ~pal_bio(part_bio), color = "#ffffff", weight = 1, fillOpacity = 1,
-        popup = ~paste("<strong>", nom_officiel, "</strong><br/>SAU Bio (ha) :", bio_ha_sum / 2,
+        fillColor = ~pal_bio_local(part_bio),  # ← palette locale
+        color = "#ffffff", weight = 1, fillOpacity = 1,
+        popup = ~paste("<strong>", nom_officiel, "</strong><br/>SAU Bio (ha) :", bio_ha,
                        "<br/>Part de la SAU Bio (%) :", part_bio),
         group = "SAU bio"
       )
@@ -872,25 +892,33 @@ server <- function(input, output, session) {
         }
         
         if (input$indicateur == "sau" && nrow(centroid_pat_leg) > 0) {
-          vals <- sort(unique(na.omit(centroid_pat_leg$rpg_ha_sum)))
-          v_min <- format(round(min(vals)),    big.mark = " ")
-          v_med <- format(round(median(vals)), big.mark = " ")
-          v_max <- format(round(max(vals)),    big.mark = " ")
+          vals <- sort(unique(na.omit(centroid_pat_leg$part_sau)))
+          p_min <- round(min(vals), 1)
+          p_max <- round(max(vals), 1)
+          
           indicateur_html <- paste0("
-        <div class='leg-sep-inner'></div>
-        <div class='leg-cat'>Indicateurs</div>
-        <div class='leg-item'>Surface Agricole Utile (ha)</div>
-        <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:6px;height:6px;'></span>", v_min, " ha</div>
-        <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:14px;height:14px;'></span>", v_med, " ha</div>
-        <div class='leg-item'><span class='swatch swatch-circle' style='background:#CE614A;width:20px;height:20px;'></span>", v_max, " ha</div>
-      ")
+    <div class='leg-sep-inner'></div>
+    <div class='leg-cat'>Indicateurs</div>
+    <div class='leg-item' style='font-weight:600; font-size:11px; margin-top:4px;'>
+      Part de SAU communale (%)
+    </div>
+    <div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:6px;'>
+      Aplat de couleur
+    </div>
+    <div style='display:flex; align-items:center; gap:6px; margin-top:2px;'>
+      <span style='font-size:11px; color:#555;'>", p_min, " %</span>
+      <span style='width:80px; height:10px; background:linear-gradient(to right, #fef6e3, #efcb3a);
+             border-radius:3px; flex-shrink:0;'></span>
+      <span style='font-size:11px; color:#555;'>", p_max, " %</span>
+    </div>
+  ")
         }
         
         if (input$indicateur == "bio" && nrow(centroid_pat_leg) > 0) {
-          vals_bio <- sort(unique(na.omit(centroid_pat_leg$bio_ha_sum)))
-          b_min <- format(round(min(vals_bio) / 2),    big.mark = " ")
-          b_med <- format(round(median(vals_bio) / 2), big.mark = " ")
-          b_max <- format(round(max(vals_bio) / 2),    big.mark = " ")
+          vals_bio <- sort(unique(na.omit(centroid_pat_leg$bio_ha)))
+          b_min <- format(round(min(vals_bio)),    big.mark = " ")
+          b_med <- format(round(median(vals_bio)), big.mark = " ")
+          b_max <- format(round(max(vals_bio)),    big.mark = " ")
           
           vals_part <- sort(unique(na.omit(centroid_pat_leg$part_bio)))
           p_min <- round(min(vals_part))
