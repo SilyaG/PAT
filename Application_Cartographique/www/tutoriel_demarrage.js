@@ -36,18 +36,18 @@ function closeTutorial() {
 function startTutorial() {
 
   var tutorialSteps = [
-    {el:'.menu-couches',        title:'Menu des couches',                    text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.'},
-    {el:'#filtre_niveau',       title:'Filtre des niveaux de labellisation',  text:'Utilisez ce filtre pour sélectionner le niveau de labellisation des PAT.'},
-    {el:'#filtre_niveau_terri', title:'Filtre des échelles territoriales',    text:'Vous pouvez aussi utiliser ce filtre pour sélectionner l\'échelle territoriale des PAT.'},
-    {el:'#reset_button',        title:'Réinitialiser la carte',               text:'Ce bouton remet la carte dans son état initial : les filtres sont effacés, le zoom revient sur la région entière et tout PAT sélectionné est désélectionné.'},
-    {el:'#map',                 title:'Carte',                               text:'La carte centrale affiche les couches et le fond de carte souhaités. Cliquer sur un PAT pour le sélectionner et en dehors de ce dernier pour revenir à la carte initiale.', placement:'left'},
-    {el:'#legend_toggle',       title:'Afficher/Masquer la légende',         text:'Cliquez sur ce bouton pour afficher ou masquer la légende des couches visibles sur la carte.'},
-    {el:'#map_legend',          title:'Légende',                             text:'La légende s\'actualise en fonction des couches présentes sur la carte.'},
-    {el:'#nom_du_pat',          title:'Barre de recherche',                  text:'Vous pouvez rechercher un PAT ou une commune ici.'},
-    {el:'#right_sidebar',       title:'Liste des PAT visibles',              text:'Cette liste affiche uniquement les PAT visibles dans la vue actuelle de la carte. Cliquez sur un PAT pour zoomer dessus.', placement:'left'},
-    {el:'#info_tutorial',       title:'Relancer le tutoriel',                text:'Vous pouvez relancer le tutoriel à tout moment en cliquant sur cette icône.'}
-  ];
-
+    {el:'.menu-couches',        title:'Menu des couches',  text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.'},
+    {el:'#filtre_niveau',       title:'Filtre des niveaux de labellisation',text:'Utilisez ce filtre pour sélectionner le niveau de labellisation des PAT.'},
+    {el:'#filtre_niveau_terri', title:'Filtre des échelles territoriales', text:'Utilisez également ce filtre pour sélectionner l\'échelle territoriale des PAT. Les filtres "niveau" et "échelle" sont cumulables.'},
+    {el:'#reset_button',        title:'Réinitialiser la carte', text:'Ce bouton remet la carte dans son état initial : les filtres sont effacés, le zoom revient sur la région entière et tout PAT sélectionné est désélectionné.'},
+    {el:'#legend_toggle',       title:'Afficher/Masquer la légende', text:'Cliquez sur ce bouton pour afficher ou masquer la légende des couches visibles sur la carte.'},
+    {el:'#map_legend',          title:'Légende', text:'La légende s\'actualise automatiquement en fonction des couches visibles sur la carte.'},
+    {el:'#map',                 title:'Carte',   text:'La carte centrale affiche les couches et le fond cartographique sélectionnés. Cliquez sur un PAT pour le sélectionner et cliquez ailleurs pour revenir à la vue initiale.', placement:'right'},
+    {el:'#nom_du_pat',          title:'Barre de recherche', text:'Vous pouvez rechercher un PAT ou une commune ici.'},
+    {el:'#right_sidebar',       title:'Liste des PAT visibles', text:'Cette liste affiche les PAT visibles dans la vue actuelle de la carte. Cliquez sur un PAT pour zoomer dessus.', placement:'left'},
+    {el:'#info_tutorial',       title:'Relancer le tutoriel', text:'Vous pouvez relancer ce tutoriel à tout moment en cliquant sur cette icône.'}
+     ];
+     
   var currentStep = 0;
 
   function showStep(step) {

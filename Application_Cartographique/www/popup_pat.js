@@ -5,11 +5,11 @@ Shiny.addCustomMessageHandler('show_pat_popup', function(data) {
   document.getElementById('pat_popup_niveau').innerText         = 'Niveau de labellisation : ' + (data.niveau || '');
   document.getElementById('pat_popup_annee').innerText          = 'Année de labellisation : '  + (data.annee  || '');
   document.getElementById('pat_popup_population').innerText     = (Number(data.population).toLocaleString('fr-FR') || '') + ' habitants';
-  document.getElementById('pat_popup_pct_population').innerText = '(soit ' + (Number(data.pct_population).toLocaleString('fr-FR') || '') + ' % de la population régionale)';
+  document.getElementById('pat_popup_pct_population').innerText = '(soit ' + (parseFloat(data.pct_population)||0).toFixed(1) + ' % de la population régionale)';
   document.getElementById('pat_popup_sau').innerText            = (Number(data.sau).toLocaleString('fr-FR') || '') + ' ha de SAU*';
-  document.getElementById('pat_popup_pct_sau').innerText        = '(soit ' + (Number(data.pct_sau).toLocaleString('fr-FR') || '') + ' % de la SAU régionale)';
+  document.getElementById('pat_popup_pct_sau').innerText        = '(soit ' + (parseFloat(data.pct_sau)||0).toFixed(1)        + ' % de la SAU régionale)';
   document.getElementById('pat_popup_bio').innerText            = (Number(data.bio).toLocaleString('fr-FR') || '') + ' ha de SAU Bio';
-  document.getElementById('pat_popup_pct_sau_bio').innerText    = '(soit ' + (Number(data.pct_sau_bio).toLocaleString('fr-FR') || '') + ' % de la SAU Bio régionale)';
+  document.getElementById('pat_popup_pct_sau_bio').innerText    = '(soit ' + (parseFloat(data.pct_sau_bio)||0).toFixed(1)    + ' % de la SAU Bio régionale)';
   document.getElementById('pat_popup_restau').innerText          = (Number(data.restau).toLocaleString('fr-FR') || '') + ' restaurants scolaires au 9 mars 2026';
 
   // ── Graphique comparatif PAT vs AuRA ─────────────────────────────────────
