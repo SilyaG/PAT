@@ -656,6 +656,9 @@ server <- function(input, output, session) {
       proxy %>% showGroup("Projet Alimentaire Territoriaux")
     } else {
       proxy %>% hideGroup("Projet Alimentaire Territoriaux")
+      session$sendCustomMessage("hide_pat_popup", list())
+      pat_actif(NULL)
+      clic_sur_pat(FALSE)
     }
     
     if (isTRUE(input$cls_layer)) {
