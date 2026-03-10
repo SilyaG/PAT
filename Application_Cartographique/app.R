@@ -21,7 +21,7 @@ library(stringr)
 couche_pat_4326 <- st_read("./data/pat_aura_112025.gpkg", quiet = TRUE) %>%
   st_transform(4326)
 
-commune_aura <- st_read("./data/communes.gpkg", quiet = TRUE) %>%
+commune_aura <- st_read("./data/communes_aura.gpkg", quiet = TRUE) %>%
   st_transform(4326)
 
 couche_cls_4326 <- st_read("./data/cls_aura.gpkg", quiet = TRUE) %>%
@@ -30,7 +30,7 @@ couche_cls_4326 <- st_read("./data/cls_aura.gpkg", quiet = TRUE) %>%
 dep_aura_4326 <- st_read("./data/departement_aura.gpkg", quiet = TRUE) %>%
   st_transform(4326)
 
-reg_aura_4326 <- st_read("./data/region.gpkg", quiet = TRUE) %>%
+reg_aura_4326 <- st_read("./data/region_aura.gpkg", quiet = TRUE) %>%
   st_transform(4326)
 
 pat_com <- read_csv("./data/pat_com.csv", show_col_types = FALSE)
@@ -68,7 +68,7 @@ ui <- fluidPage(
     tags$link(
       rel = "stylesheet",
       type = "text/css",
-      href = "app_styles.css"
+      href = "style_carto.css"
     ),
     
     tags$script(HTML(sprintf(
@@ -77,18 +77,18 @@ ui <- fluidPage(
       jsonlite::toJSON(autocomplete_pats, auto_unbox = TRUE)
     ))),
     
-    tags$script(src = "autocomplete.js"),
-    tags$script(src = "legende.js"),
-    tags$script(src = "liste_pat.js"),
-    tags$script(src = "hachure_pat.js"),
-    tags$script(src = "tutoriel.js"),
+    tags$script(src = "barre_recherche_autocomplete.js"),
+    tags$script(src = "legende_interactive.js"),
+    tags$script(src = "liste_pat_interactive.js"),
+    tags$script(src = "symbologie_hachure_pat.js"),
+    tags$script(src = "tutoriel_demarrage.js"),
     tags$script(src = "popup_pat.js"),
-    tags$script(src = "reset.js"),
-    tags$script(src = "indicateurs_highlight.js")
+    tags$script(src = "bouton_reset.js"),
+    tags$script(src = "warning_indicateurs_communaux.js")
   ),
   
-  includeHTML("www/intro_overlay.html"),
-  includeHTML("www/header.html"),
+  includeHTML("www/apparence_page_introductive.html"),
+  includeHTML("www/apparence_header_aura.html"),
   
   tags$main(
     class = "fr-container-fluid",
@@ -239,7 +239,16 @@ ui <- fluidPage(
         div(
           style = "position: relative;",
           leafletOutput("map", height = "80vh"),
-          includeHTML("www/popup_pat.html")
+          tags$button(
+            id = "legend_toggle",
+            title = "Afficher / masquer la légende",
+            style = paste(
+              "position:absolute; top:10px; left:10px; z-index:1001;",
+              "width:36px; height:36px;"
+            ),
+            tags$i(class = "ri-list-check-2")
+          ),
+          includeHTML("www/apparence_popup_pat.html")
         )
       ),
       
@@ -253,8 +262,8 @@ ui <- fluidPage(
       )
     ),
     
-    includeHTML("www/footer.html"),
-    includeHTML("www/tutorial_modal.html")
+    includeHTML("www/apparence_footer_aura.html"),
+    includeHTML("www/apparence_tutoriel.html")
   )
 )
 
@@ -540,11 +549,6 @@ server <- function(input, output, session) {
         )
       ) %>%
       
-      addControl(
-        html = "<a id='legend_toggle' href='#' title='Afficher la légende'><i class='ri-list-check-2'></i></a>",
-        position = "topleft"
-      ) %>%
-      
       addFullscreenControl(position = "topright") %>%
       htmlwidgets::onRender("
         function(el, x) {
@@ -771,12 +775,28 @@ server <- function(input, output, session) {
       proxy %>% addPolygons(
         data        = communes_sau,
         fillColor   = ~pal_sau_local(part_sau),
-        fillOpacity = 0.8,
+        fillOpacity = 1,
         color       = "#929292",
         weight      = 1,
-        popup       = ~paste0(
-          "<strong>", nom_officiel, "</strong><br/>",
-          "Part de SAU : ", round(part_sau, 1), " %"
+        popup = ~paste0(
+          "<div style='font-family:Marianne,Arial,sans-serif; min-width:200px;'>",
+          "<div style='font-weight:700; color:#000091; font-size:13px; padding-bottom:6px;",
+          " margin-bottom:8px; border-bottom:2px solid #000091;'>", nom_officiel, "</div>",
+          "<div style='display:flex; align-items:center; gap:8px; font-size:13px;",
+          " color:#333; margin-bottom:8px;'>",
+          "<span style='font-size:18px;'>&#127807;</span>",
+          "<div>",
+          "<div style='font-size:11px; color:#666;'>Part de Surface Agricole Utile</div>",
+          "</div></div>",
+          "<div style='background:#f6f6f6; border-radius:4px; padding:6px 10px;'>",
+          "<div style='font-size:11px; color:#555; margin-bottom:4px;'>Part de SAU communale</div>",
+          "<div style='background:#e5e5e5; border-radius:3px; height:10px; width:100%;'>",
+          "<div style='width:", pmin(round(part_sau), 100), "%; background:#efcb3a;",
+          " height:100%; border-radius:3px; min-width:2px;'></div>",
+          "</div>",
+          "<div style='font-size:12px; font-weight:600; color:#b8860b; margin-top:4px;'>",
+          round(part_sau, 1), " %</div>",
+          "</div></div>"
         ),
         group = "SAU"
       )
@@ -976,9 +996,6 @@ server <- function(input, output, session) {
     <div class='leg-item' style='font-weight:600; font-size:11px; margin-top:4px;'>
       Part de SAU communale (%)
     </div>
-    <div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:6px;'>
-      Aplat de couleur
-    </div>
     <div style='display:flex; align-items:center; gap:6px; margin-top:2px;'>
       <span style='font-size:11px; color:#555;'>", p_min, " %</span>
       <span style='width:80px; height:10px; background:linear-gradient(to right, #fef6e3, #efcb3a);
@@ -1091,8 +1108,8 @@ server <- function(input, output, session) {
           choices = c(
             "Aucun"                       = "none",
             "Population"                  = "pop",
-            "surface agricole utile (ha)" = "sau",
-            "surface agricole utile bio"  = "bio"
+            "Surface agricole utile" = "sau",
+            "Surface agricole utile bio"  = "bio"
           ),
           selected = "none"
         )
