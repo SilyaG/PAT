@@ -42,7 +42,13 @@ Université Lumière Lyon 2 / Université Jean Moulin Lyon 3
 Commanditaire : **DRAAF Auvergne-Rhône-Alpes**
 
 ---
+## Documentation
 
+Ce projet est accompagné d'un rapport méthodologique détaillant les choix techniques et cartographiques réalisés.
+
+📄 [Rapport_Application_Cartographique_PAT.pdf](./Rapport_Application_Cartographique_PAT.pdf)
+
+---
 ## Licence
 
 Ce projet est distribué sous licence **CeCILL-2.1**, une licence libre compatible avec la GPL, régie par le droit français.  
