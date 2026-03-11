@@ -1,0 +1,12 @@
+name: Application_Cartographique
+title: Application_Cartographique
+username: pgreaume
+account: pgreaume
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16872915
+bundleId:
+url: https://pgreaume.shinyapps.io/Application_Cartographique/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

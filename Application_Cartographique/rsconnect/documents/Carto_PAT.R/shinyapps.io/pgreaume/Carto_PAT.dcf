@@ -1,0 +1,12 @@
+name: Carto_PAT
+title: Carto_pat
+username: pgreaume
+account: pgreaume
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16873392
+bundleId: 11694271
+url: https://pgreaume.shinyapps.io/Carto_PAT/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
