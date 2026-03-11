@@ -86,7 +86,7 @@ ui <- fluidPage(
     tags$script(src = "popup_communes.js"),
     tags$script(src = "bouton_reset.js"),
     tags$script(src = "warning_indicateurs_communaux.js")
-  ),
+    ),
   
   includeHTML("www/apparence_page_introductive.html"),
   includeHTML("www/apparence_header_aura.html"),
@@ -102,11 +102,11 @@ ui <- fluidPage(
         style = "display:flex; gap:20px; margin:0; padding:0;",
         
         tags$div(
-          style = "width:250px; margin:0; padding:0;",
+          style = "width:250px; margin:0; padding:0; position:relative; display:flex; align-items:center;",
           tags$select(
             id = "filtre_niveau",
             class = "fr-select",
-            style = "color:black; margin:0;",
+            style = "color:black; margin:0; flex:1;",
             tags$option(
               "Sélectionner un niveau de labellisation",
               value = "",
@@ -116,6 +116,18 @@ ui <- fluidPage(
             tags$option(value = "Tous", "Tous les niveaux"),
             tags$option(value = "1", "Niveau 1"),
             tags$option(value = "2", "Niveau 2")
+          ),
+          tags$button(
+            id = "btn_info_niveau",
+            type = "button",
+            `aria-controls` = "modal-info-niveau",
+            `data-fr-opened` = "false",
+            title = "En savoir plus sur les niveaux",
+            style = paste(
+              "background:none; border:none; padding:0 0 0 6px; cursor:pointer;",
+              "color:#000091; display:flex; align-items:center; flex-shrink:0;"
+            ),
+            tags$i(class = "ri-information-line", style = "font-size:16px;")
           )
         ),
         
@@ -215,15 +227,23 @@ ui <- fluidPage(
           radioButtons(
             "fond",
             label = NULL,
-            choices = c(
-              "Plan IGN" = "ign",
-              "Registre Parcellaire Graphique" = "rpg",
-              "OpenStreetMap" = "osm",
-              "Limites administratives" = "fond_admin"
+            choiceNames = list(
+              "Plan IGN",
+              tags$span(
+                "Registre Parcellaire Graphique",
+                tags$br(),
+                tags$a(
+                  href = "https://www.cartoexplorer.com/imgs/legendes/ign/legende_registre_parcellaire_graphique.pdf",
+                  target = "_blank",
+                  style = "font-size: 8px; color: #888; text-decoration: none; margin-left: 2px;",
+                  "Légende RPG "                )
+              ),
+              "OpenStreetMap",
+              "Limites administratives"
             ),
+            choiceValues = list("ign", "rpg", "osm", "fond_admin"),
             selected = "ign"
           ),
-          
           hr(),
           
           h4("Couches"),
@@ -264,7 +284,69 @@ ui <- fluidPage(
     ),
     
     includeHTML("www/apparence_footer_aura.html"),
-    includeHTML("www/apparence_tutoriel.html")
+    includeHTML("www/apparence_tutoriel.html"),
+  # Modale d'information sur les niveaux
+  tags$dialog(
+    id = "modal-info-niveau",
+    class = "fr-modal",
+    role = "dialog",
+    `aria-labelledby` = "modal-info-niveau-title",
+    tags$div(
+      class = "fr-container fr-container--fluid fr-container-md",
+      tags$div(
+        class = "fr-grid-row fr-grid-row--center",
+        tags$div(
+          class = "fr-col-12 fr-col-md-8 fr-col-lg-6",
+          tags$div(
+            class = "fr-modal__body",
+            tags$div(
+              class = "fr-modal__header",
+              tags$button(
+                class = "fr-btn--close fr-btn",
+                type = "button",
+                `aria-controls` = "modal-info-niveau",
+                "Fermer"
+              )
+            ),
+            tags$div(
+              class = "fr-modal__content",
+              tags$h1(
+                id = "modal-info-niveau-title",
+                class = "fr-modal__title",
+                "Niveaux de labellisation PAT"
+              ),
+              tags$p(
+                style = "color:#555; font-size:13px; margin-bottom:20px;",
+                "Les PAT sont reconnus par le Ministère de l'Agriculture selon deux niveaux :"
+              ),
+              tags$div(
+                style = "border-left:3px solid #000091; padding:10px 14px; margin-bottom:12px; background:#f8f8f8;",
+                tags$p(
+                  style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
+                  "Niveau 1 — Projet en émergence"
+                ),
+                tags$p(
+                  style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
+                  "Démarche initiée : diagnostic, gouvernance et plan d'action en cours de structuration."
+                )
+              ),
+              tags$div(
+                style = "border-left:3px solid #000091; padding:10px 14px; background:#f8f8f8;",
+                tags$p(
+                  style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
+                  "Niveau 2 — Projet opérationnel"
+                ),
+                tags$p(
+                  style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
+                  "Gouvernance consolidée, diagnostic validé et plan d'actions pleinement mis en œuvre."
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
   )
 )
 
@@ -306,11 +388,6 @@ server <- function(input, output, session) {
   communes_centroid$rayon_sau <- scales::rescale(sqrt(communes_centroid$rpg_ha), to = c(1, 30))
   communes_centroid$rayon_bio <- scales::rescale(sqrt(communes_centroid$bio_ha), to = c(1, 30))
   
-  pal_bio <- colorNumeric(
-    palette = c("#bcd9a3", "#306600"),
-    domain = communes_centroid$part_bio,
-    na.color = "transparent"
-  )
   
   # Reset carte si changement de filtres
   observeEvent(
@@ -322,11 +399,12 @@ server <- function(input, output, session) {
       
       leafletProxy("map") %>%
         clearPopups() %>%
-        flyToBounds(
+        fitBounds(
           lng1 = unname(bbox_init["xmin"]),
           lat1 = unname(bbox_init["ymin"]),
           lng2 = unname(bbox_init["xmax"]),
-          lat2 = unname(bbox_init["ymax"])
+          lat2 = unname(bbox_init["ymax"]),
+          options = list(animate = TRUE, duration = 0.8, easeLinearity = 0.1)
         )
     },
     ignoreInit = TRUE
@@ -361,11 +439,12 @@ server <- function(input, output, session) {
     
     leafletProxy("map") %>%
       clearPopups() %>%
-      flyToBounds(
+      fitBounds(
         lng1 = unname(bbox_init["xmin"]),
         lat1 = unname(bbox_init["ymin"]),
         lng2 = unname(bbox_init["xmax"]),
-        lat2 = unname(bbox_init["ymax"])
+        lat2 = unname(bbox_init["ymax"]),
+        options = list(animate = TRUE, duration = 0.8, easeLinearity = 0.1)
       )
   })
   
@@ -414,11 +493,12 @@ server <- function(input, output, session) {
     
     leafletProxy("map") %>%
       clearPopups() %>%
-      flyToBounds(
+      fitBounds(
         lng1 = unname(bb["xmin"]),
         lat1 = unname(bb["ymin"]),
         lng2 = unname(bb["xmax"]),
-        lat2 = unname(bb["ymax"])
+        lat2 = unname(bb["ymax"]),
+        options = list(animate = TRUE, duration = 0.8, easeLinearity = 0.1)
       )
     
     show_popup_pat(pat_row)
@@ -431,11 +511,12 @@ server <- function(input, output, session) {
     
     leafletProxy("map") %>%
       clearPopups() %>%
-      flyToBounds(
+      fitBounds(
         lng1 = unname(bbox_init["xmin"]),
         lat1 = unname(bbox_init["ymin"]),
         lng2 = unname(bbox_init["xmax"]),
-        lat2 = unname(bbox_init["ymax"])
+        lat2 = unname(bbox_init["ymax"]),
+        options = list(animate = TRUE, duration = 0.8, easeLinearity = 0.1)
       )
   }
   
@@ -538,8 +619,7 @@ server <- function(input, output, session) {
       ) %>%
       
       fitBounds(xmin, ymin, xmax, ymax) %>%
-      setMaxBounds(xmin, ymin, xmax, ymax) %>%
-      
+
       addScaleBar(
         position = "bottomleft",
         options = scaleBarOptions(
@@ -728,22 +808,26 @@ server <- function(input, output, session) {
     
     if (nrow(centroid_pat) == 0) return()
     
-    centroid_pat$rayon_pop_local <- scales::rescale(sqrt(centroid_pat$population),  to = c(3, 30))
-    centroid_pat$rayon_sau_local <- scales::rescale(sqrt(centroid_pat$rpg),  to = c(3, 30))
-    centroid_pat$rayon_bio_local <- scales::rescale(sqrt(centroid_pat$bio),  to = c(3, 30))
+    centroid_pat$rayon_pop_local <- scales::rescale(sqrt(centroid_pat$population), to = c(3, 30))
+    centroid_pat$rayon_sau_local <- scales::rescale(sqrt(centroid_pat$rpg), to = c(3, 30))
     
-    # ← PALETTE BIO RECALCULÉE LOCALEMENT SUR LE PAT ACTIF
-    pal_bio_local <- colorNumeric(
-      palette  = c("#bcd9a3", "#306600"),
-      domain   = centroid_pat$part_bio,
+    bio_vals_nonzero <- centroid_pat$bio[centroid_pat$bio > 0]
+    bio_range <- if (length(bio_vals_nonzero) > 0) range(sqrt(bio_vals_nonzero)) else c(0, 1)
+    
+    centroid_pat$rayon_bio_local <- ifelse(
+      centroid_pat$bio > 0,
+      scales::rescale(sqrt(centroid_pat$bio), from = bio_range, to = c(3, 30)),
+      0
+    )
+    
+    # Palette BIO — définie ici sans dépendre de communes_sau
+    pal_bio_local <- colorQuantile(
+      palette  = c("#e6feda", "#99c221", "#68a532", "#447049"),
+      domain   = centroid_pat$part_bio[centroid_pat$part_bio > 0],
+      n        = min(4, length(unique(centroid_pat$part_bio[centroid_pat$part_bio > 0]))),
       na.color = "transparent"
     )
-    # Palette locale sur les communes du PAT uniquement
-    pal_sau_local <- colorNumeric(
-      palette  = c("#fef6e3", "#efcb3a"),
-      domain   = communes_pat$part_sau,
-      na.color = "transparent"
-    )
+
     
     if (input$indicateur == "pop") {
       proxy %>% addCircleMarkers(
@@ -769,9 +853,11 @@ server <- function(input, output, session) {
       communes_sau <- commune_aura[
         commune_aura$code_insee_chr %in% communes_pat$code_insee_chr, ]
       
-      pal_sau_local <- colorNumeric(
-        palette  = c("#fef6e3", "#efcb3a"),
+      # Palette SAU définie ici, après communes_sau
+      pal_sau_local <- colorQuantile(
+        palette  = c("#fef6e3", "#fde39c", "#efcb3a", "#c8aa39"),
         domain   = communes_sau$part_sau,
+        n        = min(4, length(unique(na.omit(communes_sau$part_sau)))),
         na.color = "transparent"
       )
       
@@ -819,7 +905,7 @@ server <- function(input, output, session) {
           "<div style='display:flex; align-items:center; gap:8px; font-size:13px;",
           " color:#333; margin-bottom:8px;'>",
           "<span style='font-size:18px;'>&#127807;</span>",
-          "<div><div style='font-weight:600;'>", formatC(round(bio_ha), format="d", big.mark=" "), " hectares</div>",
+          "<div><div style='font-weight:600;'>", formatC(round(bio_ha), format="d", big.mark=" "), ifelse(round(bio_ha) == 1, " hectare", " hectares"), "</div>",          
           "<div style='font-size:11px; color:#666;'>Surface Agricole Utile Bio</div></div>",
           "</div>",
           "<div style='background:#f6f6f6; border-radius:4px; padding:6px 10px;'>",
@@ -958,111 +1044,137 @@ server <- function(input, output, session) {
         
         if (input$indicateur == "pop" && nrow(centroid_pat_leg) > 0) {
           vals <- sort(unique(na.omit(centroid_pat_leg$population)))
-          v_min <- format(round(min(vals)),    big.mark = " ")
-          v_med <- format(round(median(vals)), big.mark = " ")
-          v_max <- format(round(max(vals)),    big.mark = " ")
+          v_min <- format(round(min(vals)), big.mark = " ")
+          v_med <- format(round(sqrt(min(vals) * max(vals))), big.mark = " ")  # ← moyenne géométrique
+          v_max <- format(round(max(vals)), big.mark = " ")
+          
+          # Valeur intermédiaire = moyenne géométrique pour rescale cohérent
+          rayons <- scales::rescale(sqrt(c(min(vals), sqrt(min(vals) * max(vals)), max(vals))), to = c(3, 30))
+          r_min <- round(rayons[1])
+          r_med <- round(rayons[2])
+          r_max <- round(rayons[3])
+          
           indicateur_html <- paste0("
-    <div class='leg-sep-inner'></div>
-    <div class='leg-cat'>Indicateurs</div>
-    <div class='leg-item'>Population communale</div>
-    <div style='display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding-left:2px; margin-top:4px;'>
-    <div style='display:flex; align-items:center; gap:8px;'>
-      <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
-        <span class='swatch swatch-circle' style='background:#CE614A; width:6px; height:6px; display:block;'></span>
-      </div>
-      <span style='font-size:12px;'>", v_min, " hab.</span>
+<div class='leg-sep-inner'></div>
+<div class='leg-cat'>Indicateurs</div>
+<div class='leg-item'>Population communale</div>
+<div style='display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding-left:2px; margin-top:4px;'>
+  <div style='display:flex; align-items:center; gap:8px;'>
+    <div style='width:60px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+      <span style='background:#CE614A; border-radius:50%; width:", r_min*2, "px; height:", r_min*2, "px; display:block;'></span>
     </div>
-    <div style='display:flex; align-items:center; gap:8px;'>
-      <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
-        <span class='swatch swatch-circle' style='background:#CE614A; width:14px; height:14px; display:block;'></span>
-      </div>
-      <span style='font-size:12px;'>", v_med, " hab.</span>
+    <span style='font-size:12px;'>", v_min, " hab.</span>
+  </div>
+  <div style='display:flex; align-items:center; gap:8px;'>
+    <div style='width:60px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+      <span style='background:#CE614A; border-radius:50%; width:", r_med*2, "px; height:", r_med*2, "px; display:block;'></span>
     </div>
-    <div style='display:flex; align-items:center; gap:8px;'>
-      <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
-        <span class='swatch swatch-circle' style='background:#CE614A; width:20px; height:20px; display:block;'></span>
-      </div>
-      <span style='font-size:12px;'>", v_max, " hab.</span>
+    <span style='font-size:12px;'>", v_med, " hab.</span>
+  </div>
+  <div style='display:flex; align-items:center; gap:8px;'>
+    <div style='width:60px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+      <span style='background:#CE614A; border-radius:50%; width:", r_max*2, "px; height:", r_max*2, "px; display:block;'></span>
     </div>
-    </div>
-  ")
+    <span style='font-size:12px;'>", v_max, " hab.</span>
+  </div>
+</div>
+")
         }
         
         if (input$indicateur == "sau" && nrow(centroid_pat_leg) > 0) {
           communes_pat_leg <- commune_aura[
             commune_aura$code_insee_chr %in% communes_pat$code_insee_chr, ]
-          vals  <- sort(unique(na.omit(communes_pat_leg$part_sau)))
-          p_min <- round(min(vals), 1)
-          p_max <- round(max(vals), 1)
+          vals <- sort(na.omit(communes_pat_leg$part_sau))
+          
+          # Seuils quantiles adaptés au PAT
+          breaks_sau <- unique(round(quantile(vals, probs = c(0, 0.25, 0.5, 0.75, 1)), 1))
+          couleurs_sau <- c("#fef6e3", "#fde39c", "#efcb3a", "#c8aa39")
+          
+          classes_html <- paste0(vapply(seq_len(length(breaks_sau) - 1), function(i) {
+            paste0(
+              "<div style='display:flex; align-items:center; gap:6px; margin-bottom:4px;'>",
+              "<span style='width:14px; height:14px; background:", couleurs_sau[i],
+              "; border:1px solid #ccc; flex-shrink:0; display:inline-block;'></span>",
+              "<span style='font-size:12px;'>", breaks_sau[i], " - ", breaks_sau[i+1], " %</span>",
+              "</div>"
+            )
+          }, character(1)), collapse = "")
           
           indicateur_html <- paste0("
-    <div class='leg-sep-inner'></div>
-    <div class='leg-cat'>Indicateurs</div>
-    <div class='leg-item' style='font-weight:600; font-size:11px; margin-top:4px;'>
-      Part de SAU communale (%)
-    </div>
-    <div style='display:flex; align-items:center; gap:6px; margin-top:2px;'>
-      <span style='font-size:11px; color:#555;'>", p_min, " %</span>
-      <span style='width:80px; height:10px; background:linear-gradient(to right, #fef6e3, #efcb3a);
-             border-radius:3px; flex-shrink:0;'></span>
-      <span style='font-size:11px; color:#555;'>", p_max, " %</span>
-    </div>
-  ")
+      <div class='leg-sep-inner'></div>
+      <div class='leg-cat'>Indicateurs</div>
+      <div class='leg-item' style='font-weight:600; font-size:11px; margin-top:4px; margin-bottom:6px;'>
+        Part de SAU (%)
+      </div>", classes_html)
         }
         
         if (input$indicateur == "bio" && nrow(centroid_pat_leg) > 0) {
-          vals_bio <- sort(unique(na.omit(centroid_pat_leg$bio_ha)))
-          b_min <- format(round(min(vals_bio) / 2),    big.mark = " ")
-          b_med <- format(round(median(vals_bio) / 2), big.mark = " ")
-          b_max <- format(round(max(vals_bio) / 2),    big.mark = " ")
           
-          vals_part <- sort(unique(na.omit(centroid_pat_leg$part_bio)))
-          p_min <- round(min(vals_part))
-          p_max <- round(max(vals_part))
+          vals_bio_nonzero <- sort(unique(na.omit(centroid_pat_leg$bio[centroid_pat_leg$bio > 0])))
+          if (length(vals_bio_nonzero) == 0) return()
           
+          v_bio_min <- min(vals_bio_nonzero)
+          v_bio_max <- max(vals_bio_nonzero)
+          v_bio_med <- sqrt(v_bio_min * v_bio_max)
+          
+          b_min <- format(round(v_bio_min), big.mark = " ")
+          b_med <- format(round(v_bio_med), big.mark = " ")
+          b_max <- format(round(v_bio_max), big.mark = " ")
+          
+          bio_range_leg <- range(sqrt(vals_bio_nonzero))
+          rayons_bio <- scales::rescale(
+            sqrt(c(v_bio_min, v_bio_med, v_bio_max)),
+            from = bio_range_leg,
+            to   = c(3, 30)
+          )
+          r_min <- round(rayons_bio[1])
+          r_med <- round(rayons_bio[2])
+          r_max <- round(rayons_bio[3])
+          
+          vals_part <- sort(na.omit(centroid_pat_leg$part_bio[centroid_pat_leg$bio > 0]))
+          breaks_bio <- unique(round(quantile(vals_part, probs = c(0, 0.25, 0.5, 0.75, 1)), 1))
+          couleurs_bio <- c("#e6feda", "#99c221", "#68a532", "#447049")
+          
+          classes_bio_html <- paste0(vapply(seq_len(length(breaks_bio) - 1), function(i) {
+            paste0(
+              "<div style='display:flex; align-items:center; gap:6px; margin-bottom:4px;'>",
+              "<span style='width:14px; height:14px; border-radius:50%; background:", couleurs_bio[i],
+              "; flex-shrink:0; display:inline-block;'></span>",
+              "<span style='font-size:12px;'>", breaks_bio[i], " - ", breaks_bio[i+1], " %</span>",
+              "</div>"
+            )
+          }, character(1)), collapse = "")
+          
+          #
           indicateur_html <- paste0("
-    <div class='leg-sep-inner'></div>
-    <div class='leg-cat'>Indicateurs</div>
-
-    <div class='leg-item' style='font-weight:600; font-size:11px; margin-top:4px;'>
-      Surface agricole bio (ha)
+<div class='leg-sep-inner'></div>
+<div class='leg-cat'>Indicateurs</div>
+<div class='leg-item' style='font-weight:600; font-size:11px; margin-top:4px;'>Surface agricole bio (ha)</div>
+<div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:4px;'>Taille du cercle proportionnel</div>
+<div style='display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding-left:2px; margin-top:4px;'>
+  <div style='display:flex; align-items:center; gap:8px;'>
+    <div style='width:60px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+      <span style='background:transparent; border:1.5px solid #161616; border-radius:50%; width:", r_min*2, "px; height:", r_min*2, "px; display:block;'></span>
     </div>
-    <div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:4px;'>
-      Taille du cercle proportionnel
+    <span style='font-size:12px;'>", b_min, " ha</span>
+  </div>
+  <div style='display:flex; align-items:center; gap:8px;'>
+    <div style='width:60px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+      <span style='background:transparent; border:1.5px solid #161616; border-radius:50%; width:", r_med*2, "px; height:", r_med*2, "px; display:block;'></span>
     </div>
-    <div style='display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding-left:2px; margin-top:4px;'>
-      <div style='display:flex; align-items:center; gap:8px;'>
-        <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
-          <span class='swatch swatch-circle' style='background:transparent; border:2px solid #161616; width:6px; height:6px; display:block;'></span>
-        </div>
-        <span style='font-size:12px;'>", b_min, " ha</span>
-      </div>
-      <div style='display:flex; align-items:center; gap:8px;'>
-        <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
-          <span class='swatch swatch-circle' style='background:transparent; border:1.5px solid #161616; width:14px; height:14px; display:block;'></span>
-        </div>
-        <span style='font-size:12px;'>", b_med, " ha</span>
-      </div>
-      <div style='display:flex; align-items:center; gap:8px;'>
-        <div style='width:20px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
-          <span class='swatch swatch-circle' style='background:transparent; border:1.5px solid #161616; width:20px; height:20px; display:block;'></span>
-        </div>
-        <span style='font-size:12px;'>", b_max, " ha</span>
-      </div>
+    <span style='font-size:12px;'>", b_med, " ha</span>
+  </div>
+  <div style='display:flex; align-items:center; gap:8px;'>
+    <div style='width:60px; display:flex; justify-content:center; align-items:center; flex-shrink:0;'>
+      <span style='background:transparent; border:1.5px solid #161616; border-radius:50%; width:", r_max*2, "px; height:", r_max*2, "px; display:block;'></span>
     </div>
-
-    <div class='leg-item' style='font-weight:600; font-size:11px; margin-top:10px;'>
-      Part de SAU bio (%)
-    </div>
-    <div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:6px;'>
-      Couleur du cercle
-    </div>
-    <div style='display:flex; align-items:center; gap:6px; margin-top:2px;'>
-      <span style='font-size:11px; color:#555;'>", p_min, "%</span>
-      <span style='width:80px; height:10px; background:linear-gradient(to right, #bcd9a3, #306600); border-radius:3px; flex-shrink:0;'></span>
-      <span style='font-size:11px; color:#555;'>", p_max, "%</span>
-    </div>
-  ")
+    <span style='font-size:12px;'>", b_max, " ha</span>
+  </div>
+</div>
+<div class='leg-item' style='font-weight:600; font-size:11px; margin-top:10px;'>Part de SAU bio (%)</div>
+<div class='leg-item' style='font-size:11px;color:#555;font-style:italic;margin-bottom:6px;'>Couleur du cercle</div>",
+                                    classes_bio_html
+          )
         }
       }
       
@@ -1125,6 +1237,9 @@ server <- function(input, output, session) {
   # Recherche PAT / commune
   observeEvent(input$search_button, {
     req(input$nom_du_pat)
+    pat_actif(NULL)
+    clic_sur_pat(FALSE)
+    session$sendCustomMessage("hide_pat_popup", list())
     recherche <- tolower(trimws(input$nom_du_pat))
     
     selection_pat <- couche_pat_4326[
@@ -1142,11 +1257,12 @@ server <- function(input, output, session) {
     
     bb <- st_bbox(selection_com)
     leafletProxy("map") %>%
-      flyToBounds(
+      fitBounds(
         lng1 = unname(bb["xmin"]),
         lat1 = unname(bb["ymin"]),
         lng2 = unname(bb["xmax"]),
-        lat2 = unname(bb["ymax"])
+        lat2 = unname(bb["ymax"]),
+        options = list(animate = TRUE, duration = 0.8, easeLinearity = 0.1)
       )
   })
   
@@ -1155,7 +1271,8 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("map")
     proxy %>% clearGroup("Projet Alimentaire Territoriaux")
     proxy %>% clearPopups()
-    
+      
+
     pat_affiche <- pat_filtre()
     
     if (!is.null(pat_actif())) {
