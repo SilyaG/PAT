@@ -6,7 +6,7 @@
 
 ---
 
-## 📋 Présentation
+## Présentation
 
 Cette application de web-cartographie permet de visualiser et d'explorer les **Projets Alimentaires Territoriaux (PAT)** de la région Auvergne-Rhône-Alpes.
 
@@ -14,7 +14,7 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ---
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
 - 🗾 Visualisation cartographique des PAT sur fond IGN, OpenStreetMap ou Registre Parcellaire
 - 🔍 Recherche par PAT ou commune
@@ -24,7 +24,7 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ---
 
-## 🛠️ Technologies utilisées
+## Technologies utilisées
 
 - **R Shiny** — Interface et serveur applicatif
 - **Leaflet.js** — Rendu cartographique interactif
@@ -32,7 +32,7 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ---
 
-## 👥 Équipe
+## Équipe
 
 Projet réalisé par les étudiants de M2 **GéoNum** et **SENTINELLES**  
 Université Lumière Lyon 2 / Université Jean Moulin Lyon 3
