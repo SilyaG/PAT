@@ -3,6 +3,7 @@
 
 ![Licence CeCILL-2.1](https://img.shields.io/badge/Licence-CeCILL--2.1-blue)
 ![Statut](https://img.shields.io/badge/Statut-Terminé-brightgreen)
+
 ---
 
 ## Présentation
@@ -15,7 +16,7 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ## Fonctionnalités
 
-- Visualisation cartographique des PAT sur fond IGN, OpenStreetMap ou Registre Parcellaire
+- Visualisation cartographique des PAT sur fond IGN, OpenStreetMap ou Registre Parcellaire Graphique
 - Recherche par PAT ou commune
 - Filtres par niveau de labellisation et échelle territoriale
 - Liste dynamique des PAT visibles dans la vue courante
@@ -25,22 +26,24 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ## Technologies utilisées
 
-- **R Shiny** Pour l'interface et serveur applicatif
-- **Leaflet.js** Pour le Rendu cartographique interactif
-- **JavaScript / HTML / CSS** Pour les composants front-end personnalisés
+| Technologie | Rôle |
+|---|---|
+| R Shiny | Interface et serveur applicatif |
+| Leaflet.js | Rendu cartographique interactif |
+| JavaScript / HTML / CSS | Composants front-end personnalisés |
 
 ---
 
 ## Équipe
 
 Projet réalisé par les étudiants de M2 **GéoNum** et **SENTINELLES**  
-Université Lumière Lyon 2 / Université Jean Moulin Lyon 3
+Université Lumière Lyon 2 / Université Jean Moulin Lyon 3  
 
 Commanditaire : **DRAAF Auvergne-Rhône-Alpes**
 
 ---
 
-## 📄 Licence
+## Licence
 
 Ce projet est distribué sous licence **CeCILL-2.1**, une licence libre compatible avec la GPL, régie par le droit français.  
 → [Consulter la licence complète](https://cecill.info/licences/Licence_CeCILL_V2.1-fr.txt)
