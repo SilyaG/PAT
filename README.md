@@ -5,3 +5,5 @@ Ce projet de web-cartographie des PAT (Projets alimentaires territoriaux) s'insc
 Ce projet est un travail réalisé par les étudiants de deuxième année des master GéoNum et SENTINNELLES (Université Lyon 2/Lyon 3).
 
 
+## Licence
+Ce projet est sous licence [CeCILL-2.1](https://cecill.info/licences/Licence_CeCILL_V2.1-fr.txt).
