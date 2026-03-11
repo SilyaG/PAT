@@ -25,9 +25,9 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ## Technologies utilisées
 
-- **R Shiny** — Interface et serveur applicatif
-- **Leaflet.js** — Rendu cartographique interactif
-- **JavaScript / HTML / CSS** — Composants front-end personnalisés
+- **R Shiny** Pour l'interface et serveur applicatif
+- **Leaflet.js** Pour le Rendu cartographique interactif
+- **JavaScript / HTML / CSS** Pour les composants front-end personnalisés
 
 ---
 
