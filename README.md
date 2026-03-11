@@ -2,8 +2,7 @@
 ### Région Auvergne-Rhône-Alpes
 
 ![Licence CeCILL-2.1](https://img.shields.io/badge/Licence-CeCILL--2.1-blue)
-![Statut](https://img.shields.io/badge/Statut-En%20développement-yellow)
-
+![Statut](https://img.shields.io/badge/Statut-Terminé-brightgreen)
 ---
 
 ## Présentation
