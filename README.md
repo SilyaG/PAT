@@ -1,4 +1,4 @@
-# 🗺️ Géocarto-PAT — Web-cartographie des Projets Alimentaires Territoriaux
+# Web-cartographie des Projets Alimentaires Territoriaux
 ### Région Auvergne-Rhône-Alpes
 
 ![Licence CeCILL-2.1](https://img.shields.io/badge/Licence-CeCILL--2.1-blue)
