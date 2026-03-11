@@ -1,7 +1,47 @@
-# Projet géonumerique sur les projet alimentaire territoriaux
-Ce projet de web-cartographie des PAT (Projets alimentaires territoriaux) s'inscrit dans le cadre d'une commande par la DRAAF (Direction Régionale de l'Alimentation, de l'Agriculture et de la Forêt) de la région Auvergne-Rhône-Alpes. 
-Ce projet est un travail réalisé par les étudiants de deuxième année des Master GéoNum et SENTINNELLES (Université Lyon 2/Lyon 3).
+# 🗺️ Géocarto-PAT — Web-cartographie des Projets Alimentaires Territoriaux
+### Région Auvergne-Rhône-Alpes
 
+![Licence CeCILL-2.1](https://img.shields.io/badge/Licence-CeCILL--2.1-blue)
+![Statut](https://img.shields.io/badge/Statut-En%20développement-yellow)
 
-## Licence
-Ce projet est sous licence [CeCILL-2.1](https://cecill.info/licences/Licence_CeCILL_V2.1-fr.txt).
+---
+
+## 📋 Présentation
+
+Cette application de web-cartographie permet de visualiser et d'explorer les **Projets Alimentaires Territoriaux (PAT)** de la région Auvergne-Rhône-Alpes.
+
+Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rhône-Alpes** (Direction Régionale de l'Alimentation, de l'Agriculture et de la Forêt), par les étudiants de deuxième année des Masters **GéoNum** et **SENTINELLES** de l'Université Lyon 2 / Lyon 3.
+
+---
+
+## ✨ Fonctionnalités
+
+- 🗾 Visualisation cartographique des PAT sur fond IGN, OpenStreetMap ou Registre Parcellaire
+- 🔍 Recherche par PAT ou commune
+- 🎚️ Filtres par niveau de labellisation et échelle territoriale
+- 📋 Liste dynamique des PAT visibles dans la vue courante
+- 🧭 Tutoriel interactif intégré
+
+---
+
+## 🛠️ Technologies utilisées
+
+- **R Shiny** — Interface et serveur applicatif
+- **Leaflet.js** — Rendu cartographique interactif
+- **JavaScript / HTML / CSS** — Composants front-end personnalisés
+
+---
+
+## 👥 Équipe
+
+Projet réalisé par les étudiants de M2 **GéoNum** et **SENTINELLES**  
+Université Lumière Lyon 2 / Université Jean Moulin Lyon 3
+
+Commanditaire : **DRAAF Auvergne-Rhône-Alpes**
+
+---
+
+## 📄 Licence
+
+Ce projet est distribué sous licence **CeCILL-2.1**, une licence libre compatible avec la GPL, régie par le droit français.  
+→ [Consulter la licence complète](https://cecill.info/licences/Licence_CeCILL_V2.1-fr.txt)
