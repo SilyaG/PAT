@@ -37,8 +37,22 @@ function startTutorial() {
 
   var tutorialSteps = [
     {el:'.menu-couches',        title:'Menu des couches',  text:'Sélectionnez le fond cartographique et les couches à afficher sur la carte.'},
+    {el: '.menu-couches',title: 'Indicateurs communaux',
+      html: `
+        <p style="font-size:13px; color:#333; line-height:1.5; margin-bottom:8px;">
+          Après avoir <strong>cliqué sur un PAT</strong>, une nouvelle couche 
+          <strong>« Communes »</strong> apparaît dans la section <strong>« Couches »</strong> du panneau de sélection.
+        </p>
+        <p style="font-size:13px; color:#333; line-height:1.5;">
+          En l'activant, vous pourrez visualiser des <strong>indicateurs communaux</strong> 
+          directement sur la carte.
+        </p>
+        <p style="font-size:11px; color:#666; margin-top:10px; font-style:italic;">
+          Cliquez sur un PAT → cochez "Communes" → choisissez un indicateur.
+        </p>
+      `},
     {el:'#filtre_niveau',       title:'Filtre des niveaux de labellisation',text:'Utilisez ce filtre pour sélectionner le niveau de labellisation des PAT.'},
-    {el:'#filtre_niveau_terri', title:'Filtre des échelles territoriales', text:'Utilisez également ce filtre pour sélectionner l\'échelle territoriale des PAT. Les filtres "niveau" et "échelle" sont cumulables.'},
+    {el:'#filtre_niveau_terri', title:'Filtre des échelles territoriales', text:'Utilisez ce filtre pour sélectionner l\'échelle territoriale des PAT. Les filtres "niveau" et "échelle" sont cumulables.'},
     {el:'#reset_button',        title:'Réinitialiser la carte', text:'Ce bouton remet la carte dans son état initial : les filtres sont effacés, le zoom revient sur la région entière et tout PAT sélectionné est désélectionné.'},
     {el:'#legend_toggle',       title:'Afficher/Masquer la légende', text:'Cliquez sur ce bouton pour afficher ou masquer la légende des couches visibles sur la carte.'},
     {el:'#map_legend',          title:'Légende', text:'La légende s\'actualise automatiquement en fonction des couches visibles sur la carte.'},
@@ -127,9 +141,13 @@ function startTutorial() {
         modal.style.left = left + 'px';
       }
 
-      document.getElementById('tutorial_title').innerText = s.title;
-      document.getElementById('tutorial_text').innerText  = s.text;
-
+      document.getElementById('tutorial_title').innerText   = s.title;
+      var textEl = document.getElementById('tutorial_text');
+      if (s.html) {
+        textEl.innerHTML = s.html;
+      } else {
+        textEl.innerText = s.text;
+      }
       var prevBtn = document.getElementById('tutorial_prev');
       var nextBtn = document.getElementById('tutorial_next');
 
