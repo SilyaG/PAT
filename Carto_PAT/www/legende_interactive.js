@@ -45,3 +45,9 @@ Shiny.addCustomMessageHandler('update_legende', function(html) {
 });
 
 
+document.addEventListener('DOMContentLoaded', function () {
+  // Masquage initial géré ici plutôt qu'en CSS
+  // car Leaflet recrée le div à chaque addControl()
+  var legend = document.getElementById('map_legend');
+  if (legend) legend.style.display = 'none';
+});

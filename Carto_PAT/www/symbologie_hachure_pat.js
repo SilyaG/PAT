@@ -92,8 +92,13 @@ Shiny.addCustomMessageHandler('apply_hatch', function(data) {
     var n = applyPatterns(data);
     if (n >= expectedCount) return;
     if (attempts >= maxAttempts) return;
-    setTimeout(tryLoop, 200);
+    // ← Délai progressif : court au début, plus long ensuite
+    var delay = attempts < 5 ? 100 : 300;
+    setTimeout(tryLoop, delay);
   }
+
+  // ← Délai initial augmenté pour laisser Leaflet terminer le rendu SVG
+  setTimeout(tryLoop, 400);
 
   tryLoop();
 
@@ -113,7 +118,7 @@ Shiny.addCustomMessageHandler('apply_hatch', function(data) {
         if (window._lastHatchData) {
           applyPatterns(window._lastHatchData);
         }
-      }, 100);
+      }, 250);
     };
 
     // déclenche la boucle à chaque zoom
