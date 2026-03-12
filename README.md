@@ -64,17 +64,17 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 | Nom | Profil |
 |---|---|
-| Paul **GRÉAUME** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/) |
-| Silya **GUERBOUB** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/) |
-| Charlotte **JOUVE** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/) |
-| Olivier **PRIMA** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/) |
+| Paul **GRÉAUME** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/Pgreaume) |
+| Silya **GUERBOUB** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/SilyaG) |
+| Charlotte **JOUVE** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/charlottelabeaumont-cmyk) |
+| Olivier **PRIMA** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/OlivierPsig) |
 
 **Gestion de projet & rédaction** — M2 SENTINELLES, Université Jean Moulin Lyon 3
 
 | Nom | Profil |
 |---|---|
-| Louise **DE SIMONE** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/) |
-| Sabry **FANDI** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/) |
+| Louise **DE SIMONE** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/louise-desimone) |
+| Sabry **FANDI** | [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github)](https://github.com/sf2411) |
 
 **Commanditaire** : DRAAF Auvergne-Rhône-Alpes
 
