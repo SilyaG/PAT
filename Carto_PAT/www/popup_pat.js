@@ -1,5 +1,11 @@
+// Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte, Prima Oliver / Université Lumière Lyon 2] 
+// Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.
+
+
+// Recçoit l'objet data et remplis les popups avec les valeurs correspondante
 Shiny.addCustomMessageHandler('show_pat_popup', function(data) {
 
+  // On remplis les éléments DOM un à un
   document.getElementById('pat_popup_nom').innerText            = data.nom        || '';
   document.getElementById('pat_popup_niveau').innerText         = 'Niveau de labellisation : ' + (data.niveau || '');
   document.getElementById('pat_popup_annee').innerText          = 'Année de labellisation : '  + (data.annee  || '');
@@ -11,16 +17,25 @@ Shiny.addCustomMessageHandler('show_pat_popup', function(data) {
   document.getElementById('pat_popup_pct_sau_bio').innerText    = '(soit ' + (parseFloat(data.pct_sau_bio)||0).toFixed(1)    + ' % de la SAU* Bio régionale)';
   document.getElementById('pat_popup_restau').innerText         = (Number(data.restau).toLocaleString('fr-FR') || '') + ' restaurants scolaires au 9 mars 2026';
 
+
+  // Graphique comparatif PAT vs AURA
+  // Calculs de barres horizontales ; on vérifie que les valeurs sont bien nulériques
   var partBio = parseFloat(String(data.partbio  || '0').replace(',', '.'));
   var bioAura = parseFloat(String(data.bio_aura || '0').replace(',', '.'));
   if (isNaN(partBio)) partBio = 0;
   if (isNaN(bioAura)) bioAura = 0;
 
+  // Borne max arrondie aux multiples de 5
   var maxVal = Math.ceil(Math.max(partBio, bioAura) * 1.3 / 5) * 5 || 10;
+
+  // Largeur en pourcentage des barres
   var wPat   = (partBio / maxVal * 100).toFixed(1);
   var wAura  = (bioAura / maxVal * 100).toFixed(1);
+
+  // Couleur du PAT
   var colPat = partBio >= bioAura ? '#1f8d49' : '#e05c0a';
 
+  // Composition du HTML
   var chartHTML =
     '<div style="margin:10px 0 4px 0;">' +
       '<div style="font-size:11px; font-weight:600; color:#3a3a3a; margin-bottom:8px;">Part de SAU* bio : PAT vs AuRA</div>' +
@@ -48,7 +63,8 @@ Shiny.addCustomMessageHandler('show_pat_popup', function(data) {
     '</div>';
 
   document.getElementById('pat_popup_chart').innerHTML = chartHTML;
-
+  
+ // Contacts
   var contactsEl = document.getElementById('pat_popup_contacts');
   contactsEl.innerHTML = '';
   if (data.contacts && data.contacts.length > 0) {

@@ -1,10 +1,20 @@
+// Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte, Prima Oliver / Université Lumière Lyon 2] 
+// Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.
+
+
+
 Shiny.addCustomMessageHandler("show_toast_indicateurs", function(msg) {
-    // Éviter les doublons
+    // Éviter de créer 2 fois le même toast si le handler est déclenché
     if (document.getElementById("toast-indicateurs")) return;
   
+    // Création de l'éléments DOM
     var toast = document.createElement("div");
     toast.id = "toast-indicateurs";
+
+    //Contenu HTML et icône
     toast.innerHTML = "<i class='ri-bar-chart-line' style='margin-right:6px;'></i>Indicateurs communaux disponibles ↖";
+
+    // Style en ligne: position fixe en bas à gauche, design
     toast.style.cssText = `
     position: fixed;
     top: 700px;        
@@ -23,7 +33,8 @@ Shiny.addCustomMessageHandler("show_toast_indicateurs", function(msg) {
   `;
     document.body.appendChild(toast);
   
-    // Apparition
+    // Apparition animée en deux frames successives
+    //(double requestAnimationFrame pour forcer le recalcul du style)
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
         toast.style.opacity = "1";

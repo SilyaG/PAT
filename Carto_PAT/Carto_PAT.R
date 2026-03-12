@@ -1,4 +1,9 @@
-########################################### PROJET CAROT ########################################################
+########################################### PROJET CAROT ###########################################
+######### Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte,Prima Oliver #########
+####################################Université Lumière Lyon 2]######################################
+#########Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.##############
+
+
 ## APPEL AUX LIBRAIRIES NÉCESSAIRES À LA CRÉATION DE LA CARTE INTERACTIVE ##
 library(shiny)
 library(leaflet)
@@ -10,6 +15,7 @@ library(jsonlite)
 library(scales)
 library(stringr)
 
+# Enlever la commentarisation pour installation de leaflet.extras
 # remotes::install_github("trafficonese/leaflet.extras")
 
 # Petit helper sécurisé
@@ -50,8 +56,12 @@ pal_pat <- colorFactor(
 )
 
 ########################################### Partie UI #############################################################
+# Définition de l'interface utilisateur (UI) de l'application Shiny
+# Structure générale : fluidPage contenant tous les éléments visuels
 ui <- fluidPage(
+  # En-tête (head) : charger les styles CSS et scripts JavaScript externes
   tags$head(
+    # Design System de la République Française (DSFR) - CSS et JS
     tags$link(
       rel = "stylesheet",
       href = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/dsfr.min.css"
@@ -60,47 +70,55 @@ ui <- fluidPage(
       src = "https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/dsfr.module.min.js",
       type = "module"
     ),
+    # Icônes Remix (boutons, logos, etc.)
     tags$link(
       href = "https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css",
       rel = "stylesheet"
     ),
-    
+    # Styles personnalisés spécifiques à la cartographie
     tags$link(
       rel = "stylesheet",
       type = "text/css",
       href = "style_carto_PAT.css"
     ),
     
+    # Variables JavaScript globales : listes d'autocomplétion des communes et PAT
     tags$script(HTML(sprintf(
       "window.AUTOCOMPLETE_COMMUNES = %s;\nwindow.AUTOCOMPLETE_PATS = %s;",
       jsonlite::toJSON(autocomplete_communes, auto_unbox = TRUE),
       jsonlite::toJSON(autocomplete_pats, auto_unbox = TRUE)
     ))),
     
-    tags$script(src = "barre_recherche_autocomplete.js"),
-    tags$script(src = "legende_interactive.js"),
-    tags$script(src = "liste_pat_interactive.js"),
-    tags$script(src = "symbologie_hachure_pat.js"),
-    tags$script(src = "tutoriel_demarrage.js"),
-    tags$script(src = "popup_pat.js"),
-    tags$script(src = "popup_communes.js"),
-    tags$script(src = "bouton_reset.js"),
-    tags$script(src = "warning_indicateurs_communaux.js")
-    ),
+    # Scripts JavaScript personnalisés pour l'interactivité
+    tags$script(src = "barre_recherche_autocomplete.js"),     # Autocomplétion barre de recherche
+    tags$script(src = "legende_interactive.js"),              # Gestion interactive de la légende
+    tags$script(src = "liste_pat_interactive.js"),            # Clic sur PAT dans le menu latéral
+    tags$script(src = "symbologie_hachure_pat.js"),           # Hachures SVG pour PAT
+    tags$script(src = "tutoriel_demarrage.js"),               # Modal tutoriel au démarrage
+    tags$script(src = "popup_pat.js"),                        # Popup personnalisée PAT
+    tags$script(src = "popup_communes.js"),                   # Popup communes (si besoin)
+    tags$script(src = "bouton_reset.js"),                     # RéAction bouton reset
+    tags$script(src = "warning_indicateurs_communaux.js")     # Avertissements indicateurs
+  ),
   
-  includeHTML("www/apparence_page_introductive.html"),
-  includeHTML("www/apparence_header_aura.html"),
+  # Éléments HTML statiques inclus depuis des fichiers externes
+  includeHTML("www/apparence_page_introductive.html"),    # Page d'introduction/splash screen
+  includeHTML("www/apparence_header_aura.html"),          # En-tête avec logo AURA
   
+  # Contenu principal de l'application
   tags$main(
     class = "fr-container-fluid",
     br(),
     
+    # BARRE DE FILTRES : Section supérieure avec contrôles de filtrage
     tags$div(
       style = "display:flex; gap:20px; align-items:flex-end; margin:0px 0 20px 0; padding:0;",
       
+      # Groupe des filtres + bouton reset
       tags$div(
         style = "display:flex; gap:20px; margin:0; padding:0;",
         
+        # Filtre 1 : Niveau de labellisation (Niveau 1 ou 2)
         tags$div(
           style = "width:250px; margin:0; padding:0; position:relative; display:flex; align-items:center;",
           tags$select(
@@ -117,6 +135,8 @@ ui <- fluidPage(
             tags$option(value = "1", "Niveau 1"),
             tags$option(value = "2", "Niveau 2")
           ),
+          
+          #Button info pour en savoir plus sur le niveau des PAT 
           tags$button(
             id = "btn_info_niveau",
             type = "button",
@@ -131,6 +151,7 @@ ui <- fluidPage(
           )
         ),
         
+        # Filtre 2 : Échelle du territoire (PAiT, intercommunale, départementale)
         tags$div(
           style = "width:250px; margin:0; padding:0;",
           tags$select(
@@ -149,6 +170,8 @@ ui <- fluidPage(
             tags$option(value = "PAT d'échelle départementale", "Départementale")
           )
         ),
+        
+        # Bouton réinitialiser : remet les filtres à zéro
         tags$button(
           id = "reset_button",
           class = "fr-btn fr-btn--secondary",
@@ -157,13 +180,16 @@ ui <- fluidPage(
           "Réinitialiser"
         )
       ),
+      # Zone pour afficher les avertissements (pas de résultats avec les filtres actuels)
       uiOutput("warning_pat_ui"),
       tags$div(
         style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;"),
-
-  tags$div(
-    style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
+      
+      # BOUTONS ET BARRE DE RECHERCHE (alignés à droite)
+      tags$div(
+        style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
         
+        # Bouton Tutoriel : affiche le guide d'utilisation
         tags$button(
           id = "info_tutorial",
           class = "fr-btn fr-btn--secondary",
@@ -172,6 +198,7 @@ ui <- fluidPage(
           "Tutoriel"
         ),
         
+        # BARRE DE RECHERCHE : Permet de chercher un PAT ou une commune
         tags$div(
           class = "fr-search-bar",
           role = "search",
@@ -182,6 +209,7 @@ ui <- fluidPage(
             `for` = "nom_du_pat"
           ),
           
+          # Panneau d'autocomplétion : affiche les suggestions (communes et PAT)
           tags$div(
             id = "autocomplete_panel",
             class = "autocomplete-panel",
@@ -195,6 +223,7 @@ ui <- fluidPage(
             )
           ),
           
+          # Champ de saisie pour la recherche
           tags$input(
             class = "fr-input",
             id = "nom_du_pat",
@@ -203,12 +232,14 @@ ui <- fluidPage(
             `aria-describedby` = "search_input_messages"
           ),
           
+          # Zone pour les messages (erreurs, confirmations, etc.)
           tags$div(
             class = "fr-messages-group",
             id = "search_input_messages",
             `aria-live` = "polite"
           ),
           
+          # Bouton rechercher : lance la recherche et zoom/sélection
           actionButton(
             inputId = "search_button",
             label = "Rechercher",
@@ -218,11 +249,16 @@ ui <- fluidPage(
       )
     ),
     
+    
+    # LAYOUT PRINCIPAL : 3 colonnes (gauche: menu | centre: carte | droite: sidebar)
     fluidRow(
+      # COLONNE GAUCHE : Menu des fonds et couches (20% de la largeur)
       column(
         width = 2,
         div(
           class = "menu-couches",
+          
+          # Section 1 : Sélection du fond cartographique
           h4("Fond cartographique"),
           radioButtons(
             "fond",
@@ -244,22 +280,28 @@ ui <- fluidPage(
             choiceValues = list("ign", "rpg", "osm", "fond_admin"),
             selected = "ign"
           ),
-          hr(),
+          hr(), # Séparateur
           
+          # Section 2 : Affichage/masquage des couches de données
           h4("Couches"),
-          checkboxInput("pat_layer", "Projet Alimentaire Territoriaux", TRUE),
-          checkboxInput("cls_layer", "Contrat Locaux de Santé", FALSE),
-          checkboxInput("dep_layer", "Départements", FALSE),
-          uiOutput("com_layer_ui"),     
+          checkboxInput("pat_layer", "Projet Alimentaire Territoriaux", TRUE), # PAT visibles par défaut
+          checkboxInput("cls_layer", "Contrat Locaux de Santé", FALSE),        # CLS masqués par défaut
+          checkboxInput("dep_layer", "Départements", FALSE),                   # Départements masqués par défaut
+          uiOutput("com_layer_ui"),     # Communes et indicateurs (affichés si PAT sélectionné)
           
         )
       ),
       
+      # COLONNE CENTRALE : Carte Leaflet interactive (65% de la largeur)
       column(
         width = 8,
         div(
           style = "position: relative;",
+          
+          # Carte Leaflet occupant 80% de la hauteur de la fenêtre
           leafletOutput("map", height = "80vh"),
+          
+          # Bouton pour afficher/masquer la légende (superposé sur la carte)
           tags$button(
             id = "legend_toggle",
             title = "Afficher / masquer la légende",
@@ -269,76 +311,81 @@ ui <- fluidPage(
             ),
             tags$i(class = "ri-list-check-2")
           ),
+          # Popup personnalisée des PAT (HTML/CSS externos)
           includeHTML("www/apparence_popup_pat.html")
         )
       ),
       
+      # COLONNE DROITE : Panneau latéral avec liste des PAT visibles (15% de la largeur)
       column(
         width = 2,
         div(
           id = "right_sidebar",
           class = "right-panel visible-sidebar",
-          uiOutput("pat_sidemenu")
+          uiOutput("pat_sidemenu") # Menu dépliable des PAT visibles dans la vue
         )
       )
     ),
     
-    includeHTML("www/apparence_footer_aura.html"),
-    includeHTML("www/apparence_tutoriel.html"),
-  # Modale d'information sur les niveaux
-  tags$dialog(
-    id = "modal-info-niveau",
-    class = "fr-modal",
-    role = "dialog",
-    `aria-labelledby` = "modal-info-niveau-title",
-    tags$div(
-      class = "fr-container fr-container--fluid fr-container-md",
+    # Éléments HTML statiques en bas de page
+    includeHTML("www/apparence_footer_aura.html"),  # Pied de page avec crédits/infos AURA
+    includeHTML("www/apparence_tutoriel.html"),     # Modal tutoriel (affichage au démarrage)
+    
+    # Modale d'information sur les niveaux
+    tags$dialog(
+      id = "modal-info-niveau",
+      class = "fr-modal",
+      role = "dialog",
+      `aria-labelledby` = "modal-info-niveau-title",
       tags$div(
-        class = "fr-grid-row fr-grid-row--center",
+        class = "fr-container fr-container--fluid fr-container-md",
         tags$div(
-          class = "fr-col-12 fr-col-md-8 fr-col-lg-6",
+          class = "fr-grid-row fr-grid-row--center",
           tags$div(
-            class = "fr-modal__body",
+            class = "fr-col-12 fr-col-md-8 fr-col-lg-6",
             tags$div(
-              class = "fr-modal__header",
-              tags$button(
-                class = "fr-btn--close fr-btn",
-                type = "button",
-                `aria-controls` = "modal-info-niveau",
-                "Fermer"
-              )
-            ),
-            tags$div(
-              class = "fr-modal__content",
-              tags$h1(
-                id = "modal-info-niveau-title",
-                class = "fr-modal__title",
-                "Niveaux de labellisation PAT"
-              ),
-              tags$p(
-                style = "color:#555; font-size:13px; margin-bottom:20px;",
-                "Les PAT sont reconnus par le Ministère de l'Agriculture selon deux niveaux :"
-              ),
+              class = "fr-modal__body",
               tags$div(
-                style = "border-left:3px solid #000091; padding:10px 14px; margin-bottom:12px; background:#f8f8f8;",
-                tags$p(
-                  style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
-                  "Niveau 1 — Projet en émergence"
-                ),
-                tags$p(
-                  style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
-                  "Démarche initiée : diagnostic, gouvernance et plan d'action en cours de structuration."
+                class = "fr-modal__header",
+                tags$button(
+                  class = "fr-btn--close fr-btn",
+                  type = "button",
+                  `aria-controls` = "modal-info-niveau",
+                  "Fermer"
                 )
               ),
               tags$div(
-                style = "border-left:3px solid #000091; padding:10px 14px; background:#f8f8f8;",
-                tags$p(
-                  style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
-                  "Niveau 2 — Projet opérationnel"
+                class = "fr-modal__content",
+                tags$h1(
+                  id = "modal-info-niveau-title",
+                  class = "fr-modal__title",
+                  "Niveaux de labellisation PAT"
                 ),
                 tags$p(
-                  style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
-                  "Gouvernance consolidée, diagnostic validé et plan d'actions pleinement mis en œuvre."
+                  style = "color:#555; font-size:13px; margin-bottom:20px;",
+                  "Les PAT sont reconnus par le Ministère de l'Agriculture selon deux niveaux :"
+                ),
+                tags$div(
+                  style = "border-left:3px solid #000091; padding:10px 14px; margin-bottom:12px; background:#f8f8f8;",
+                  tags$p(
+                    style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
+                    "Niveau 1 — Projet en émergence"
+                  ),
+                  tags$p(
+                    style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
+                    "Démarche initiée : diagnostic, gouvernance et plan d'action en cours de structuration."
+                  )
+                ),
+                tags$div(
+                  style = "border-left:3px solid #000091; padding:10px 14px; background:#f8f8f8;",
+                  tags$p(
+                    style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
+                    "Niveau 2 — Projet opérationnel"
+                  ),
+                  tags$p(
+                    style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
+                    "Gouvernance consolidée, diagnostic validé et plan d'actions pleinement mis en œuvre."
+                  )
                 )
               )
             )
@@ -347,8 +394,9 @@ ui <- fluidPage(
       )
     )
   )
-  )
 )
+
+# Fin de fluidPage(ui)
 
 ########################################### Partie SERVER ###########################################################
 server <- function(input, output, session) {
@@ -410,16 +458,19 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
   
-  # Filtres PAT
+  # Filtre réactif des PAT basé sur les sélections utilisateur
+  # Applique les filtres de niveau (1/2) et d'échelle (interterritorial/intercommunal/départemental)
   pat_filtre <- reactive({
     pat <- couche_pat_4326
     
+    # Filtre par niveau de labellisation (1 ou 2)
     if (!is.null(input$filtre_niveau) &&
         input$filtre_niveau != "Tous" &&
         input$filtre_niveau != "") {
       pat <- pat[pat$niveau == input$filtre_niveau, ]
     }
     
+    # Filtre par échelle du territoire (PAiT, intercommunale, départementale)
     if (!is.null(input$filtre_niveau_terri) &&
         input$filtre_niveau_terri != "Tous" &&
         input$filtre_niveau_terri != "") {
@@ -429,7 +480,7 @@ server <- function(input, output, session) {
     pat
   })
   
-  #Bouton reset 
+  # Gestion du clic sur le bouton "Réinitialiser" - remet les filtres à zéro et recentre la carte 
   observeEvent(input$reset_button, {
     session$sendCustomMessage("reset_filtres", list())
     
@@ -448,11 +499,15 @@ server <- function(input, output, session) {
       )
   })
   
-  # Popup PAT custom
+  # Affiche une popup personnalisée contenant les informations détaillées du PAT sélectionné
+  # Envoie les données au client via sendCustomMessage pour le rendu HTML personnalisé
   show_popup_pat <- function(pat_row) {
+    
+    # Récupère et nettoie la liste des contacts (séparés par des points-virgules)
     contacts <- unlist(strsplit(as.character(pat_row$mail_coord[1] %||% ""), ";"))
     contacts <- trimws(contacts[contacts != ""])
     
+    # Envoie les données du PAT au JavaScript pour affichage dans la popup personnalisée
     session$sendCustomMessage("show_pat_popup", list(
       nom            = as.character(pat_row$nom_du_pat[1]),
       niveau         = as.character(pat_row$niveau[1]),
@@ -469,26 +524,36 @@ server <- function(input, output, session) {
       contacts       = as.list(contacts)
     ))
   }
-  # Communes du PAT actif via code_pat -> code_insee
+  
+  # Récupère la liste des communes appartenant au PAT actuellement sélectionné
+  # Utilise le lien code_pat -> code_insee pour retrouver les communes
   communes_dans_pat_actif <- reactive({
     req(pat_actif())
     
+    # Récupère les codes PAT associés au PAT actif
     codes_pat <- unique(na.omit(couche_pat_4326$code_pat[couche_pat_4326$nom_du_pat == pat_actif()]))
     if (length(codes_pat) == 0) return(commune_aura[0, ])
     
+    # Retrouve les codes INSEE associés à ces codes PAT
     insee <- unique(na.omit(pat_com$code_insee_chr[pat_com$code_pat %in% codes_pat]))
     if (length(insee) == 0) return(commune_aura[0, ])
     
+    # Retourne les géométries des communes correspondantes
     commune_aura[commune_aura$code_insee_chr %in% insee, ]
   })
   
+  # Fonction pour sélectionner un PAT : met à jour l'état, zoome et affiche la popup
   select_pat <- function(pat_row, depuis_clic_carte = FALSE) {
     req(nrow(pat_row) > 0)
     
+    # Définit le PAT actif et marque si la sélection vient d'un clic sur la carte
     pat_actif(pat_row$nom_du_pat[1])
     clic_sur_pat(depuis_clic_carte)
     
+    # Affiche un toast pour indiquer le chargement des indicateurs
     session$sendCustomMessage("show_toast_indicateurs", list())
+    
+    # Récupère la bounding box du PAT et zoome dessus
     bb <- st_bbox(pat_row)
     
     leafletProxy("map") %>%
@@ -501,14 +566,17 @@ server <- function(input, output, session) {
         options = list(animate = TRUE, duration = 0.8, easeLinearity = 0.1)
       )
     
+    # Affiche la popup personnalisée avec les informations du PAT
     show_popup_pat(pat_row)
   }
   
+  # Fonction pour désélectionner le PAT actif et revenir à la vue initiale
   deselect_pat <- function() {
     pat_actif(NULL)
     clic_sur_pat(FALSE)
     session$sendCustomMessage("hide_pat_popup", list())
     
+    # Recentre la carte sur la bounding box initiale
     leafletProxy("map") %>%
       clearPopups() %>%
       fitBounds(
@@ -520,19 +588,26 @@ server <- function(input, output, session) {
       )
   }
   
-  # Liste des PAT visibles
+  # Détermine la liste des PAT visibles dans la vue actuelle de la carte
+  # Filtre par couche active, filtres appliqués, et zone visible (bounding box)
   pat_visibles_dans_vue <- reactive({
+    
+    # Si la couche PAT est masquée, retourne un objet vide
     if (isFALSE(input$pat_layer)) return(couche_pat_4326[0, ])
     
+    # Applique les filtres sélectionnés par l'utilisateu
     pat <- pat_filtre()
     
+    # Si un PAT est actif, affiche uniquement ce PAT
     if (!is.null(pat_actif())) {
       pat <- pat[pat$nom_du_pat == pat_actif(), ]
     }
     
+    # Récupère la bounding box de la vue actuelle
     b <- input$map_bounds
     if (is.null(b)) return(pat)
     
+    # Crée un polygone de la zone visible et filtre les PAT qui l'intersectent
     bbox_view <- sf::st_bbox(
       c(xmin = b$west, ymin = b$south, xmax = b$east, ymax = b$north),
       crs = 4326
@@ -543,14 +618,19 @@ server <- function(input, output, session) {
     pat[idx[, 1], ]
   })
   
+  # Rendu du menu latéral droit : affiche la liste des PAT visibles dans la vue courante
   output$pat_sidemenu <- renderUI({
+    
+    # Récupère les PAT visibles et extrait les noms uniques
     pat <- pat_visibles_dans_vue()
     pats <- sort(unique(na.omit(pat$nom_du_pat)))
     
+    # Affiche un message si aucun PAT n'est visible
     if (length(pats) == 0) {
       return(tags$p("Aucun PAT visible dans la vue (ou couche PAT masquée)."))
     }
     
+    # Construit le menu latéral collapsible avec la liste des PAT
     tags$nav(
       class = "fr-sidemenu",
       role = "navigation",
@@ -577,6 +657,7 @@ server <- function(input, output, session) {
             paste0("PAT visible(s) : ", length(pats))
           ),
           
+          # Liste cliquable des PAT avec attribut data-pat pour le JavaScript
           tags$ul(
             class = "fr-sidemenu__list",
             lapply(pats, function(nm) {
@@ -596,7 +677,7 @@ server <- function(input, output, session) {
     )
   })
   
-  # Carte initiale
+  # Rendu de la carte Leaflet initiale avec tous les fonds et couches de base
   output$map <- renderLeaflet({
     xmin <- unname(bbox_init["xmin"])
     ymin <- unname(bbox_init["ymin"])
@@ -609,6 +690,7 @@ server <- function(input, output, session) {
         maxZoom = 15
       )
     ) %>%
+      # Fond OpenStreetMap standard
       addProviderTiles("OpenStreetMap", group = "OSM") %>%
       
       # Fond neutre toujours visible (base pour les limites admin)
@@ -618,8 +700,10 @@ server <- function(input, output, session) {
         options = providerTileOptions(opacity = 1)
       ) %>%
       
+      # Fit aux limites et restriction du zoom
       fitBounds(xmin, ymin, xmax, ymax) %>%
-
+      
+      # Barre d'échelle en bas à gauche
       addScaleBar(
         position = "bottomleft",
         options = scaleBarOptions(
@@ -630,20 +714,25 @@ server <- function(input, output, session) {
         )
       ) %>%
       
+      # Bouton plein écran
       addFullscreenControl(position = "topright") %>%
+      
+      # Repositionne les contrôles de zoom en haut à droite
       htmlwidgets::onRender("
         function(el, x) {
           this.zoomControl.setPosition('topright');
         }
       ") %>%
       
-      # Fonds
+      # Plan IGN (WMS)
       addWMSTiles(
         baseUrl = "https://data.geopf.fr/wms-r/wms",
         layers  = "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
         options = WMSTileOptions(format = 'image/png', transparent = FALSE, version = '1.3.0'),
         group = "Plan IGN"
       ) %>%
+      
+      # Registre Parcellaire Graphique (WMS)
       addWMSTiles(
         baseUrl = "https://data.geopf.fr/wms-r/wms",
         layers  = "LANDUSE.AGRICULTURE2024",
@@ -651,7 +740,7 @@ server <- function(input, output, session) {
         group = "Registre Parcellaire Graphique"
       ) %>%
       
-      # Départements
+      # Département (limites grises fines)
       addPolygons(
         data = dep_aura_4326,
         color = "#7b7b7b",
@@ -661,7 +750,7 @@ server <- function(input, output, session) {
         group = "Departement"
       ) %>%
       
-      # Limites administratives
+      # Région (limites épaisses, non interactive)
       addPolygons(
         data        = reg_aura_4326,
         color       = "#161616",
@@ -672,7 +761,7 @@ server <- function(input, output, session) {
         group       = "Limites administratives"
       ) %>%
       
-      # Départements
+      # Département (limites contours, non interactive)
       addPolygons(
         data        = dep_aura_4326,
         color       = "#7b7b7b",
@@ -693,7 +782,7 @@ server <- function(input, output, session) {
         group = "Communes"
       ) %>%
       
-      # CLS
+      # Contrats Locaux de Santé (CLS)
       addPolygons(
         data = couche_cls_4326,
         color = "#6a6af4",
@@ -708,16 +797,20 @@ server <- function(input, output, session) {
       )
   })
   
-  # Gestion fonds de plan
+  
+  # Gestion dynamique de la sélection des fonds cartographiques
+  # Cache tous les fonds et affiche uniquement celui sélectionné par l'utilisateur
   observe({
     proxy <- leafletProxy("map")
     
+    # Cache tous les fonds
     proxy %>% hideGroup("Plan IGN")
     proxy %>% hideGroup("Registre Parcellaire Graphique")
     proxy %>% hideGroup("OSM")
     proxy %>% hideGroup("Limites administratives")
     proxy %>% hideGroup("fond_neutre_fixe")  # ← ajout
     
+    # Affiche le fond sélectionné
     if (input$fond == "ign"){
       proxy %>% showGroup("Plan IGN")
     }
@@ -727,16 +820,20 @@ server <- function(input, output, session) {
     if (input$fond == "osm") {
       proxy %>% showGroup("OSM")
     }
+    
+    # Pour le fond administratif, affiche le fond neutre + les limites administratives superposées
     if (input$fond == "fond_admin"){
       proxy %>% showGroup("fond_neutre_fixe")   # ← fond de base
       proxy %>% showGroup("Limites administratives")  # ← WMS par-dessus
     }
   })
   
-  # Affichage couches simples
+  # Gestion de l'affichage des couches simples (PAT, CLS, Communes, Départements)
+  # Affiche ou masque ces couches selon les checkboxes de l'utilisateur
   observe({
     proxy <- leafletProxy("map")
     
+    # Couche PAT
     if (isTRUE(input$pat_layer)) {
       proxy %>% showGroup("Projet Alimentaire Territoriaux")
     } else {
@@ -746,18 +843,21 @@ server <- function(input, output, session) {
       clic_sur_pat(FALSE)
     }
     
+    # Couche Contrats Locaux de Santé
     if (isTRUE(input$cls_layer)) {
       proxy %>% showGroup("Contrats locaux de santé")
     } else {
       proxy %>% hideGroup("Contrats locaux de santé")
     }
     
+    # Couche Communes
     if (isTRUE(input$com_layer)) {
       proxy %>% showGroup("Communes")
     } else {
       proxy %>% hideGroup("Communes")
     }
     
+    # Couche Départements
     if (isTRUE(input$dep_layer)) {
       proxy %>% showGroup("Departement")
     } else {
@@ -765,17 +865,22 @@ server <- function(input, output, session) {
     }
   })
   
-  # Affichage dynamique des communes : uniquement celles du PAT actif
+  
+  # Affichage dynamique des limites communales : uniquement celles du PAT actif
+  # Les communes ne s'affichent que si un PAT est sélectionné et la couche est activée
   observe({
     proxy <- leafletProxy("map")
     proxy %>% clearGroup("Communes")
     
+    # Retour si la couche est masquée ou aucun PAT actif
     if (isFALSE(input$com_layer)) return()
     if (is.null(pat_actif())) return()
     
+    # Récupère les communes du PAT actif
     communes_pat <- communes_dans_pat_actif()
     if (is.null(communes_pat) || nrow(communes_pat) == 0) return()
     
+    # Affiche les géométries des communes avec des limites grises
     proxy %>% addPolygons(
       data = communes_pat,
       color = "#929292",
@@ -786,31 +891,39 @@ server <- function(input, output, session) {
     )
   })
   
-  # Indicateurs dynamiques : uniquement sur les communes du PAT actif
+  
+  # Affichage dynamique des indicateurs : population, SAU, SAU bio
+  # Les indicateurs s'affichent uniquement sur les communes du PAT actif
   observe({
     proxy <- leafletProxy("map")
     
+    # Nettoie les groupes d'indicateurs précédents
     proxy %>%
       clearGroup("Population communale") %>%
       clearGroup("SAU") %>%
       clearGroup("SAU bio")
     
+    # Retour si pas de couche commune visible, pas d'indicateur sélectionné, ou pas de PAT actif
     if (!isTRUE(input$com_layer)) return()
     if (is.null(input$indicateur) || input$indicateur == "none") return()
     if (is.null(pat_actif())) return()
     
+    # Récupère les communes du PAT actif
     communes_pat <- communes_dans_pat_actif()
     if (is.null(communes_pat) || nrow(communes_pat) == 0) return()
     
+    # Filtre les centroïdes des communes du PAT actif pour les indicateurs
     centroid_pat <- communes_centroid[
       communes_centroid$code_insee_chr %in% communes_pat$code_insee_chr,
     ]
     
     if (nrow(centroid_pat) == 0) return()
     
+    # Recalcule les rayons des cercles localement (proportionnels aux valeurs du PAT)
     centroid_pat$rayon_pop_local <- scales::rescale(sqrt(centroid_pat$population), to = c(3, 30))
     centroid_pat$rayon_sau_local <- scales::rescale(sqrt(centroid_pat$rpg), to = c(3, 30))
     
+    #les valeurs des centroids s'appliquent uniquement si la valeur est au dessus de 0 
     bio_vals_nonzero <- centroid_pat$bio[centroid_pat$bio > 0]
     bio_range <- if (length(bio_vals_nonzero) > 0) range(sqrt(bio_vals_nonzero)) else c(0, 1)
     
@@ -827,8 +940,8 @@ server <- function(input, output, session) {
       n        = min(4, length(unique(centroid_pat$part_bio[centroid_pat$part_bio > 0]))),
       na.color = "transparent"
     )
-
     
+    # Indicateur Population : cercles rouges proportionnels au nombre d'habitants
     if (input$indicateur == "pop") {
       proxy %>% addCircleMarkers(
         data = centroid_pat,
@@ -849,6 +962,7 @@ server <- function(input, output, session) {
       )
     }
     
+    # Indicateur SAU : polygones colorés selon le % de SAU communale
     if (input$indicateur == "sau") {
       communes_sau <- commune_aura[
         commune_aura$code_insee_chr %in% communes_pat$code_insee_chr, ]
@@ -899,6 +1013,7 @@ server <- function(input, output, session) {
     if (input$indicateur == "bio") {
       centroid_pat$couleur_barre <- pal_bio_local(centroid_pat$part_bio)
       
+      # Indicateur SAU Bio : cercles colorés selon le % de SAU en bio
       proxy %>% addCircleMarkers(
         data = centroid_pat,
         radius = ~rayon_bio_local,
@@ -933,18 +1048,21 @@ server <- function(input, output, session) {
     }
   })
   
-  # Légende
+  # Gestion dynamique de la légende : met à jour le contenu selon les couches actives et les filtres
+  # La légende affiche les symboles correspondant uniquement aux couches visibles et aux PAT filtrés
   observe({
     sections <- list()
     
+    # Section : Projets Alimentaires Territoriaux
     if (isTRUE(input$pat_layer)) {
       
-      # Déterminer les PAT effectivement affichés
+      # Récupère les PAT affichés (filtrés et visibles)
       pat_legende <- pat_filtre()
       if (!is.null(pat_actif())) {
         pat_legende <- pat_legende[pat_legende$nom_du_pat == pat_actif(), ]
       }
       
+      # Détermine quels styles sont présents dans les PAT affichés
       niveaux_affiches  <- unique(pat_legende$niveau)
       echelles_affichees <- unique(pat_legende$echelle)
       
@@ -1018,6 +1136,7 @@ server <- function(input, output, session) {
     </div>")
       }
       
+      # Ajoute la section PAT à la légende
       sections <- append(sections, list(paste0(
         "<div class='leg-cat'>Projets Alimentaires Territoriaux</div>",
         sous_titre,
@@ -1026,6 +1145,7 @@ server <- function(input, output, session) {
       )))
     }
     
+    # Section : Contrats Locaux de Santé
     if (isTRUE(input$cls_layer)) {
       sections <- append(sections, list("
         <div class='leg-cat'>Contrats Locaux de Santé</div>
@@ -1033,6 +1153,7 @@ server <- function(input, output, session) {
       "))
     }
     
+    # Section : Départements (affichée seulement si le fond administratif n'est pas sélectionné)
     if (isTRUE(input$dep_layer) && input$fond != "fond_admin") {
       sections <- append(sections, list("
         <div class='leg-cat'>Départements</div>
@@ -1040,10 +1161,12 @@ server <- function(input, output, session) {
       "))
     }
     
+    # Section : Communes et indicateurs (affichée quand communes sont visibles et un PAT est actif)
     if (isTRUE(input$com_layer) && !is.null(pat_actif())) {
       
       indicateur_html <- ""
       
+      # Construit le HTML des indicateurs selon celui sélectionné
       if (!is.null(input$indicateur) && input$indicateur != "none") {
         
         # Calcul des valeurs réelles du PAT actif pour la légende
@@ -1051,6 +1174,7 @@ server <- function(input, output, session) {
         centroid_pat_leg <- communes_centroid[
           communes_centroid$code_insee_chr %in% communes_pat$code_insee_chr, ]
         
+        # Indicateur Population : légende avec cercles de différentes tailles
         if (input$indicateur == "pop" && nrow(centroid_pat_leg) > 0) {
           vals <- sort(unique(na.omit(centroid_pat_leg$population)))
           v_min <- format(round(min(vals)), big.mark = " ")
@@ -1090,6 +1214,7 @@ server <- function(input, output, session) {
 ")
         }
         
+        # Indicateur SAU : légende avec gradient de couleurs
         if (input$indicateur == "sau" && nrow(centroid_pat_leg) > 0) {
           communes_pat_leg <- commune_aura[
             commune_aura$code_insee_chr %in% communes_pat$code_insee_chr, ]
@@ -1117,6 +1242,7 @@ server <- function(input, output, session) {
       </div>", classes_html)
         }
         
+        # Indicateur Bio : légende avec cercles de tailles et gradient de couleurs
         if (input$indicateur == "bio" && nrow(centroid_pat_leg) > 0) {
           
           vals_bio_nonzero <- sort(unique(na.omit(centroid_pat_leg$bio[centroid_pat_leg$bio > 0])))
@@ -1136,6 +1262,7 @@ server <- function(input, output, session) {
             from = bio_range_leg,
             to   = c(3, 30)
           )
+          #Réglage de la taille des cercles dans la légende en prenant la moyenne géométrique 
           r_min <- round(rayons_bio[1])
           r_med <- round(rayons_bio[2])
           r_max <- round(rayons_bio[3])
@@ -1187,6 +1314,7 @@ server <- function(input, output, session) {
         }
       }
       
+      # Ajoute la section Communes et indicateurs
       sections <- append(sections, list(paste0("
     <div class='leg-cat'>Communes</div>
     <div class='leg-item'><span class='swatch-line' style='background:#929292;'></span>Limites communales</div>",
@@ -1194,6 +1322,7 @@ server <- function(input, output, session) {
       )))
     }
     
+    # Section : Limites administratives (affichée quand le fond administratif est sélectionné)
     if (!is.null(input$fond) && input$fond == "fond_admin") {
       sections <- append(sections, list("
         <div class='leg-cat'>Limites administratives</div>
@@ -1210,6 +1339,7 @@ server <- function(input, output, session) {
     
     html <- paste0("<div id='map_legend'>", content, "</div>")
     
+    # Ajoute ou met à jour le contrôle de légende sur la carte
     leafletProxy("map") %>%
       removeControl("legend_control") %>%
       addControl(
@@ -1219,12 +1349,16 @@ server <- function(input, output, session) {
       )
   })
   
+  # Gestion du UI pour le rendu conditionnel des indicateurs communaux
+  # Les indicateurs ne s'affichent que lorsqu'un PAT est sélectionné
   output$com_layer_ui <- renderUI({
     if (is.null(pat_actif())) return(NULL)
     
     tagList(
+      # Checkbox pour afficher/masquer les communes
       checkboxInput("com_layer", "Communes", TRUE),
       hr(),
+      # Section conditionnelle : affiche les options d'indicateurs que si les communes sont visibles
       conditionalPanel(
         condition = "input.com_layer == true",
         h4("Indicateurs communaux"),
@@ -1243,7 +1377,8 @@ server <- function(input, output, session) {
     )
   })
   
-  # Recherche PAT / commune
+  # Gestion du formulaire de recherche des PAT et communes
+  # Permet à l'utilisateur de chercher un PAT ou une commune par son nom
   observeEvent(input$search_button, {
     req(input$nom_du_pat)
     pat_actif(NULL)
@@ -1251,6 +1386,7 @@ server <- function(input, output, session) {
     session$sendCustomMessage("hide_pat_popup", list())
     recherche <- tolower(trimws(input$nom_du_pat))
     
+    # Cherche d'abord si c'est un PAT
     selection_pat <- couche_pat_4326[
       tolower(trimws(couche_pat_4326$nom_du_pat)) == recherche, ]
     
@@ -1259,11 +1395,13 @@ server <- function(input, output, session) {
       return()
     }
     
+    # Sinon cherche une commune
     selection_com <- commune_aura[
       tolower(trimws(commune_aura$nom_officiel)) == recherche, ]
     
     if (nrow(selection_com) == 0) return()
     
+    # Zoome sur la commune trouvée
     bb <- st_bbox(selection_com)
     leafletProxy("map") %>%
       fitBounds(
@@ -1275,15 +1413,17 @@ server <- function(input, output, session) {
       )
   })
   
-  # Affichage PAT filtrés
+  # Affichage dynamique des PAT filtrés avec deux styles : hachuré pour Niveau 1, aplat pour Niveau 2
+  # Les PAT sont triés par échelle (départemental → interterritorial → intercommunal)
   observe({
     proxy <- leafletProxy("map")
     proxy %>% clearGroup("Projet Alimentaire Territoriaux")
     proxy %>% clearPopups()
-      
-
+    
+    # Récupère les PAT filtrés
     pat_affiche <- pat_filtre()
     
+    # Si un PAT est actif, affiche uniquement ce PAT
     if (!is.null(pat_actif())) {
       pat_affiche <- pat_affiche[pat_affiche$nom_du_pat == pat_actif(), ]
     }
@@ -1327,10 +1467,12 @@ server <- function(input, output, session) {
         group       = "Projet Alimentaire Territoriaux"
       )
       
+      # Prépare la map des couleurs pour appliquer les hachures via JavaScript
       couleurs_map <- setNames(
         as.list(pal_pat(pat_niv1$echelle)),
         pat_niv1$nom_du_pat
       )
+      # Envoie les couleurs au client pour appliquer les patterns de hachures
       session$sendCustomMessage("apply_hatch", couleurs_map)
     }
   })
@@ -1342,6 +1484,7 @@ server <- function(input, output, session) {
   output$warning_pat_ui <- renderUI({
     pat <- pat_filtre()
     
+    # Affiche l'alerte seulement si des filtres sont appliqués et qu'aucun PAT ne correspond
     if (nrow(pat) == 0 &&
         !is.null(input$filtre_niveau) && input$filtre_niveau != "" &&
         !is.null(input$filtre_niveau_terri) && input$filtre_niveau_terri != "") {
@@ -1358,26 +1501,31 @@ server <- function(input, output, session) {
     }
   })
   
-  # Hachures au démarrage
+  # Initialisation des hachures au démarrage pour les PAT Niveau 1
+  # Applique les patterns SVG via JavaScript une fois la carte chargée
   observeEvent(input$map_initialized, {
     pat_affiche <- pat_filtre()
     pat_niv1 <- pat_affiche[!is.na(pat_affiche$niveau) & pat_affiche$niveau == "1", ]
     if (nrow(pat_niv1) == 0) return()
     
+    # Prépare la map nom_du_pat → couleur pour les hachures
     couleurs_map <- setNames(
       as.list(pal_pat(pat_niv1$echelle)),
       pat_niv1$nom_du_pat
     )
+    # Envoie au JavaScript pour appliquer les patterns
     session$sendCustomMessage("apply_hatch", couleurs_map)
   })
   
-  # Clic sur PAT
+  # Gestion des clics sur les PAT de la carte
+  # Permet de sélectionner un PAT ou un groupe de PAT si plusieurs se chevauchent
   observeEvent(input$map_shape_click, {
     if (!isTRUE(input$pat_layer)) return()
     
     click <- input$map_shape_click
     req(click)
     
+    # Crée un point avec les coordonnées du clic
     point <- st_sfc(st_point(c(click$lng, click$lat)), crs = 4326)
     
     # IMPORTANT : si un PAT est déjà actif, on ne teste le clic
@@ -1387,6 +1535,7 @@ server <- function(input, output, session) {
       pat_sf <- pat_sf[pat_sf$nom_du_pat == pat_actif(), ]
     }
     
+    # Détermine quels PAT intersectent le point cliqué
     intersect <- st_intersects(pat_sf, point, sparse = FALSE)
     pat_click <- pat_sf[unlist(intersect), ]
     
@@ -1407,35 +1556,38 @@ server <- function(input, output, session) {
     # Cas 2 : plusieurs PAT superposés (seulement quand aucun PAT n'est actif)
     clic_sur_pat(TRUE)
     
-liens <- paste0(
-  vapply(
-    seq_len(nrow(pat_click)),
-    function(i) {
-      code_json <- jsonlite::toJSON(as.character(pat_click$code_pat[i]), auto_unbox = TRUE)
-      libelle   <- htmltools::htmlEscape(as.character(pat_click$nom_du_pat[i]))
-      echelle   <- htmltools::htmlEscape(as.character(pat_click$echelle[i]))
-
-      paste0(
-        "<li style='margin-bottom:6px; list-style:none;'>",
-        "<a href='#'",
-        " style='display:block; padding:6px 10px; background:#f5f5fe;",
-        " border-left:3px solid #000091; color:#000091 !important;",
-        " text-decoration:none !important; font-size:12px;",
-        " font-family:Marianne,Arial,sans-serif;'",
-        " onmouseover=\"this.style.background='#e3e3fd'\"",
-        " onmouseout=\"this.style.background='#f5f5fe'\"",
-        " onclick='Shiny.setInputValue(\"pat_selectionne_code\", ",
-        code_json,
-        ", {priority:\"event\"}); return false;'>",
-        "<span style='font-weight:600;'>", libelle, "</span>",
-        "<br/><span style='font-size:11px; color:#666;'>", echelle, "</span>",
-        "</a></li>"
-      )
-    },
-    character(1)
-  ),
-  collapse = ""
-)
+    liens <- paste0(
+      vapply(
+        seq_len(nrow(pat_click)),
+        function(i) {
+          code_json <- jsonlite::toJSON(as.character(pat_click$code_pat[i]), auto_unbox = TRUE)
+          libelle   <- htmltools::htmlEscape(as.character(pat_click$nom_du_pat[i]))
+          echelle   <- htmltools::htmlEscape(as.character(pat_click$echelle[i]))
+          
+          # Crée le lien HTML avec onmouseover/onmouseout pour le style au survol
+          paste0(
+            "<li style='margin-bottom:6px; list-style:none;'>",
+            "<a href='#'",
+            " style='display:block; padding:6px 10px; background:#f5f5fe;",
+            " border-left:3px solid #000091; color:#000091 !important;",
+            " text-decoration:none !important; font-size:12px;",
+            " font-family:Marianne,Arial,sans-serif;'",
+            " onmouseover=\"this.style.background='#e3e3fd'\"",
+            " onmouseout=\"this.style.background='#f5f5fe'\"",
+            " onclick='Shiny.setInputValue(\"pat_selectionne_code\", ",
+            code_json,
+            ", {priority:\"event\"}); return false;'>",
+            "<span style='font-weight:600;'>", libelle, "</span>",
+            "<br/><span style='font-size:11px; color:#666;'>", echelle, "</span>",
+            "</a></li>"
+          )
+        },
+        character(1)
+      ),
+      collapse = ""
+    )
+    
+    # Affiche le popup avec les options de sélection
     leafletProxy("map") %>%
       clearPopups() %>%
       addPopups(
@@ -1453,10 +1605,11 @@ liens <- paste0(
       )
   })
   
-  # Clic sur PAT depuis liste / popup multi-PAT
+  # Gestion du clic sur un PAT depuis le menu latéral ou la recherche
   observeEvent(input$pat_selectionne, {
     req(input$pat_selectionne)
     
+    # Récupère le PAT correspondant au nom sélectionné
     pat <- pat_filtre()
     pat_row <- pat[pat$nom_du_pat == input$pat_selectionne, ]
     if (nrow(pat_row) == 0) return()
@@ -1464,11 +1617,12 @@ liens <- paste0(
     select_pat(pat_row, depuis_clic_carte = FALSE)
   })
   
-  # Clic sur Pop-up choix du pat pour le zoom
   
+  # Gestion du clic sur un PAT depuis le popup multi-PAT (via code_pat)
   observeEvent(input$pat_selectionne_code, {
     req(input$pat_selectionne_code)
     
+    # Récupère le PAT correspondant au code_pat
     pat <- pat_filtre()
     pat_row <- pat[as.character(pat$code_pat) == as.character(input$pat_selectionne_code), ]
     if (nrow(pat_row) == 0) return()
@@ -1476,13 +1630,15 @@ liens <- paste0(
     select_pat(pat_row, depuis_clic_carte = FALSE)
   })
   
-  # Reset si clic ailleurs
+  # Gestion du clic ailleurs sur la carte : désélectionne le PAT actif
   observeEvent(input$map_click, {
+    # Si un popup multi-PAT est affiché, on ignore le clic (pour ne pas le fermer immédiatement)
     if (clic_sur_pat()) {
       clic_sur_pat(FALSE)
       return()
     }
     
+    # Sinon, désélectionne le PAT actif
     if (!is.null(pat_actif())) {
       deselect_pat()
     }
@@ -1490,4 +1646,5 @@ liens <- paste0(
 }
 
 ################################# LANCEMENT DE L'APPLICATION #########################################################
+# Lance l'application Shiny en reliant l'interface utilisateur (UI) au serveur (Server)
 shinyApp(ui, server)

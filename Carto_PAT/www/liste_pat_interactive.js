@@ -1,3 +1,6 @@
+// Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte, Prima Oliver / Université Lumière Lyon 2] 
+// Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.
+
 // Chacun des fichier JS correspond à une fonction bien défini compréhensible par le nom du fichier 
 // Ici il s'agit du pannel de droite comprenant la liste des PAT 
 

@@ -39,6 +39,7 @@
   box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
 }
 
+/* Fenêtre de tutoriel */
 .tutorial-modal {
   position: fixed;
   z-index: 9999;
@@ -67,7 +68,6 @@
 }
 
 /* fenêtre d'introduction du tutoriel */
-/* fenêtre d'introduction du tutoriel */
 #intro_overlay {
   position: fixed;
   top: 0; left: 0;
@@ -90,7 +90,6 @@
   padding: 30px;
   box-sizing: border-box;
 }
-
 
 .intro-overlay p {
   color: #333;

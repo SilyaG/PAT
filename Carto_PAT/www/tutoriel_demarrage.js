@@ -1,3 +1,7 @@
+// Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte, Prima Oliver / Université Lumière Lyon 2] 
+// Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.
+
+
 // Chacun des fichier JS correspond à une fonction bien défini compréhensible par le nom du fichier 
 // Ici il s'agit du fichier concernant le tutoriel d'explication de l'application
 
@@ -6,21 +10,25 @@
 
 document.addEventListener('DOMContentLoaded', function() {
 
+  // Bouton de démarrage du tutoriel afficher sur l'écran d'acceuil
   document.getElementById('start_tutorial').addEventListener('click', function() {
     document.getElementById('intro_overlay').style.display = 'none';
-    startTutorial();
+    startTutorial(); // Lancer la séquence
   });
 
+  // Bouton "passer" sur l'écran d'accueil
   document.getElementById('skip_tutorial').addEventListener('click', function() {
     document.getElementById('intro_overlay').style.display = 'none';
   });
 
+  // Croix de fermeture quand le tutoriel est déja en cours
   document.getElementById('tutorial_close').addEventListener('click', function() {
     closeTutorial();
   });
 
   var infoBtn = document.getElementById('info_tutorial');
   if (infoBtn) {
+    // Icône d'info pour relancer le tuto
     infoBtn.addEventListener('click', function() {
       startTutorial();
     });
@@ -28,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function closeTutorial() {
+  //Masque tous les éléments de l'overlay/tutorial
   document.getElementById('tutorial_overlay').style.display = 'none';
   document.getElementById('tutorial_highlight').style.display = 'none';
   document.getElementById('tutorial_modal').style.display = 'none';
