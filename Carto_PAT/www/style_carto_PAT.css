@@ -6,6 +6,7 @@
   padding: 10px;
   border-radius: 8px;
   overflow-y:auto;
+  font-family: Marianne, Arial, sans-serif;
 }
 
 /* titre du menu des couches */
@@ -136,6 +137,7 @@
   border-radius: 8px;  
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
   padding:8px;
+  font-family: Marianne, Arial, sans-serif;
 }
 
 /* Style du titre de section (PAT ou Communes) */
@@ -196,6 +198,7 @@ select.fr-select,
   border-radius:8px;
   height: 80vh;
   overflow-y:auto;
+  font-family: Marianne, Arial, sans-serif;
 }
 
 /* Style des liens dans le menu latéral */
@@ -270,25 +273,24 @@ select.fr-select,
 
 
 /*Style de la légende de la carte*/
-    #map-legend {
-      display: none; /*caché par défaut */
-      background: #ffffff;
-      padding: 14px 16px;
+    #map_legend {
+      padding: 10px 14px;
       border-radius: 6px;
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: none;
+      border: none;
       min-width: 240px;
       font-size: 13px;
+      font-family: Marianne, Arial, sans-serif;
       line-height: 1.5;
       max-height: 60vh;
       overflow-y: auto;
-      margin-top: 65px;
     }
     
     /* titre principale de la légende */
-    #map-legend h4 {
+    #map_legend h4 {
       margin: 0 0 12px 0;
       font-size: 14px;
+      font-family: Marianne, Arial, sans-serif;
       font-weight: 600;
       color: #000091;
     }
@@ -349,14 +351,6 @@ select.fr-select,
       background: linear-gradient(to right, #bcd9a3, #306600);
       border-radius: 3px;
     }
-    
-    /* ajoute la légende à la carte */
-    .map-legend h4 {
-      margin: 0 0 12px 0;
-      font-size: 14px;
-      font-weight: 600;
-      color: #000091;
-    }
 
 /* Personalisation des controles leaflet */
 .leaflet-bar {
@@ -366,7 +360,12 @@ select.fr-select,
 }
 .leaflet-control:has(#map_legend) {
   margin-top: 50px !important;
+  background: rgba(255, 255, 255, 0.8) !important;       /* ← fond ici */
+  border: 1px solid #e5e5e5 !important; /* ← bordure ici */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important; /* ← ombre ici */
+  border-radius: 6px !important;
   pointer-events: none;
+  padding: 0 !important;
 }
 
 .leaflet-control:has(#map_legend) * {
@@ -398,7 +397,6 @@ select.fr-select,
   box-shadow: none !important;
   padding: 0 !important;
 }
-
 
 /* ============================================
 Pop-up des PAT
@@ -636,15 +634,18 @@ input[type="radio"] {
     max-height: 70vh !important;
     overflow-y: auto !important;
     font-size: 13px;
+    font-family: Marianne, Arial, sans-serif;
   } 
   .tutorial-modal h3 {
     font-size: 14px !important;
     margin-bottom: 6px !important;
+    font-family: Marianne, Arial, sans-serif;
   }
 
   .tutorial-modal p {
     font-size: 12px !important;
     margin-bottom: 8px !important;
+    font-family: Marianne, Arial, sans-serif;
   }
 
   /* Boutons Précédent/Suivant plus grands pour le tactile */
@@ -654,4 +655,13 @@ input[type="radio"] {
     font-size: 13px !important;
     padding: 8px 16px !important;
   }
+}
+
+/* Popup PAT en mode plein écran */
+:-webkit-full-screen .pat-popup,
+:fullscreen .pat-popup {
+  position: absolute !important;
+  z-index: 9999 !important;
+  bottom: 30px !important;
+  right: 10px !important;
 }

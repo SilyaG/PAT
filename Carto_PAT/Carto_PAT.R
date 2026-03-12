@@ -861,6 +861,9 @@ server <- function(input, output, session) {
         na.color = "transparent"
       )
       
+      # APRÈS — couleur dynamique
+      communes_sau$couleur_barre <- pal_sau_local(communes_sau$part_sau)
+      
       proxy %>% addPolygons(
         data        = communes_sau,
         fillColor   = ~pal_sau_local(part_sau),
@@ -875,28 +878,31 @@ server <- function(input, output, session) {
           " color:#333; margin-bottom:8px;'>",
           "<span style='font-size:18px;'>&#127807;</span>",
           "<div>",
-          "<div style='font-size:11px; color:#666;'>Part de Surface Agricole Utile</div>",
+          "<div style='font-size:11px; color:#666;'>Part de la Surface Agricole Utile dans la commune</div>",
           "</div></div>",
-          "<div style='background:#f6f6f6; border-radius:4px; padding:6px 10px;'>",
-          "<div style='font-size:11px; color:#555; margin-bottom:4px;'>Part de SAU communale</div>",
-          "<div style='background:#e5e5e5; border-radius:3px; height:10px; width:100%;'>",
-          "<div style='width:", pmin(round(part_sau), 100), "%; background:#efcb3a;",
-          " height:100%; border-radius:3px; min-width:2px;'></div>",
+          "<div style='background:#e5e5e5; border-radius:3px; height:10px; width:100%;",
+          " border:1px solid #ccc;'>",                                    # ← bordure sur le fond gris
+          "<div style='width:", pmin(round(part_sau), 100), "%; background:", couleur_barre, ";",
+          " height:100%; border-radius:3px; min-width:2px;",
+          " outline:1px solid rgba(0,0,0,0.15);'>",                       # ← contour subtil sur la barre
           "</div>",
-          "<div style='font-size:12px; font-weight:600; color:#b8860b; margin-top:4px;'>",
+          "</div>",
+          "<div style='font-size:12px; font-weight:600; color:#666666; margin-top:4px;'>",
           round(part_sau, 1), " %</div>",
           "</div></div>"
         ),
-        popupOptions = popupOptions(autoPan = TRUE,   autoPanPadding = c(20, 20)),
+        popupOptions = popupOptions(autoPan = TRUE, autoPanPadding = c(20, 20)),
         group = "SAU"
       )
     }
     
     if (input$indicateur == "bio") {
+      centroid_pat$couleur_barre <- pal_bio_local(centroid_pat$part_bio)
+      
       proxy %>% addCircleMarkers(
         data = centroid_pat,
         radius = ~rayon_bio_local,
-        fillColor = ~pal_bio_local(part_bio),  # ← palette locale
+        fillColor = ~pal_bio_local(part_bio),
         color = "#ffffff", weight = 1, fillOpacity = 1,
         popup = ~paste0(
           "<div style='font-family:Marianne,Arial,sans-serif; min-width:200px;'>",
@@ -905,20 +911,23 @@ server <- function(input, output, session) {
           "<div style='display:flex; align-items:center; gap:8px; font-size:13px;",
           " color:#333; margin-bottom:8px;'>",
           "<span style='font-size:18px;'>&#127807;</span>",
-          "<div><div style='font-weight:600;'>", formatC(round(bio_ha), format="d", big.mark=" "), ifelse(round(bio_ha) == 1, " hectare", " hectares"), "</div>",          
-          "<div style='font-size:11px; color:#666;'>Surface Agricole Utile Bio</div></div>",
+          "<div><div style='font-weight:600;'>",
+          formatC(round(bio_ha), format="d", big.mark=" "),
+          ifelse(round(bio_ha) == 1, " hectare", " hectares"), "</div>",
+          "<div style='font-size:11px; color:#666;'>Part de la Surface Agricole Utile Bio dans la commune</div></div>",
           "</div>",
-          "<div style='background:#f6f6f6; border-radius:4px; padding:6px 10px;'>",
-          "<div style='font-size:11px; color:#555; margin-bottom:4px;'>Part de SAU bio</div>",
-          "<div style='background:#e5e5e5; border-radius:3px; height:10px; width:100%;'>",
-          "<div style='width:", pmin(round(part_bio), 100), "%; background:#1f8d49;",
-          " height:100%; border-radius:3px; min-width:2px;'></div>",
+          "<div style='background:#e5e5e5; border-radius:3px; height:10px; width:100%;",
+          " border:1px solid #ccc;'>",                               # ← bordure sur le fond gris
+          "<div style='width:", pmin(round(part_bio), 100), "%; background:", couleur_barre, ";",
+          " height:100%; border-radius:3px; min-width:2px;",
+          " outline:1px solid rgba(0,0,0,0.15);'>",                  # ← contour subtil sur la barre
           "</div>",
-          "<div style='font-size:12px; font-weight:600; color:#1f8d49; margin-top:4px;'>",
+          "</div>",
+          "<div style='font-size:12px; font-weight:600; color:#666666; margin-top:4px;'>",
           round(part_bio, 1), " %</div>",
           "</div></div>"
         ),
-        popupOptions = popupOptions(autoPan = TRUE,   autoPanPadding = c(20, 20)),
+        popupOptions = popupOptions(autoPan = TRUE, autoPanPadding = c(20, 20)),
         group = "SAU bio"
       )
     }
