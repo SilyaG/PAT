@@ -15,7 +15,7 @@ Shiny.addCustomMessageHandler('show_pat_popup', function(data) {
   document.getElementById('pat_popup_pct_sau').innerText        = '(soit ' + (parseFloat(data.pct_sau)||0).toFixed(1)        + ' % de la SAU* régionale)';
   document.getElementById('pat_popup_bio').innerText            = (Number(data.bio).toLocaleString('fr-FR') || '') + ' ha de SAU* Bio';
   document.getElementById('pat_popup_pct_sau_bio').innerText    = '(soit ' + (parseFloat(data.pct_sau_bio)||0).toFixed(1)    + ' % de la SAU* Bio régionale)';
-  document.getElementById('pat_popup_restau').innerText         = (Number(data.restau).toLocaleString('fr-FR') || '') + ' restaurants scolaires au 9 mars 2026';
+  document.getElementById('pat_popup_restau').innerText         = (Number(data.restau).toLocaleString('fr-FR') || '') + ' Établissements de restauration collective au 9 mars 2026';
 
 
   // Graphique comparatif PAT vs AURA
