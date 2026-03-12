@@ -1,10 +1,20 @@
+// Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte, Prima Oliver / Université Lumière Lyon 2] 
+// Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.
+
+
+
+
+
 // ============================================================
 // Tooltip DSFR sur les options du filtre niveau de labellisation
 // ============================================================
 
+
+// Attend que le DOM soit chargé avant d'éxécuter le script
+
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Création du tooltip
+    // Création du tooltip qui s'affichera
     var tooltip = document.createElement('div');
     tooltip.id = 'tooltip_niveau';
     tooltip.style.cssText = `
@@ -24,11 +34,13 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
     document.body.appendChild(tooltip);
   
+    // Description des niveau de labellisation
     var descriptions = {
       "1": "Niveau 1 — Engagement structuré : le PAT dispose d'un diagnostic territorial et d'un plan d'action validé par le Ministère de l'Agriculture.",
       "2": "Niveau 2 — Reconnaissance avancée : le PAT dispose d'une gouvernance consolidée, d'un suivi-évaluation et d'actions opérationnelles engagées."
     };
   
+    
     function attachTooltip(selectId) {
       var select = document.getElementById(selectId);
       if (!select) return;
@@ -56,7 +68,9 @@ document.addEventListener('DOMContentLoaded', function () {
         font-size: 14px;
       `;
       wrapper.appendChild(panel);
-  
+
+
+     // Fonction pour construire le contenu du panneau
       function buildPanel() {
         panel.innerHTML = '';
         Array.from(select.options).forEach(function(opt) {
@@ -71,11 +85,15 @@ document.addEventListener('DOMContentLoaded', function () {
           `;
           item.textContent = opt.text;
           item.dataset.value = opt.value;
+
+          // Gestion du survol de l'option
   
           item.addEventListener('mouseenter', function(e) {
             item.style.background = '#f0f0fb';
             item.style.borderLeft = '3px solid #6a6af4';
-  
+
+
+          // Afficher le tooltip
             if (descriptions[opt.value]) {
               tooltip.innerHTML =
                 '<span style="font-weight:700; display:block; margin-bottom:4px; color:#8eb8f7;">' +
@@ -84,18 +102,19 @@ document.addEventListener('DOMContentLoaded', function () {
               tooltip.style.display = 'block';
             }
           });
-  
+
+         // Suit le mouvement de la souris
           item.addEventListener('mousemove', function(e) {
             tooltip.style.left = (e.clientX + 16) + 'px';
             tooltip.style.top  = (e.clientY - 10) + 'px';
           });
-  
+        // Masque l'option en la quittant
           item.addEventListener('mouseleave', function() {
             item.style.background = '';
             item.style.borderLeft = '3px solid transparent';
             tooltip.style.display = 'none';
           });
-  
+        // Sélectionne au clic 
           item.addEventListener('mousedown', function(e) {
             e.preventDefault();
             select.value = opt.value;
@@ -107,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
           panel.appendChild(item);
         });
       }
-  
+        // Ferme le panneau en cliquant ailleurs
       select.addEventListener('mousedown', function(e) {
         e.preventDefault();
         buildPanel();
@@ -122,5 +141,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
   
+    // Applique la transformation au select avec l'id filtre niveau
     attachTooltip('filtre_niveau');
   });

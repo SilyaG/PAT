@@ -1,3 +1,12 @@
+// Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte, Prima Oliver / Université Lumière Lyon 2] 
+// Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.
+
+
+// Chacun des fichiers JS correspond à une fonction bien défini compréhensible par le nom du fichier
+// Ici il s'agit de la fonction qui reset la carte et les filtres aux valeurs par défaut
+
+// Ce script écoute le clic sur le bouton reset et envoie un message à Shiny pour déclencher la reinitialisation des filtres et de la carte 
+
 document.addEventListener('DOMContentLoaded', function() {
   var btn = document.getElementById("reset_button");
   if (btn) {
@@ -7,19 +16,21 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// Ce message handler reçoiy le message shiny pour reinitialiser les filtres et lz carte 
 Shiny.addCustomMessageHandler("reset_filtres", function(msg) {
 
   // ── Filtres niveaux ──────────────────────────────────────────────────
-  var filtreNiveau = document.getElementById("filtre_niveau");
+  var filtreNiveau = document.getElementById("filtre_niveau"); // Filtres de niveau
   if (filtreNiveau) {
-    filtreNiveau.value = "";
-    filtreNiveau.dispatchEvent(new Event("change"));
+    filtreNiveau.value = ""; // Vider la valeur du filtre
+    filtreNiveau.dispatchEvent(new Event("change")); // Déclencher l'évenement met à jour l'interface
   }
 
-  var filtreNiveauTerri = document.getElementById("filtre_niveau_terri");
+// Reinitialiser le filtre de niveau territorial
+  var filtreNiveauTerri = document.getElementById("filtre_niveau_terri"); 
   if (filtreNiveauTerri) {
-    filtreNiveauTerri.value = "";
-    filtreNiveauTerri.dispatchEvent(new Event("change"));
+    filtreNiveauTerri.value = ""; // Vider la valeur de filtre
+    filtreNiveauTerri.dispatchEvent(new Event("change")); // Déclencher l'évenement met à jour l'interface
   }
 
   // ── Barre de recherche ───────────────────────────────────────────────

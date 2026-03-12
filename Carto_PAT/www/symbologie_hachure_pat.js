@@ -1,17 +1,21 @@
+// Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte, Prima Oliver / Université Lumière Lyon 2] 
+// Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.
+
+
 // Chacun des fichier JS correspond à une fonction bien défini compréhensible par le nom du fichier 
 // Ici la fonction permet d'appliqué des hachures à la symbologie de la couche PAT 
 
 
 // ===== Handler hachurage SVG pour PAT niveau 1 =====
-// ce Handler est appelé depui Shiny avec SendCustomMessage()
-// il reçoit un objet "data" contenant : {LayerID : couleur}
+// Ce Handler est appelé depuis Shiny avec SendCustomMessage()
+// Il reçoit un objet "data" contenant : {LayerID : couleur}
 
 Shiny.addCustomMessageHandler('apply_hatch', function(data) {
 
   // Stocke les données pour pouvoir réappliquer après zoom
   window._lastHatchData = data;
 
-  // nombre d'éléments attendu à styliser
+  // Nombre d'éléments attendu à styliser
   var expectedCount = Object.keys(data).length;
 
 // Fonction qui applique les patterns SVG
@@ -20,26 +24,26 @@ Shiny.addCustomMessageHandler('apply_hatch', function(data) {
     // Recupère le widget leaflet de Shiny
     var widget = HTMLWidgets.find('#map');
 
-    // si la carte n'existe pas encore la boucle s'arrete
+    // Si la carte n'existe pas encore la boucle s'arrete
     if (!widget || !widget.getMap()) return 0;
 
     var leafletMap = widget.getMap();
     
     var applied = 0; //compte les polygonnes à modifiés
 
-    // Parcour toutes les couches de la carte 
+    // Parcours toutes les couches de la carte 
     leafletMap.eachLayer(function(layer) {
 
-      // recupère l'identifiant de la couche
+      // Recupère l'identifiant de la couche
       var lid = layer.options && layer.options.layerId;
 
-      // ignore si pas d'id ou pas de correspondance dans les données
+      // Ignore si pas d'id ou pas de correspondance dans les données
       if (!lid || !dataToApply[lid]) return;
 
-      // couleur associé au PAT
+      // Couleur associé au PAT
       var color = dataToApply[lid];
 
-      // vérifie que la couche possède un path SVG
+      //Vvérifie que la couche possède un path SVG
       if (!layer._path) return;
 
       // Récupère l'élément SVG
@@ -49,7 +53,7 @@ Shiny.addCustomMessageHandler('apply_hatch', function(data) {
       // Création d'un identifiant unique pour le pattern
       var patId = 'hatch-' + lid.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Math.random().toString(36).substr(2, 6);
 
-      // définition des patterns dans defs
+      // Définition des patterns dans defs
       var defs = svgEl.querySelector('defs');
       if (!defs) {
         defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -72,7 +76,7 @@ Shiny.addCustomMessageHandler('apply_hatch', function(data) {
       line.setAttribute('stroke-width', '8');
       line.setAttribute('stroke-opacity', '0.5');
       pat.appendChild(line); // ajoute la ligne dans le pattern
-      defs.appendChild(pat); // ajoute le patten dans le bloc defs
+      defs.appendChild(pat); // ajoute le pattern dans le bloc defs
 
       // application du pattern sur les polygone
       layer._path.setAttribute('fill', 'url(#' + patId + ')');

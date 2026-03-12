@@ -1,3 +1,9 @@
+
+// Copyright (C) [2026] [Gréaume Paul, Guerboub Silya, Jouve Charlotte, Prima Oliver / Université Lumière Lyon 2] 
+// Distribué sous licence CeCILL-2.1 — voir le fichier LICENSE pour les détails.
+
+
+
 // ============================================================
 // Tooltip DSFR sur les options du filtre niveau de labellisation
 // ============================================================

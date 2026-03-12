@@ -99,7 +99,7 @@ ui <- fluidPage(
     tags$script(src = "popup_communes.js"),                   # Popup communes (si besoin)
     tags$script(src = "bouton_reset.js"),                     # RéAction bouton reset
     tags$script(src = "warning_indicateurs_communaux.js")     # Avertissements indicateurs
-    ),
+  ),
   
   # Éléments HTML statiques inclus depuis des fichiers externes
   includeHTML("www/apparence_page_introductive.html"),    # Page d'introduction/splash screen
@@ -185,9 +185,9 @@ ui <- fluidPage(
       tags$div(
         style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;"),
       
-  # BOUTONS ET BARRE DE RECHERCHE (alignés à droite)
-  tags$div(
-    style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
+      # BOUTONS ET BARRE DE RECHERCHE (alignés à droite)
+      tags$div(
+        style = "display:flex; align-items:flex-end; gap:8px; margin-left:auto;",
         
         # Bouton Tutoriel : affiche le guide d'utilisation
         tags$button(
@@ -249,8 +249,8 @@ ui <- fluidPage(
       )
     ),
     
-  
-  # LAYOUT PRINCIPAL : 3 colonnes (gauche: menu | centre: carte | droite: sidebar)
+    
+    # LAYOUT PRINCIPAL : 3 colonnes (gauche: menu | centre: carte | droite: sidebar)
     fluidRow(
       # COLONNE GAUCHE : Menu des fonds et couches (20% de la largeur)
       column(
@@ -327,64 +327,65 @@ ui <- fluidPage(
       )
     ),
     
-   # Éléments HTML statiques en bas de page
+    # Éléments HTML statiques en bas de page
     includeHTML("www/apparence_footer_aura.html"),  # Pied de page avec crédits/infos AURA
     includeHTML("www/apparence_tutoriel.html"),     # Modal tutoriel (affichage au démarrage)
-  
-  # Modale d'information sur les niveaux
-  tags$dialog(
-    id = "modal-info-niveau",
-    class = "fr-modal",
-    role = "dialog",
-    `aria-labelledby` = "modal-info-niveau-title",
-    tags$div(
-      class = "fr-container fr-container--fluid fr-container-md",
+    
+    # Modale d'information sur les niveaux
+    tags$dialog(
+      id = "modal-info-niveau",
+      class = "fr-modal",
+      role = "dialog",
+      `aria-labelledby` = "modal-info-niveau-title",
       tags$div(
-        class = "fr-grid-row fr-grid-row--center",
+        class = "fr-container fr-container--fluid fr-container-md",
         tags$div(
-          class = "fr-col-12 fr-col-md-8 fr-col-lg-6",
+          class = "fr-grid-row fr-grid-row--center",
           tags$div(
-            class = "fr-modal__body",
+            class = "fr-col-12 fr-col-md-8 fr-col-lg-6",
             tags$div(
-              class = "fr-modal__header",
-              tags$button(
-                class = "fr-btn--close fr-btn",
-                type = "button",
-                `aria-controls` = "modal-info-niveau",
-                "Fermer"
-              )
-            ),
-            tags$div(
-              class = "fr-modal__content",
-              tags$h1(
-                id = "modal-info-niveau-title",
-                class = "fr-modal__title",
-                "Niveaux de labellisation PAT"
-              ),
-              tags$p(
-                style = "color:#555; font-size:13px; margin-bottom:20px;",
-                "Les PAT sont reconnus par le Ministère de l'Agriculture selon deux niveaux :"
-              ),
+              class = "fr-modal__body",
               tags$div(
-                style = "border-left:3px solid #000091; padding:10px 14px; margin-bottom:12px; background:#f8f8f8;",
-                tags$p(
-                  style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
-                  "Niveau 1 — Projet en émergence"
-                ),
-                tags$p(
-                  style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
-                  "Démarche initiée : diagnostic, gouvernance et plan d'action en cours de structuration."
+                class = "fr-modal__header",
+                tags$button(
+                  class = "fr-btn--close fr-btn",
+                  type = "button",
+                  `aria-controls` = "modal-info-niveau",
+                  "Fermer"
                 )
               ),
               tags$div(
-                style = "border-left:3px solid #000091; padding:10px 14px; background:#f8f8f8;",
-                tags$p(
-                  style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
-                  "Niveau 2 — Projet opérationnel"
+                class = "fr-modal__content",
+                tags$h1(
+                  id = "modal-info-niveau-title",
+                  class = "fr-modal__title",
+                  "Niveaux de labellisation PAT"
                 ),
                 tags$p(
-                  style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
-                  "Gouvernance consolidée, diagnostic validé et plan d'actions pleinement mis en œuvre."
+                  style = "color:#555; font-size:13px; margin-bottom:20px;",
+                  "Les PAT sont reconnus par le Ministère de l'Agriculture selon deux niveaux :"
+                ),
+                tags$div(
+                  style = "border-left:3px solid #000091; padding:10px 14px; margin-bottom:12px; background:#f8f8f8;",
+                  tags$p(
+                    style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
+                    "Niveau 1 — Projet en émergence"
+                  ),
+                  tags$p(
+                    style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
+                    "Démarche initiée : diagnostic, gouvernance et plan d'action en cours de structuration."
+                  )
+                ),
+                tags$div(
+                  style = "border-left:3px solid #000091; padding:10px 14px; background:#f8f8f8;",
+                  tags$p(
+                    style = "font-weight:700; color:#000091; margin:0 0 4px 0; font-size:13px;",
+                    "Niveau 2 — Projet opérationnel"
+                  ),
+                  tags$p(
+                    style = "margin:0; font-size:12px; color:#444; line-height:1.5;",
+                    "Gouvernance consolidée, diagnostic validé et plan d'actions pleinement mis en œuvre."
+                  )
                 )
               )
             )
@@ -392,7 +393,6 @@ ui <- fluidPage(
         )
       )
     )
-  )
   )
 )
 
@@ -702,7 +702,7 @@ server <- function(input, output, session) {
       
       # Fit aux limites et restriction du zoom
       fitBounds(xmin, ymin, xmax, ymax) %>%
-
+      
       # Barre d'échelle en bas à gauche
       addScaleBar(
         position = "bottomleft",
@@ -940,7 +940,7 @@ server <- function(input, output, session) {
       n        = min(4, length(unique(centroid_pat$part_bio[centroid_pat$part_bio > 0]))),
       na.color = "transparent"
     )
-
+    
     # Indicateur Population : cercles rouges proportionnels au nombre d'habitants
     if (input$indicateur == "pop") {
       proxy %>% addCircleMarkers(
