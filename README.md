@@ -51,7 +51,7 @@ Ce projet est accompagné d'un rapport méthodologique détaillant les choix tec
 
 Le script d'automatisation de la création des couches mobilisées dans l'application cartographique est disponible dans le dossier "data". 
 
-📄 [Script d'automatisation](./data/automatisation.r)
+📄 [Script d'automatisation](Carto_PAT/data/automatisation.R)
 
 
 ---
