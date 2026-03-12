@@ -49,12 +49,9 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 ---
 
 ## Documentation
-
-| Ressource | Description |
-|---|---|
-| 📄 [Rapport méthodologique](./Rapport_Application_Cartographique_PAT.pdf) | Détail des choix techniques et cartographiques |
-| 📂 [Données & script d'automatisation](./Carto_PAT/data) | Couches géographiques et script de génération |
-| 🎨 [Fichiers front-end](./Carto_PAT/www) | Composants JS, CSS et HTML personnalisés |
+Ce projet est accompagné d'un rapport méthodologique détaillant les choix techniques et cartographiques réalisés.
+📄 [Rapport_Application_Cartographique_PAT.pdf](./Rapport_Application_Cartographique_PAT.pdf)
+Le script d'automatisation de la création des couches mobilisées dans l'application cartographique est disponible dans le dossier "data". 
 
 ---
 
