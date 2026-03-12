@@ -1048,8 +1048,8 @@ server <- function(input, output, session) {
     }
   })
   
-  # Gestion dynamique de la légende : met à jour le contenu selon les couches actives et les filtres
-  # La légende affiche les symboles correspondant uniquement aux couches visibles et aux PAT filtrés
+# Gestion dynamique de la légende : met à jour le contenu selon les couches actives et les filtres
+# La légende affiche les symboles correspondant uniquement aux couches visibles et aux PAT filtrés
   observe({
     sections <- list()
     
@@ -1376,9 +1376,9 @@ server <- function(input, output, session) {
       )
     )
   })
-  
-  # Gestion du formulaire de recherche des PAT et communes
-  # Permet à l'utilisateur de chercher un PAT ou une commune par son nom
+
+# Gestion du formulaire de recherche des PAT et communes
+# Permet à l'utilisateur de chercher un PAT ou une commune par son nom
   observeEvent(input$search_button, {
     req(input$nom_du_pat)
     pat_actif(NULL)
@@ -1419,7 +1419,7 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("map")
     proxy %>% clearGroup("Projet Alimentaire Territoriaux")
     proxy %>% clearPopups()
-    
+      
     # Récupère les PAT filtrés
     pat_affiche <- pat_filtre()
     
@@ -1501,8 +1501,8 @@ server <- function(input, output, session) {
     }
   })
   
-  # Initialisation des hachures au démarrage pour les PAT Niveau 1
-  # Applique les patterns SVG via JavaScript une fois la carte chargée
+# Initialisation des hachures au démarrage pour les PAT Niveau 1
+# Applique les patterns SVG via JavaScript une fois la carte chargée
   observeEvent(input$map_initialized, {
     pat_affiche <- pat_filtre()
     pat_niv1 <- pat_affiche[!is.na(pat_affiche$niveau) & pat_affiche$niveau == "1", ]
@@ -1556,37 +1556,37 @@ server <- function(input, output, session) {
     # Cas 2 : plusieurs PAT superposés (seulement quand aucun PAT n'est actif)
     clic_sur_pat(TRUE)
     
-    liens <- paste0(
-      vapply(
-        seq_len(nrow(pat_click)),
-        function(i) {
-          code_json <- jsonlite::toJSON(as.character(pat_click$code_pat[i]), auto_unbox = TRUE)
-          libelle   <- htmltools::htmlEscape(as.character(pat_click$nom_du_pat[i]))
-          echelle   <- htmltools::htmlEscape(as.character(pat_click$echelle[i]))
-          
-          # Crée le lien HTML avec onmouseover/onmouseout pour le style au survol
-          paste0(
-            "<li style='margin-bottom:6px; list-style:none;'>",
-            "<a href='#'",
-            " style='display:block; padding:6px 10px; background:#f5f5fe;",
-            " border-left:3px solid #000091; color:#000091 !important;",
-            " text-decoration:none !important; font-size:12px;",
-            " font-family:Marianne,Arial,sans-serif;'",
-            " onmouseover=\"this.style.background='#e3e3fd'\"",
-            " onmouseout=\"this.style.background='#f5f5fe'\"",
-            " onclick='Shiny.setInputValue(\"pat_selectionne_code\", ",
-            code_json,
-            ", {priority:\"event\"}); return false;'>",
-            "<span style='font-weight:600;'>", libelle, "</span>",
-            "<br/><span style='font-size:11px; color:#666;'>", echelle, "</span>",
-            "</a></li>"
-          )
-        },
-        character(1)
-      ),
-      collapse = ""
-    )
-    
+liens <- paste0(
+  vapply(
+    seq_len(nrow(pat_click)),
+    function(i) {
+      code_json <- jsonlite::toJSON(as.character(pat_click$code_pat[i]), auto_unbox = TRUE)
+      libelle   <- htmltools::htmlEscape(as.character(pat_click$nom_du_pat[i]))
+      echelle   <- htmltools::htmlEscape(as.character(pat_click$echelle[i]))
+
+      # Crée le lien HTML avec onmouseover/onmouseout pour le style au survol
+      paste0(
+        "<li style='margin-bottom:6px; list-style:none;'>",
+        "<a href='#'",
+        " style='display:block; padding:6px 10px; background:#f5f5fe;",
+        " border-left:3px solid #000091; color:#000091 !important;",
+        " text-decoration:none !important; font-size:12px;",
+        " font-family:Marianne,Arial,sans-serif;'",
+        " onmouseover=\"this.style.background='#e3e3fd'\"",
+        " onmouseout=\"this.style.background='#f5f5fe'\"",
+        " onclick='Shiny.setInputValue(\"pat_selectionne_code\", ",
+        code_json,
+        ", {priority:\"event\"}); return false;'>",
+        "<span style='font-weight:600;'>", libelle, "</span>",
+        "<br/><span style='font-size:11px; color:#666;'>", echelle, "</span>",
+        "</a></li>"
+      )
+    },
+    character(1)
+  ),
+  collapse = ""
+)
+
     # Affiche le popup avec les options de sélection
     leafletProxy("map") %>%
       clearPopups() %>%
