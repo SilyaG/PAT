@@ -50,7 +50,7 @@ Ce projet est accompagné d'un rapport méthodologique détaillant les choix tec
 📄 [Rapport_Application_Cartographique_PAT.pdf](./Rapport_Application_Cartographique_PAT.pdf)
 
 Le script d'automatisation de la création des couches mobilisées dans l'application cartographique est disponible dans le dossier "data". 
-
+📄 [Script d'automatisation](./data/automatisation.r)
 
 
 ---
