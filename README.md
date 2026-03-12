@@ -48,17 +48,6 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ---
 
-## Installation et lancement
-```r
-# Installer les dépendances R nécessaires
-install.packages(c("shiny", "leaflet", "sf", ...))
-
-# Lancer l'application
-shiny::runApp("Carto_PAT/")
-```
-
----
-
 ## Documentation
 
 | Ressource | Description |
