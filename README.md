@@ -37,8 +37,15 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ## Équipe
 
-Projet réalisé par Paul **GRÉAUME**, Silya **GUERBOUB**, Charlotte **JOUVE**, Olivier **PRIMA** (M2 **GéoNum**, Université Lumière Lyon 2), Louise **DE SIMONE**, Sabry **FANDI** (M2 **SENTINELLES**, Université Jean Moulin Lyon 3)
+Développeurs : 
+-  Paul **GRÉAUME** (M2 **GéoNum**, Université Lumière Lyon 2)
+-  Silya **GUERBOUB** (M2 **GéoNum**, Université Lumière Lyon 2)
+-  Charlotte **JOUVE** (M2 **GéoNum**, Université Lumière Lyon 2)
+-  Olivier **PRIMA** (M2 **GéoNum**, Université Lumière Lyon 2)
 
+Gestion de Projet et rédaction : 
+-  Louise **DE SIMONE** (M2 **SENTINELLES**, Université Jean Moulin Lyon 3)
+-  Sabry **FANDI** (M2 **SENTINELLES**, Université Jean Moulin Lyon 3)
  
 Commanditaire : **DRAAF Auvergne-Rhône-Alpes**
 
