@@ -18,12 +18,12 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ## Fonctionnalités
 
-- 🗺️ Visualisation cartographique des PAT sur fond IGN, OpenStreetMap ou Registre Parcellaire Graphique
-- 🔍 Recherche par PAT ou commune
-- 🎛️ Filtres par niveau de labellisation et/ou échelle territoriale
-- 📋 Liste dynamique des PAT visibles dans la vue courante
-- 💬 Pop-ups détaillés par entité
-- 🎓 Tutoriel interactif intégré
+- Visualisation cartographique des PAT sur fond IGN, OpenStreetMap ou Registre Parcellaire Graphique
+- Recherche par PAT ou commune
+- Filtres par niveau de labellisation et/ou échelle territoriale
+- Liste dynamique des PAT visibles dans la vue courante
+- Pop-ups détaillés par entité
+- Tutoriel interactif intégré
 
 ---
 
