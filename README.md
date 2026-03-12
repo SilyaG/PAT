@@ -80,6 +80,13 @@ Elle a été développée dans le cadre d'une commande de la **DRAAF Auvergne-Rh
 
 ---
 
+## Crédits
+
+- 🗺️ Données cartographiques : © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), disponibles sous licence [ODbL](https://opendatacommons.org/licenses/odbl/)
+- 🎨 Composants UI : [Système de Design de l'État (DSFR)](https://www.systeme-de-design.gouv.fr/) — Direction Interministérielle du Numérique (DINUM), licence MIT
+
+---
+
 ## Licence
 
 Ce projet est distribué sous licence **CeCILL-2.1**, une licence libre compatible avec la GPL, régie par le droit français.  
