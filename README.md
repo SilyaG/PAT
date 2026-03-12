@@ -78,8 +78,8 @@ Ce projet est accompagné d'un rapport méthodologique détaillant les choix tec
 
 ## Crédits
 
-- 🗺️ Données cartographiques : © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), disponibles sous licence [ODbL](https://opendatacommons.org/licenses/odbl/)
-- 🎨 Composants UI : [Système de Design de l'État (DSFR)](https://www.systeme-de-design.gouv.fr/) — Direction Interministérielle du Numérique (DINUM), licence MIT
+- Données cartographiques : © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), disponibles sous licence [ODbL](https://opendatacommons.org/licenses/odbl/)
+- Composants UI : [Système de Design de l'État (DSFR)](https://www.systeme-de-design.gouv.fr/) — Direction Interministérielle du Numérique (DINUM), licence MIT
 
 ---
 
