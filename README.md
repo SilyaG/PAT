@@ -43,7 +43,7 @@ Développeurs :
 -  Charlotte **JOUVE** (M2 **GéoNum**, Université Lumière Lyon 2)
 -  Olivier **PRIMA** (M2 **GéoNum**, Université Lumière Lyon 2)
 
-Gestion de Projet et rédaction : 
+Gestion de projet et rédaction : 
 -  Louise **DE SIMONE** (M2 **SENTINELLES**, Université Jean Moulin Lyon 3)
 -  Sabry **FANDI** (M2 **SENTINELLES**, Université Jean Moulin Lyon 3)
  
